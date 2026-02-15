@@ -1,6 +1,6 @@
 return {
-  -- 1. Disable the default LazyVim autopairs using the NEW name
   { "nvim-mini/mini.pairs", enabled = false },
+  -- 1. Disable the default LazyVim autopairs using the NEW name
   -- Fallback for the old name just in case your LazyVim version is mid-transition
   { "nvim-mini/mini.pairs", enabled = false },
 

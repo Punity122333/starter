@@ -43,7 +43,7 @@ return {
             },
           },
         },
-        
+
         asm_lsp = {
           cmd = { "asm-lsp" },
           filetypes = { "asm", "s", "S", "nasm" },
@@ -54,7 +54,7 @@ return {
             ["asm-lsp"] = {
               assembler = "nasm",
               instruction_set = "x86",
-              default_diagnostics = false,  -- Disable built-in diagnostics (they're usually wrong)
+              default_diagnostics = false, -- Disable built-in diagnostics (they're usually wrong)
             },
           },
           -- Keep autocomplete/hover but disable the broken diagnostics
@@ -65,7 +65,7 @@ return {
             vim.diagnostic.enable(false, { bufnr = bufnr })
           end,
         },
-        
+
         clangd = {
           filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
           capabilities = {
@@ -275,32 +275,46 @@ return {
             client.server_capabilities.documentFormattingProvider = false
           end,
         },
-        -- Lua LS
         lua_ls = {
           filetypes = { "lua" },
           single_file_support = true,
           settings = {
             Lua = {
+              runtime = {
+                version = "LuaJIT",
+                pathStrict = true, -- Only search for files in the runtime path
+              },
               diagnostics = {
-                -- Suppress common false positive warnings
-                disable = {
-                  "missing-fields",
-                  "inject-field",
-                  "param-type-mismatch",
-                  "assign-type-mismatch",
-                },
+                enable = true, -- Keeping it on but making it smart
                 globals = { "vim" },
+                disable = { "lowercase-global", "undefined-global" }, -- Nuke the annoying ones
+                groupSeverity = {
+                  strong = "Warning",
+                  strict = "Warning",
+                },
+                unusedLocalExclude = { "_*" }, -- Don't yell about variables starting with underscore
               },
               workspace = {
+                -- This is the big one: Only load what you actually need
+                library = {
+                  vim.fn.expand("$VIMRUNTIME/lua"),
+                  vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
+                  "${3rd}/luv/library", -- Just the essentials
+                },
                 checkThirdParty = false,
+                maxPreload = 500, -- Half your original; stay lean
+                preloadFileSize = 100, -- Smaller limit for faster startup
               },
-              telemetry = {
-                enable = false,
+              completion = {
+                callSnippet = "Replace",
+                displayContext = 1, -- Only show enough context to be useful
+                postfix = "@", -- Better postfix trigger
               },
+              hint = { enable = false }, -- Inlay hints are visual clutter for this vibe
+              telemetry = { enable = false },
             },
           },
         },
-        -- GLSL LSP servers (for shader development) - glsl_analyzer is prioritized
         glsl_analyzer = {
           cmd = { "glsl_analyzer" },
           filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },

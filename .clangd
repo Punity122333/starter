@@ -1,0 +1,44 @@
+# clangd Configuration for Fast Startup and Performance
+# Place this in your project root or home directory (~/.config/clangd/config.yaml for global)
+
+CompileFlags:
+  # Add common compile flags
+  Add:
+    - "-std=c++20"
+    - "-Wall"
+  # Remove flags that slow down analysis
+  Remove:
+    - "-m*"
+    - "-f*san"  # Sanitizers slow down indexing
+
+Index:
+  # Background indexing settings for performance
+  Background: Build  # Only index files that are part of the build
+  StandardLibrary: Yes  # Index standard library (one-time cost, but worth it)
+
+Completion:
+  AllScopes: No  # Only show completions from current scope (faster)
+
+InlayHints:
+  # Disable heavy features for performance
+  Enabled: No
+  ParameterNames: No
+  DeducedTypes: No
+
+Hover:
+  ShowAKA: No  # Don't show full type expansions (faster)
+
+Diagnostics:
+  # Control diagnostic frequency
+  UnusedIncludes: None  # Disable unused include analysis (can be slow)
+  MissingIncludes: None  # Disable missing include warnings (faster startup)
+  
+  # Suppress common noisy warnings
+  Suppress:
+    - "unused-*"
+    - "missing-*"
+
+# Performance: Limit cache size (in MB)
+# clangd will use this much memory for caching
+Cache:
+  Size: 1024  # 1GB cache (adjust based on your RAM)

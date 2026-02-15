@@ -8,7 +8,6 @@ This configuration adds support for shader programming languages in Neovim.
 - **Extensions**: `.glsl`, `.vert`, `.frag`, `.tesc`, `.tese`, `.geom`, `.comp`
 - **Use Cases**: OpenGL shader development
 - **LSP**: glsl_analyzer (prioritized), glslls (fallback via Mason)
-
 ### HLSL (High-Level Shading Language)
 - **Extensions**: `.hlsl`, `.hlsli`, `.fx`, `.fxh`, `.vsh`, `.psh`, `.vs`, `.ps`, `.gs`, `.cs`
 - **Use Cases**: DirectX shader development
