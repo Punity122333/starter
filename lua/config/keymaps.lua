@@ -92,6 +92,7 @@ vim.keymap.set("v", "<A-S-j>", ":m '>+1<cr>gv=gv", { desc = "Move block down" })
 vim.keymap.set("v", "<A-S-k>", ":m '<-2<cr>gv=gv", { desc = "Move block up" })
 vim.keymap.set("n", "<leader>br", function() Snacks.bufdelete() end, { desc = "Remove Current Buffer" })
 vim.keymap.set("n", "<leader>pv", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 
 -- NOTE: asm_lsp is disabled in lsp.lua to avoid bogus diagnostics
 -- If you need LSP features for assembly, uncomment the asm_lsp config in lua/plugins/lsp.lua

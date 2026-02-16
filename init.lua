@@ -12,8 +12,8 @@ vim.env.PATH = vim.fn.expand("~/.local/bin:") .. vim.env.PATH
 vim.env.PATH = vim.fn.expand("~/.local/share/nvim/mason/bin:") .. vim.env.PATH
 
 -- 2. Pass the flag into lazy (Ensure your config/lazy.lua uses this logic)
-require("config.lazy") 
--- Note: In your lua/config/lazy.lua, you should have: 
+require("config.lazy")
+-- Note: In your lua/config/lazy.lua, you should have:
 -- defaults = { lazy = os.getenv("NO_LAZY") ~= "1" }
 
 vim.defer_fn(function()
@@ -45,14 +45,23 @@ package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/li
 
 vim.opt.relativenumber = false
 vim.opt.number = true
-
-vim.opt.conceallevel = 0
+vim.g.VM_theme = "neon" -- or 'ocean', 'purplegray', 'spacegray'vim.opt.conceallevel = 0
 vim.opt.concealcursor = ""
 vim.keymap.set("n", "hi", ":Inspect<CR>")
 
+-- Normal Mode (Cursor Mode) Highlighting
+vim.cmd([[
+  " This is the main cursor in VM Normal Mode
+  highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
+         
+  " This is the 'selection' or 'extension' highlight (the text you've grabbed)
+  highlight VM_Extend_hl guibg=#224466 gui=italic
+    
+  " This is for the cursors specifically when you are in 'Extend' (Visual) mode
+  highlight VM_Cursor_hl guifg=#000000 guibg=#00f2ff
+]])
 local god_hex = "#1a1b26"
 local selection_blue = "#28344a"
-
 local function apply_god_theme()
   local buf = vim.api.nvim_get_current_buf()
   local line_count = vim.api.nvim_buf_line_count(buf)
@@ -98,6 +107,7 @@ local function apply_god_theme()
       or name:find("Text")
       or name:find("Avante")
       or name:find("Ask")
+      or name:find("VM")
 
     local is_active_selector = name:find("Selected") and (name:find("SnacksPicker") or name:find("Telescope"))
 
@@ -148,11 +158,11 @@ local function apply_god_theme()
   end
   vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = "#16161e", bg = god_hex })
   vim.api.nvim_set_hl(0, "AvanteSidebarWinHorizontalSeparator", { fg = "#16161e", bg = god_hex })
-  local snacks_selection_bg = "#1a1b26" 
-  vim.api.nvim_set_hl(0, "AvantePopup", { bg = "#16161e", force = true }) 
+  local snacks_selection_bg = "#1a1b26"
+  vim.api.nvim_set_hl(0, "AvantePopup", { bg = "#16161e", force = true })
   local snack_hls = {
-    SnacksPickerSelected = { bg = "NONE", fg = "#88c0d0" }, 
-    SnacksPickerCursorLine = { bg = snacks_selection_bg }, 
+    SnacksPickerSelected = { bg = "NONE", fg = "#88c0d0" },
+    SnacksPickerCursorLine = { bg = snacks_selection_bg },
   }
   for group, settings in pairs(snack_hls) do
     vim.api.nvim_set_hl(0, group, settings)
@@ -162,7 +172,7 @@ local function apply_god_theme()
 end
 
 local god_group = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })
-vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter"}, {
+vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
   group = god_group,
   callback = apply_god_theme,
 })

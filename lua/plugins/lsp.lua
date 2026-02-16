@@ -11,9 +11,17 @@ return {
     },
     opts = {
       diagnostics = {
-        update_in_insert = { delay = 500 }, -- 0.5 second debounce
+        update_in_insert = true,
         underline = true,
         severity_sort = true,
+        virtual_text = {
+          spacing = 4,
+          prefix = "●",
+        },
+        float = {
+          border = "rounded",
+          source = "always",
+        },
       },
       servers = {
         -- BasedPyright for Python
@@ -347,7 +355,41 @@ return {
       },
     },
     config = function(_, opts)
-      -- Apply diagnostics config
+      local diagnostic_timers = {}
+      
+      local original_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
+      
+      vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+        local bufnr = vim.uri_to_bufnr(result.uri)
+        
+        if vim.api.nvim_get_mode().mode == "i" then
+          if diagnostic_timers[bufnr] then
+            vim.fn.timer_stop(diagnostic_timers[bufnr])
+          end
+          
+          diagnostic_timers[bufnr] = vim.fn.timer_start(500, function()
+            vim.schedule(function()
+              original_handler(err, result, ctx, config)
+              diagnostic_timers[bufnr] = nil
+            end)
+          end)
+        else
+          original_handler(err, result, ctx, config)
+        end
+      end
+      
+      vim.api.nvim_create_autocmd("InsertLeave", {
+        group = vim.api.nvim_create_augroup("DiagnosticsInsertLeave", { clear = true }),
+        callback = function()
+          local bufnr = vim.api.nvim_get_current_buf()
+          if diagnostic_timers[bufnr] then
+            vim.fn.timer_stop(diagnostic_timers[bufnr])
+            diagnostic_timers[bufnr] = nil
+          end
+          vim.diagnostic.show(nil, bufnr)
+        end,
+      })
+
       vim.diagnostic.config(opts.diagnostics)
 
       -- Get lspconfig

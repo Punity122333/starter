@@ -54,7 +54,11 @@ return {
     "folke/which-key.nvim",
     event = "VeryLazy",
     opts = {
-      delay = 100, -- Set your speed here (in ms)
+      delay = 100,
+      -- Set your speed here (in ms)
+      spec = {
+        { "<leader>gh", group = "Git Hunks" }, -- This creates the label in the menu
+      },
     },
   },
 }
