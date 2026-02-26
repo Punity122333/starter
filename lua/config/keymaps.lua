@@ -7,7 +7,7 @@
 vim.api.nvim_create_user_command("WQ", function()
   -- 1. Save all buffers
   vim.cmd("silent! wall")
-  
+
   -- 2. Wait a bit for autosave/persistence to finish
   vim.defer_fn(function()
     -- 3. Stop any autosave timers
@@ -16,13 +16,13 @@ vim.api.nvim_create_user_command("WQ", function()
       -- Disable autosave before quitting
       vim.g.auto_save_abort = true
     end
-    
+
     -- 4. Save session if persistence is enabled
     local ok_persist, persistence = pcall(require, "persistence")
     if ok_persist and persistence then
       persistence.save()
     end
-    
+
     -- 5. Wait for everything to complete, then quit
     vim.defer_fn(function()
       vim.cmd("qall!")
@@ -90,45 +90,67 @@ vim.keymap.set("i", "<A-S-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move line up
 -- Move blocks in Visual Mode
 vim.keymap.set("v", "<A-S-j>", ":m '>+1<cr>gv=gv", { desc = "Move block down" })
 vim.keymap.set("v", "<A-S-k>", ":m '<-2<cr>gv=gv", { desc = "Move block up" })
-vim.keymap.set("n", "<leader>br", function() Snacks.bufdelete() end, { desc = "Remove Current Buffer" })
+vim.keymap.set("n", "<leader>br", function()
+  Snacks.bufdelete()
+end, { desc = "Remove Current Buffer" })
 vim.keymap.set("n", "<leader>pv", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+-- in your keymaps.lua
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+-- Resizing windows with Alt+Shift + Arrows
+vim.keymap.set("n", "<A-S-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
+vim.keymap.set("n", "<A-S-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
+vim.keymap.set("n", "<A-S-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
+vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
+vim.keymap.set("n", "<A-S-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
+-- Search the entire drive from /
+-- Search /home/pxnity but exclude the heavy bloat
+vim.keymap.set("n", "<leader>fD", function()
+  Snacks.picker.files({
+    cwd = vim.fn.expand("~"),
+    hidden = true,
+    ignored = false,
+    title = "Home Search",
+    -- Add the folders you want to dodge here
+    exclude = {
+      "node_modules",
+      ".git",
+      ".cache",
+      "__pycache__",
+      ".venv",
+      "venv",
+      "build",
+      "dist",
+    },
+  })
+end, { desc = "Search Home" })
+-- Search text in /home/pxnity but ignore the brainrot folders
+vim.keymap.set("n", "<leader>sD", function()
+  Snacks.picker.grep({
+    cwd = vim.fn.expand("~"),
+    title = "Grep Home (Filtered)",
+    hidden = true, -- Search in hidden files too
+    ignored = false, -- Don't stop at .gitignore
+    exclude = {
+      "node_modules",
+      ".git",
+      ".cache",
+      "__pycache__",
+      ".venv",
+      "venv",
+      "build",
+      "dist",
+      "*.lock",
+    },
+  })
+end, { desc = "Grep Home Directory" })
+-- Reveal current file in Snacks explorer
+vim.keymap.set("n", "<leader>fx", function()
+  Snacks.explorer.reveal()
+end, { desc = "Reveal Current File in Explorer" })
+vim.keymap.del("n", "<leader>gg") -- This opens the Snacks explorer specifically focused on your open buffers
+-- Vertical terminal split
+vim.keymap.set("n", "<leader>pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
 
--- NOTE: asm_lsp is disabled in lsp.lua to avoid bogus diagnostics
--- If you need LSP features for assembly, uncomment the asm_lsp config in lua/plugins/lsp.lua
--- and uncomment the toggle below
-
--- -- Global state for the toggle
--- _G.asm_dialect_mode = "standard"
--- 
--- vim.keymap.set("n", "<leader>pA", function()
---   local clients = vim.lsp.get_clients({ name = "asm_lsp" })
---   
---   -- Flip the state
---   if _G.asm_dialect_mode == "standard" then
---     _G.asm_dialect_mode = "nasm_16"
---   else
---     _G.asm_dialect_mode = "standard"
---   end
--- 
---   for _, client in ipairs(clients) do
---     if _G.asm_dialect_mode == "nasm_16" then
---       client.config.settings = {
---         assembler = "nasm",
---         instruction_set = "x86",
---         mode = "16bit"
---       }
---       print("LSP Dialect: 16-BIT NASM (Bootloader Mode)")
---     else
---       client.config.settings = {
---         assembler = "gas",
---         instruction_set = "x86_64",
---         mode = "64bit"
---       }
---       print("LSP Dialect: STANDARD (64-bit GAS)")
---     end
---     
---     -- Force the restart to apply settings
---     vim.cmd("LspRestart asm_lsp")
---   end
--- end, { desc = "Toggle ASM Dialect (16-bit NASM / 64-bit GAS)" })
+-- Horizontal terminal split
+vim.keymap.set("n", "<leader>ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })

@@ -2,9 +2,8 @@ return {
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
-    lazy = false,
-    version = false, 
-    build = "make", 
+    version = true,
+    build = "make",
     opts = {
       provider = "copilot",
       -- NEW: Move specific provider configs into this table
@@ -47,7 +46,7 @@ return {
       "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
-      "nvim-tree/nvim-web-devicons", 
+      "nvim-tree/nvim-web-devicons",
       "zbirenbaum/copilot.lua",
       {
         "MeanderingProgrammer/render-markdown.nvim",

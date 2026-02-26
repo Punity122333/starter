@@ -52,4 +52,7 @@ vim.api.nvim_create_autocmd("User", {
     hl(0, "AlphaFooter", { fg = "#565f89" })
   end,
 })
-
+-- Stop clipboard from blocking startup
+vim.schedule(function()
+  vim.opt.clipboard = "unnamedplus"
+end)

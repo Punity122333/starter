@@ -39,6 +39,20 @@ vim.keymap.set("n", "<leader>mi", function()
   print(vim.inspect(inspect_info))
 end, { desc = "Inspect under mouse" })
 
+if vim.fn.has("wayland") == 1 then
+  vim.g.clipboard = {
+    name = "wl-clipboard",
+    copy = {
+      ["+"] = "wl-copy",
+      ["*"] = "wl-copy",
+    },
+    paste = {
+      ["+"] = "wl-paste",
+      ["*"] = "wl-paste",
+    },
+    cache_enabled = 1,
+  }
+end
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
 package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/lib/lua/5.1/?.so;"
@@ -108,6 +122,9 @@ local function apply_god_theme()
       or name:find("Avante")
       or name:find("Ask")
       or name:find("VM")
+      or name:find("Rainbow")
+      or name:find("LazyReason")
+      or name:find("Lsp")
 
     local is_active_selector = name:find("Selected") and (name:find("SnacksPicker") or name:find("Telescope"))
 
@@ -148,7 +165,7 @@ local function apply_god_theme()
     vim.api.nvim_set_hl(0, g, { bg = god_hex, force = true })
   end
 
-  local blink = { "BlinkCmpMenu" }
+  local blink = { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "NoiceLspSignatureHelp", "LspSignatureActiveParameter" }
   for _, g in ipairs(blink) do
     vim.api.nvim_set_hl(0, g, { bg = "#16161e", blend = 20, force = true })
   end

@@ -79,15 +79,25 @@ return {
           capabilities = {
             offsetEncoding = { "utf-16" },
           },
+
           cmd = {
             "clangd",
             "--background-index",
             "--clang-tidy",
             "--query-driver=/usr/bin/g++,/usr/bin/gcc",
             "--fallback-style=google",
+            "--pch-storage=memory",
+            "-j=4",
           },
           single_file_support = true,
           root_dir = function(fname)
+            local util = require("lspconfig.util")
+            -- Use the new vim.fs API for the git check to stop the deprecation warning
+            local git_root = vim.fs.dirname(vim.fs.find(".git", { path = fname, upward = true })[1])
+
+            return util.root_pattern("compile_commands.json", "compile_flags.txt")(fname) or git_root or vim.fn.getcwd()
+          end,
+          oot_dir = function(fname)
             return vim.fn.getcwd()
           end,
           on_attach = function(client, bufnr)
@@ -356,17 +366,17 @@ return {
     },
     config = function(_, opts)
       local diagnostic_timers = {}
-      
+
       local original_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
-      
+
       vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
         local bufnr = vim.uri_to_bufnr(result.uri)
-        
+
         if vim.api.nvim_get_mode().mode == "i" then
           if diagnostic_timers[bufnr] then
             vim.fn.timer_stop(diagnostic_timers[bufnr])
           end
-          
+
           diagnostic_timers[bufnr] = vim.fn.timer_start(500, function()
             vim.schedule(function()
               original_handler(err, result, ctx, config)
@@ -377,7 +387,7 @@ return {
           original_handler(err, result, ctx, config)
         end
       end
-      
+
       vim.api.nvim_create_autocmd("InsertLeave", {
         group = vim.api.nvim_create_augroup("DiagnosticsInsertLeave", { clear = true }),
         callback = function()
