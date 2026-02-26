@@ -165,18 +165,21 @@ local function apply_god_theme()
     vim.api.nvim_set_hl(0, g, { bg = god_hex, force = true })
   end
 
-  local blink = { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "NoiceLspSignatureHelp", "LspSignatureActiveParameter" }
+  local blink = { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "NoiceLspSignatureHelp", "LspSignatureActiveParameter", "NoicePopup" }
   for _, g in ipairs(blink) do
-    vim.api.nvim_set_hl(0, g, { bg = "#16161e", blend = 20, force = true })
+    vim.api.nvim_set_hl(0, g, { bg = "#15151c", blend = 0, force = true })
   end
+  vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
+  vim.api.nvim_set_hl(0, "LspInfoBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
   local sep = { "Split", "Splitter", "Separator", "WinSeparator", "VertSplit" }
   for _, g in ipairs(sep) do
-    vim.api.nvim_set_hl(0, g, { bg = god_hex, blend = 20, fg = "#16161e", force = true })
+    vim.api.nvim_set_hl(0, g, { bg = god_hex, blend = 20, fg = "#15151c", force = true })
   end
-  vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = "#16161e", bg = god_hex })
-  vim.api.nvim_set_hl(0, "AvanteSidebarWinHorizontalSeparator", { fg = "#16161e", bg = god_hex })
+  vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = "#15151c", bg = god_hex })
+  vim.api.nvim_set_hl(0, "AvanteSidebarWinHorizontalSeparator", { fg = "#15151c", bg = god_hex })
   local snacks_selection_bg = "#1a1b26"
-  vim.api.nvim_set_hl(0, "AvantePopup", { bg = "#16161e", force = true })
+  vim.api.nvim_set_hl(0, "AvantePopup", { bg = "#15151c", force = true })
   local snack_hls = {
     SnacksPickerSelected = { bg = "NONE", fg = "#88c0d0" },
     SnacksPickerCursorLine = { bg = snacks_selection_bg },
@@ -184,8 +187,8 @@ local function apply_god_theme()
   for group, settings in pairs(snack_hls) do
     vim.api.nvim_set_hl(0, group, settings)
   end
-  vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = "#16161e", force = true })
-  vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = "#16161e", force = true })
+  vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = "#15151c", force = true })
+  vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = "#15151c", force = true })
 end
 
 local god_group = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })

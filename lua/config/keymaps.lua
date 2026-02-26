@@ -148,9 +148,9 @@ end, { desc = "Grep Home Directory" })
 vim.keymap.set("n", "<leader>fx", function()
   Snacks.explorer.reveal()
 end, { desc = "Reveal Current File in Explorer" })
-vim.keymap.del("n", "<leader>gg") -- This opens the Snacks explorer specifically focused on your open buffers
+vim.keymap.del("n", "<leader>gg")
+-- vim.keymap.set("n", "<leader>p", { desc = "Terminal Splitters" })-- This opens the Snacks explorer specifically focused on your open buffers
 -- Vertical terminal split
 vim.keymap.set("n", "<leader>pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
-
 -- Horizontal terminal split
 vim.keymap.set("n", "<leader>ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })

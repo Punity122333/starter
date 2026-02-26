@@ -4,7 +4,15 @@ local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
 function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
   opts = opts or {}
   opts.border = opts.border or "rounded"
-  return orig_util_open_floating_preview(contents, syntax, opts, ...)
+  local bufnr, winnr = orig_util_open_floating_preview(contents, syntax, opts, ...)
+  if winnr and vim.api.nvim_win_is_valid(winnr) then
+    vim.api.nvim_set_option_value(
+      "winhighlight",
+      "Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder",
+      { win = winnr }
+    )
+  end
+  return bufnr, winnr
 end
 
 -- 2. UNIFIED UI OVERRIDES
@@ -38,7 +46,13 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
     -- FIX SNACKS SPECIFICALLY
     -- If Snacks is still being boxy, we force its internal highlight group
     hl(0, "SnacksScratch", { bg = "none" })
-    hl(0, "SnacksBackdrop", { bg = "none" }) -- This kills the dimming backdrop
+    hl(0, "SnacksBackdrop", { bg = "none" })
+    hl(0, "BlinkCmpSignatureHelp", { bg = "#15151c", blend = 0 })
+    hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#15151c", fg = "#232330", blend = 0 })
+    hl(0, "BlinkCmpSignatureHelpActiveParameter", { bg = "#15151c", bold = true, blend = 0 })
+    hl(0, "NoicePopup", { bg = "#15151c", blend = 0 })
+    hl(0, "NoicePopupBorder", { bg = "#15151c", fg = "#232330", blend = 0 })
+    hl(0, "LspInfoBorder", { bg = "#15151c", fg = "#232330", blend = 0 })
   end,
 })
 vim.g.lazygit_config = false -- 3. ALPHA DASHBOARD COLORS
