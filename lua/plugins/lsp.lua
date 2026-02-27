@@ -296,40 +296,83 @@ return {
         lua_ls = {
           filetypes = { "lua" },
           single_file_support = true,
+          on_attach = function(client, bufnr)
+            client.server_capabilities.semanticTokensProvider = nil
+            client.server_capabilities.documentFormattingProvider = false
+            client.server_capabilities.documentRangeFormattingProvider = false
+            client.server_capabilities.codeLensProvider = nil
+            client.server_capabilities.documentLinkProvider = nil
+            client.server_capabilities.colorProvider = nil
+            client.server_capabilities.foldingRangeProvider = nil
+            client.server_capabilities.documentSymbolProvider = false
+          end,
           settings = {
             Lua = {
               runtime = {
                 version = "LuaJIT",
-                pathStrict = true, -- Only search for files in the runtime path
+                pathStrict = true,
               },
               diagnostics = {
-                enable = true, -- Keeping it on but making it smart
+                enable = true,
                 globals = { "vim" },
-                disable = { "lowercase-global", "undefined-global" }, -- Nuke the annoying ones
+                disable = {
+                  "lowercase-global",
+                  "undefined-global",
+                  "missing-fields",
+                  "inject-field",
+                  "param-type-mismatch",
+                  "assign-type-mismatch",
+                  "redundant-parameter",
+                  "cast-local-type",
+                },
                 groupSeverity = {
                   strong = "Warning",
                   strict = "Warning",
                 },
-                unusedLocalExclude = { "_*" }, -- Don't yell about variables starting with underscore
+                unusedLocalExclude = { "_*" },
+                neededFileStatus = {
+                  ["codestyle-check"] = "None",
+                  ["spell-check"] = "None",
+                },
+                workspaceDelay = 3000,
+                workspaceRate = 40,
               },
               workspace = {
-                -- This is the big one: Only load what you actually need
                 library = {
                   vim.fn.expand("$VIMRUNTIME/lua"),
-                  vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
-                  "${3rd}/luv/library", -- Just the essentials
+                  "${3rd}/luv/library",
                 },
                 checkThirdParty = false,
-                maxPreload = 500, -- Half your original; stay lean
-                preloadFileSize = 100, -- Smaller limit for faster startup
+                maxPreload = 200,
+                preloadFileSize = 50,
+                ignoreDir = { ".git", "node_modules", ".vscode", "test", "tests", "spec" },
               },
               completion = {
                 callSnippet = "Replace",
-                displayContext = 1, -- Only show enough context to be useful
-                postfix = "@", -- Better postfix trigger
+                displayContext = 0,
+                postfix = "@",
+                workspaceWord = false,
+                showWord = "Disable",
               },
-              hint = { enable = false }, -- Inlay hints are visual clutter for this vibe
+              type = {
+                castNumberToInteger = true,
+                weakUnionCheck = true,
+                weakNilCheck = true,
+              },
+              hint = { enable = false },
+              semantic = {
+                enable = false,
+              },
+              codeLens = { enable = false },
               telemetry = { enable = false },
+              window = {
+                progressBar = false,
+                statusBar = false,
+              },
+              misc = {
+                executablePath = "",
+                parameters = { "--loglevel=warning" },
+              },
             },
           },
         },

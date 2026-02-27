@@ -29,9 +29,9 @@ require("lazy").setup({
     lazy = not force_all,
     version = false,
   },
-  -- This is the secret sauce: 
+  -- This is the secret sauce:
   -- It overrides the 'lazy' property on every plugin spec before loading
-  concurrency = force_all and 100 or nil, 
+  concurrency = force_all and 100 or nil,
   performance = {
     cache = { enabled = true },
     reset_packpath = true,
@@ -64,3 +64,4 @@ if force_all then
     end,
   })
 end
+

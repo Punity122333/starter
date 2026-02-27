@@ -52,12 +52,16 @@ return {
   },
   {
     "folke/which-key.nvim",
-    event = "VeryLazy",
+    lazy = false,
+    init = function()
+      vim.o.timeoutlen = 130
+      vim.o.ttimeoutlen = 10
+    end,
     opts = {
-      delay = 100,
-      -- Set your speed here (in ms)
+      delay = 130,
+      notify = false,
       spec = {
-        { "<leader>gh", group = "Git Hunks" }, -- This creates the label in the menu
+        { "<leader>gh", group = "Git Hunks" },
       },
     },
   },

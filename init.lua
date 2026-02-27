@@ -189,6 +189,12 @@ local function apply_god_theme()
   end
   vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = "#15151c", force = true })
   vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = "#15151c", force = true })
+
+  vim.api.nvim_set_hl(0, "Cursor", { fg = "#000000", bg = "#00ff00", force = true })
+  vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#00ff00", force = true })
+  vim.api.nvim_set_hl(0, "CursorIM", { fg = "#000000", bg = "#00ff00", force = true })
+  vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#00ff00", force = true })
+  vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 end
 
 local god_group = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })

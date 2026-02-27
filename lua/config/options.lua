@@ -1,3 +1,6 @@
+vim.opt.timeoutlen = 130
+vim.opt.ttimeoutlen = 10
+
 -- 1. FORCE GLOBAL ROUNDED BORDERS
 -- This intercepts Neovim's internal window creation and forces the 'rounded' style
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
