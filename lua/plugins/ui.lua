@@ -2,20 +2,18 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      -- We keep the theme SOLID so your code is readable
       colorscheme = "tokyonight",
     },
   },
   {
     "folke/tokyonight.nvim",
     opts = {
-      transparent = false, -- Middle stays solid
-      on_highlights = function(hl, c)
-        -- We kill the background ONLY on the parts that touch the borders
-        hl.SignColumn = { bg = "none" } -- Left edge
-        hl.LineNr = { bg = "none" } -- Line number strip
-        hl.StatusLine = { bg = "none" } -- Bottom edge
-        hl.EndOfBuffer = { bg = "none" } -- Bottom empty space
+      transparent = false,
+      on_highlights = function(hl)
+        hl.SignColumn = { bg = "none" }
+        hl.LineNr = { bg = "none" }
+        hl.StatusLine = { bg = "none" }
+        hl.EndOfBuffer = { bg = "none" }
       end,
     },
   },
@@ -25,24 +23,18 @@ return {
       scratch = {
         win = {
           style = "scratch",
-          border = "rounded", -- Rounded corners look way more "pro"
-          title = "", -- Adding spaces = Instant de-jank
+          border = "rounded",
+          title = "",
           title_pos = "center",
         },
       },
       lazygit = {
-        enabled = true, -- Enable lazygit integration
+        enabled = true,
         theme = {
-          -- This makes the text color softer (using a comment/muted color)
           optionsTextColor = { fg = "NonText" },
-
-          -- This makes the selection bar dark navy to match your dash
           selectedLineBgColor = { bg = "CursorLine" },
-
-          -- Softens the borders
           activeBorderColor = { fg = "Special", bold = true },
         },
-        -- Configure lazygit window
         win = {
           style = "lazygit",
           border = "rounded",
@@ -64,5 +56,26 @@ return {
         { "<leader>gh", group = "Git Hunks" },
       },
     },
+  },
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    opts = {
+      exclude = {
+        file_types = { "Avante", "AvanteInput" },
+      },
+    },
+  },
+  -- SURGICAL FIX: Manually kill Treesitter on Avante buffers to stop the crash
+  {
+    "yetone/avante.nvim",
+    config = function(_, opts)
+      require("avante").setup(opts)
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "Avante", "AvanteInput" },
+        callback = function(ev)
+          vim.treesitter.stop(ev.buf)
+        end,
+      })
+    end,
   },
 }

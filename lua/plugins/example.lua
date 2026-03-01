@@ -1,11 +1,10 @@
 return {
   {
     "p00f/clangd_extensions.nvim",
-    ft = { "c", "cpp", "objc", "objcpp", "cuda", "proto" }, -- Lazy load on filetype
+    ft = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
     opts = {
-      -- Performance: Disable heavy features
       inlay_hints = {
-        inline = false, -- Don't show inline hints (performance)
+        inline = false,
         only_current_line = false,
         show_parameter_hints = false,
         show_variable_name = false,
@@ -17,7 +16,6 @@ return {
         right_align_padding = 7,
         highlight = "Comment",
       },
-      -- AST features - disable for performance
       ast = {
         role_icons = {
           type = "",
@@ -40,11 +38,9 @@ return {
           detail = "Comment",
         },
       },
-      -- Memory indicator - lightweight
       memory_usage = {
         border = "rounded",
       },
-      -- Symbol info - keep this, it's useful and not too heavy
       symbol_info = {
         border = "rounded",
       },

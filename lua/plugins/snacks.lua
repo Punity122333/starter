@@ -4,6 +4,15 @@ return {
   lazy = false,
 
   opts = {
+    -- This sets your explorer width to 15%
+    explorer = {
+      win = {
+        layout = {
+          position = "right", -- or "left", whichever you prefer
+          width = 0.15,
+        },
+      },
+    },
     picker = {
       icons = {
         selected = "󰄲 ",

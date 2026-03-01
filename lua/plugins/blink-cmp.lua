@@ -16,36 +16,29 @@ return {
           auto_show = true,
         },
       },
-      
+
       snippets = {
-        preset = "default", -- Use blink's built-in snippet expansion
+        preset = "default",
       },
       keymap = {
         preset = "default",
-        -- THE FIX: Enter only accepts if you explicitly selected something
-        -- Otherwise it just inserts a newline like a normal editor
         ["<S-CR>"] = { "accept", "fallback" },
-        -- Smart Tab: Copilot > Snippet > Completion > indent fallback
         ["<Tab>"] = {
           function(cmp)
-            -- Check if Copilot suggestion is visible
             local copilot_ok, copilot = pcall(require, "copilot.suggestion")
             if copilot_ok and copilot.is_visible() then
               copilot.accept()
               return true
             end
-            
-            -- Try snippet navigation first
+
             if cmp.snippet_forward() then
               return true
             end
-            
-            -- Try completion selection
+
             if cmp.select_next() then
               return true
             end
-            
-            -- Fallback: Insert actual tab/indent
+
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
             return true
           end,
@@ -58,8 +51,8 @@ return {
         default = { "lsp", "path", "snippets", "buffer" },
         providers = {
           lsp = {
-            max_items = 25, -- Limit LSP completions to 25 items
-            timeout_ms = 700, -- Faster timeout for LSP
+            max_items = 25,
+            timeout_ms = 700,
           },
           buffer = {
             max_items = 25,
@@ -72,7 +65,7 @@ return {
           },
         },
       },
-      
+
     }
   end,
 }

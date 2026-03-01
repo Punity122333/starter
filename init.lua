@@ -1,4 +1,3 @@
--- 1. Check for the NO_LAZY flag before anything else
 local force_all = os.getenv("NO_LAZY") == "1"
 
 if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
@@ -11,17 +10,13 @@ vim.env.PATH = vim.fn.expand("~/.npm-global/bin:") .. vim.env.PATH
 vim.env.PATH = vim.fn.expand("~/.local/bin:") .. vim.env.PATH
 vim.env.PATH = vim.fn.expand("~/.local/share/nvim/mason/bin:") .. vim.env.PATH
 
--- 2. Pass the flag into lazy (Ensure your config/lazy.lua uses this logic)
 require("config.lazy")
--- Note: In your lua/config/lazy.lua, you should have:
--- defaults = { lazy = os.getenv("NO_LAZY") ~= "1" }
 
 vim.defer_fn(function()
   pcall(require, "lspconfig")
 
   local ft = vim.bo.filetype
   if ft ~= "" and ft ~= "lazy" and ft ~= "dashboard" then
-    -- Don't double-trigger if we already forced everything to load
     if not force_all then
       vim.cmd("doautocmd BufEnter")
     end
@@ -59,16 +54,13 @@ package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/li
 
 vim.opt.relativenumber = false
 vim.opt.number = true
-vim.g.VM_theme = "neon" -- or 'ocean', 'purplegray', 'spacegray'vim.opt.conceallevel = 0
+vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
 vim.keymap.set("n", "hi", ":Inspect<CR>")
 
--- Normal Mode (Cursor Mode) Highlighting
 vim.cmd([[
-  " This is the main cursor in VM Normal Mode
   highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
          
-  " This is the 'selection' or 'extension' highlight (the text you've grabbed)
   highlight VM_Extend_hl guibg=#224466 gui=italic
     
   " This is for the cursors specifically when you are in 'Extend' (Visual) mode
@@ -165,7 +157,8 @@ local function apply_god_theme()
     vim.api.nvim_set_hl(0, g, { bg = god_hex, force = true })
   end
 
-  local blink = { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "NoiceLspSignatureHelp", "LspSignatureActiveParameter", "NoicePopup" }
+  local blink =
+    { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "NoiceLspSignatureHelp", "LspSignatureActiveParameter", "NoicePopup" }
   for _, g in ipairs(blink) do
     vim.api.nvim_set_hl(0, g, { bg = "#15151c", blend = 0, force = true })
   end
@@ -202,5 +195,20 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
   group = god_group,
   callback = apply_god_theme,
 })
-
 apply_god_theme()
+vim.api.nvim_create_autocmd("BufDelete", {
+  callback = function(args)
+    local ft = vim.bo[args.buf].filetype
+    if ft ~= "avante" and ft ~= "avante-input" then
+      vim.schedule(function()
+        local ok, avante_api = pcall(require, "avante.api")
+        if ok and avante_api.refresh then
+          pcall(avante_api.refresh)
+        else
+          vim.cmd("AvanteRefresh")
+        end
+      end)
+    end
+  end,
+  desc = "Refresh Avante when a code buffer is deleted",
+})

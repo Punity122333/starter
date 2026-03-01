@@ -2,28 +2,33 @@ return {
   {
     "yetone/avante.nvim",
     event = "VeryLazy",
-    version = true,
+    version = false,
     build = "make",
     opts = {
+      mode = "agentic",
       provider = "copilot",
-      -- NEW: Move specific provider configs into this table
+      instructions_file = "avante.md",
       providers = {
         copilot = {
           endpoint = "https://api.githubcopilot.com",
-          model = "gpt-4o", -- Or "claude-3.5-sonnet"
+          model = "claude-haiku-4.5",
           proxy = nil,
           allow_insecure_call = true,
           timeout = 30000,
+          extra_request_body = {
+            temperature = 0,
+            max_tokens = 8192,
+          },
         },
       },
       behaviour = {
-        auto_suggestions = false, -- Still OFF as requested
+        enable_cursor_planning_mode = true,
+        auto_suggestions = false,
         auto_set_highlight_group = true,
         auto_set_keymaps = true,
         auto_apply_diff_after_generation = false,
         support_paste_from_clipboard = false,
       },
-      -- Keeping your Snacks integration for that clean UI
       input = {
         provider = "snacks",
       },
@@ -38,6 +43,16 @@ return {
           hint = "<leader>ah",
           suggestion = "<leader>as",
           repology = "<leader>ar",
+        },
+      },
+      windows = {
+        position = "right",
+        width = 20,
+        wrap = true,
+        sidebar_header = {
+          enabled = true,
+          align = "center",
+          rounded = true,
         },
       },
     },

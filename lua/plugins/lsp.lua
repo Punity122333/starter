@@ -24,7 +24,6 @@ return {
         },
       },
       servers = {
-        -- BasedPyright for Python
         basedpyright = {
           mason = false,
           cmd = { "/home/pxnity/.local/bin/basedpyright-langserver", "--stdio" },

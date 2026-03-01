@@ -4,9 +4,9 @@ return {
     opts = {
       suggestion = {
         enabled = true,
-        auto_trigger = true, -- Shows ghost text as you type
+        auto_trigger = true,
         keymap = {
-          accept = "<Tab>", -- Tab accepts Copilot suggestions when visible
+          accept = "<Tab>",
           accept_word = false,
           accept_line = false,
           next = "<M-]>",
