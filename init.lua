@@ -58,7 +58,7 @@ package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/shar
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
 package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/lib/lua/5.1/?.so;"
 
-vim.opt.relativenumber = false
+vim.opt.relativenumber = true
 vim.opt.number = true
 vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
@@ -263,7 +263,7 @@ vim.api.nvim_create_autocmd("BufDelete", {
   desc = "Refresh Avante when a code buffer is deleted",
 })
 
--- Restore the global modifiable fix
+
 vim.api.nvim_create_autocmd({ "BufAdd", "BufNew", "BufEnter" }, {
   group = vim.api.nvim_create_augroup("GlobalModifiableFix", { clear = true }),
   callback = function(args)
@@ -274,7 +274,7 @@ vim.api.nvim_create_autocmd({ "BufAdd", "BufNew", "BufEnter" }, {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "avante", "avante-input" },
   callback = function(args)
-    -- Force Treesitter to treat this as markdown
+
     local ok, _ = pcall(vim.treesitter.start, args.buf, "markdown")
     if not ok then
       -- Fallback if the parser isn't installed

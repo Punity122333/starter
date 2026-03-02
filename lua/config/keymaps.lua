@@ -128,6 +128,24 @@ vim.keymap.set("n", "<leader>pv_pdf", ":silent !zathura <cfile> &<CR>", { desc =
 
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 
+vim.keymap.set("n", "<leader>uN", function()
+  local rn = not vim.wo.relativenumber
+  vim.wo.relativenumber = rn
+  vim.notify(rn and "Relative numbers" or "Absolute numbers", vim.log.levels.INFO)
+end, { desc = "Toggle relative/absolute line numbers" })
+
+vim.api.nvim_create_user_command("TSRestart", function()
+  local buf = vim.api.nvim_get_current_buf()
+  local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
+  if lang then
+    vim.treesitter.stop(buf)
+    vim.treesitter.start(buf, lang)
+    vim.notify("Treesitter restarted for: " .. lang, vim.log.levels.INFO)
+  else
+    vim.notify("No Treesitter parser for this filetype", vim.log.levels.WARN)
+  end
+end, { desc = "Restart Treesitter for current buffer" })
+
 vim.keymap.set("n", "<leader>am", toggle_avante_model, { desc = "avante: toggle copilot model" })
 
 vim.api.nvim_create_autocmd("FileType", {
