@@ -52,6 +52,9 @@ return {
     opts = {
       delay = 130,
       notify = false,
+      win = {
+        height = { min = 4, max = 25 },
+      },
       spec = {
         { "<leader>gh", group = "Git Hunks" },
       },

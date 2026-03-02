@@ -199,9 +199,35 @@ local function apply_god_theme()
   vim.api.nvim_set_hl(0, "CursorIM", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#00ff00", force = true })
   vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+
+  local diag_underline_groups = {
+    "DiagnosticUnderlineError",
+    "DiagnosticUnderlineWarn",
+    "DiagnosticUnderlineInfo",
+    "DiagnosticUnderlineHint",
+    "DiagnosticUnderlineOk",
+  }
+  for _, g in ipairs(diag_underline_groups) do
+    local existing = vim.api.nvim_get_hl(0, { name = g })
+    vim.api.nvim_set_hl(0, g, { sp = existing.sp, underline = true, bg = "NONE", force = true })
+  end
+
+  local illuminate_groups = {
+    "IlluminatedWordText",
+    "IlluminatedWordRead",
+    "IlluminatedWordWrite",
+    "LspReferenceText",
+    "LspReferenceRead",
+    "LspReferenceWrite",
+  }
+  for _, g in ipairs(illuminate_groups) do
+    vim.api.nvim_set_hl(0, g, { bg = selection_blue, force = true })
+  end
+
   -- Since your font is already bold, we use color to differentiate
   vim.api.nvim_set_hl(0, "markdownBold", { fg = "#ff9e64", bold = true, force = true })
   vim.api.nvim_set_hl(0, "@markup.strong", { fg = "#ff9e64", bold = true, force = true })
+  vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { fg = "#6c7086", strikethrough = true, force = true })
 end
 local god_group = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
