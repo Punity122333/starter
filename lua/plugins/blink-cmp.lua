@@ -22,6 +22,10 @@ return {
       },
       keymap = {
         preset = "default",
+        ["<Up>"] = { "fallback" },
+        ["<Down>"] = { "fallback" },
+        ["<C-n>"] = { "select_next", "fallback" },
+        ["<C-p>"] = { "select_prev", "fallback" },
         ["<S-CR>"] = { "accept", "fallback" },
         ["<Tab>"] = {
           function(cmp)
@@ -44,8 +48,6 @@ return {
           end,
         },
         ["<S-Tab>"] = { "snippet_backward", "select_prev", "fallback" },
-        ["<C-n>"] = { "select_next", "fallback" },
-        ["<C-p>"] = { "select_prev", "fallback" },
       },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
