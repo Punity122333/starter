@@ -124,7 +124,7 @@ vim.keymap.del("n", "<leader>gg")
 
 vim.keymap.set("n", "<leader>pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
 vim.keymap.set("n", "<leader>ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })
-vim.keymap.set("n", "<leader>pv_pdf", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
+vim.keymap.set("n", "<leader>pvpdf", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
 
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 
