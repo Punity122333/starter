@@ -11,7 +11,7 @@ return {
       providers = {
         copilot = {
           endpoint = "https://api.githubcopilot.com",
-          model = "claude-haiku-4.5",
+          model = "oswe-vscode-prime",
           proxy = nil,
           allow_insecure_call = true,
           timeout = 30000,
@@ -47,13 +47,17 @@ return {
       },
       windows = {
         position = "right",
-        width = 20,
+        width = 23,
         wrap = true,
         sidebar_header = {
           enabled = true,
           align = "center",
           rounded = true,
         },
+      },
+      suggestion = {
+        throttle = 300,
+        debounce = 150,
       },
     },
     dependencies = {

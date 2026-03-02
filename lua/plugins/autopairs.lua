@@ -14,9 +14,9 @@ return {
         lua = { "string" },
         python = { "string" },
       },
-      -- This fixes the "desync" by making sure the pairs 
+      -- This fixes the "desync" by making sure the pairs
       -- actually trigger even if the LSP is being slow
-      map_cr = true, 
+      map_cr = true,
       map_bs = true,
     },
     config = function(_, opts)

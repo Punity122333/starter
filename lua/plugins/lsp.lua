@@ -407,38 +407,57 @@ return {
       },
     },
     config = function(_, opts)
-      local diagnostic_timers = {}
-
       local original_handler = vim.lsp.handlers["textDocument/publishDiagnostics"]
 
       vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
-        local bufnr = vim.uri_to_bufnr(result.uri)
-
-        if vim.api.nvim_get_mode().mode == "i" then
-          if diagnostic_timers[bufnr] then
-            vim.fn.timer_stop(diagnostic_timers[bufnr])
-          end
-
-          diagnostic_timers[bufnr] = vim.fn.timer_start(500, function()
-            vim.schedule(function()
-              original_handler(err, result, ctx, config)
-              diagnostic_timers[bufnr] = nil
-            end)
-          end)
-        else
-          original_handler(err, result, ctx, config)
-        end
+        original_handler(err, result, ctx, config)
       end
 
-      vim.api.nvim_create_autocmd("InsertLeave", {
-        group = vim.api.nvim_create_augroup("DiagnosticsInsertLeave", { clear = true }),
+      local refresh_timer = nil
+      local refresh_in_flight = false
+      local refresh_generation = 0
+      vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "BufWritePost", "InsertLeave" }, {
+        group = vim.api.nvim_create_augroup("DiagnosticsRefreshOnChange", { clear = true }),
         callback = function()
-          local bufnr = vim.api.nvim_get_current_buf()
-          if diagnostic_timers[bufnr] then
-            vim.fn.timer_stop(diagnostic_timers[bufnr])
-            diagnostic_timers[bufnr] = nil
+          if refresh_timer then
+            vim.fn.timer_stop(refresh_timer)
+            refresh_timer = nil
           end
-          vim.diagnostic.show(nil, bufnr)
+          refresh_generation = refresh_generation + 1
+          local gen = refresh_generation
+          local delay = vim.api.nvim_get_mode().mode == "i" and 400 or 200
+          refresh_timer = vim.fn.timer_start(delay, function()
+            vim.schedule(function()
+              refresh_timer = nil
+              if gen ~= refresh_generation then
+                return
+              end
+              if refresh_in_flight then
+                return
+              end
+              refresh_in_flight = true
+              local bufnr = vim.api.nvim_get_current_buf()
+              if not vim.api.nvim_buf_is_valid(bufnr) then
+                refresh_in_flight = false
+                return
+              end
+              local clients = vim.lsp.get_clients({ bufnr = bufnr })
+              for _, client in ipairs(clients) do
+                if client.server_capabilities.diagnosticProvider then
+                  local params = { textDocument = vim.lsp.util.make_text_document_params(bufnr) }
+                  client.request("textDocument/diagnostic", params, nil, bufnr)
+                end
+              end
+              vim.diagnostic.reset(nil, bufnr)
+              for _, client in ipairs(clients) do
+                local ns = vim.lsp.diagnostic.get_namespace(client.id)
+                vim.diagnostic.show(ns, bufnr)
+              end
+              vim.defer_fn(function()
+                refresh_in_flight = false
+              end, 200)
+            end)
+          end)
         end,
       })
 

@@ -1,3 +1,9 @@
+vim.keymap.set("n", "<leader>aa", function()
+  local ok, err = pcall(require("avante").ask)
+  if not ok and not err:match("yield") then
+    vim.notify(err, vim.log.levels.ERROR)
+  end
+end)
 local force_all = os.getenv("NO_LAZY") == "1"
 
 if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
@@ -147,6 +153,11 @@ local function apply_god_theme()
     ::continue::
   end
 
+  -- Force bold highlights for markdown elements
+  vim.api.nvim_set_hl(0, "markdownBold", { bold = true, force = true })
+  vim.api.nvim_set_hl(0, "@markup.strong", { bold = true, force = true })
+  vim.api.nvim_set_hl(0, "@text.strong", { bold = true, force = true })
+
   local sel_groups = { "BlinkCmpMenuSelection", "PmenuSel", "CmpItemAbbrSelected", "TelescopeSelection" }
   for _, g in ipairs(sel_groups) do
     vim.api.nvim_set_hl(0, g, { bg = selection_blue, force = true })
@@ -188,14 +199,27 @@ local function apply_god_theme()
   vim.api.nvim_set_hl(0, "CursorIM", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#00ff00", force = true })
   vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+  -- Since your font is already bold, we use color to differentiate
+  vim.api.nvim_set_hl(0, "markdownBold", { fg = "#ff9e64", bold = true, force = true })
+  vim.api.nvim_set_hl(0, "@markup.strong", { fg = "#ff9e64", bold = true, force = true })
 end
-
 local god_group = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
   group = god_group,
   callback = apply_god_theme,
 })
+
+-- Handle bold text concealment for Avante
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "avante", "avante-input" },
+  callback = function()
+    vim.opt_local.conceallevel = 2
+    vim.opt_local.concealcursor = "nc"
+  end,
+})
+
 apply_god_theme()
+
 vim.api.nvim_create_autocmd("BufDelete", {
   callback = function(args)
     local ft = vim.bo[args.buf].filetype
@@ -211,4 +235,28 @@ vim.api.nvim_create_autocmd("BufDelete", {
     end
   end,
   desc = "Refresh Avante when a code buffer is deleted",
+})
+
+-- Restore the global modifiable fix
+vim.api.nvim_create_autocmd({ "BufAdd", "BufNew", "BufEnter" }, {
+  group = vim.api.nvim_create_augroup("GlobalModifiableFix", { clear = true }),
+  callback = function(args)
+    vim.bo[args.buf].modifiable = true
+    vim.bo[args.buf].readonly = false
+  end,
+})
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "avante", "avante-input" },
+  callback = function(args)
+    -- Force Treesitter to treat this as markdown
+    local ok, _ = pcall(vim.treesitter.start, args.buf, "markdown")
+    if not ok then
+      -- Fallback if the parser isn't installed
+      vim.bo[args.buf].syntax = "markdown"
+    end
+
+    -- Now concealment actually has something to work with
+    vim.opt_local.conceallevel = 2
+    vim.opt_local.concealcursor = "nc"
+  end,
 })
