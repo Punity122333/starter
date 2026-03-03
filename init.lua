@@ -169,10 +169,11 @@ local function apply_god_theme()
   end
 
   local blink =
-    { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "NoiceLspSignatureHelp", "LspSignatureActiveParameter", "NoicePopup" }
+    { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "BlinkCmpDoc", "BlinkCmpDocSeparator", "NoiceLspSignatureHelp", "LspSignatureActiveParameter", "NoicePopup" }
   for _, g in ipairs(blink) do
     vim.api.nvim_set_hl(0, g, { bg = "#15151c", blend = 0, force = true })
   end
+  vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#15151c", fg = "#15151c", blend = 0, force = true })
   vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
   vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
   vim.api.nvim_set_hl(0, "LspInfoBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })

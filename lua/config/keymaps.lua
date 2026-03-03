@@ -89,6 +89,8 @@ vim.keymap.set("n", "<leader>ti", ":lua require('image').toggle()<CR>", { desc =
 vim.keymap.set("n", "<leader>br", function()
   Snacks.bufdelete()
 end, { desc = "Remove Current Buffer" })
+vim.keymap.set("n", "<leader>bn", "<cmd>BufferLineCycleNext<cr>", { desc = "Next Buffer" })
+vim.keymap.set("n", "<leader>bp", "<cmd>BufferLineCyclePrev<cr>", { desc = "Previous Buffer" })
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
 vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })
 

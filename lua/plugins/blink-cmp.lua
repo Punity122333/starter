@@ -15,6 +15,20 @@ return {
         menu = {
           auto_show = true,
         },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 100,
+          window = {
+            border = "none",
+            winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine",
+          },
+        },
+      },
+      signature = {
+        enabled = true,
+        window = {
+          border = "none",
+        },
       },
 
       snippets = {
@@ -39,15 +53,11 @@ return {
               return true
             end
 
-            if cmp.select_next() then
-              return true
-            end
-
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
             return true
           end,
         },
-        ["<S-Tab>"] = { "snippet_backward", "select_prev", "fallback" },
+        ["<S-Tab>"] = { "snippet_backward", "fallback" },
       },
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },

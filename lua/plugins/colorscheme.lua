@@ -44,6 +44,9 @@ return {
         hl.BlinkCmpSignatureHelp = { bg = "#15151c", blend = 0 }
         hl.NoiceLspSignatureHelp = { bg = "#15151c", blend = 0 }
         hl.LspSignatureActiveParameter = { bg = "#15151c", blend = 0 }
+        hl.BlinkCmpDoc = { bg = "#15151c", blend = 0 }
+        hl.BlinkCmpDocBorder = { bg = "#15151c", fg = "#15151c", blend = 0 }
+        hl.BlinkCmpDocSeparator = { bg = "#15151c", fg = "#232330", blend = 0 }
         hl.NoicePopup = { bg = "#15151c", blend = 0 }
         hl.NoicePopupBorder = { bg = "#15151c", fg = "#232330", blend = 0 }
         hl.MsgArea = solid_bg

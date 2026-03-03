@@ -12,6 +12,7 @@ return {
             -- The new semantic tokens crash
             { find = "semanticTokensProvider" },
             { find = "semantic_tokens.lua" },
+            { find = "shared.lua" }
           },
         },
         opts = { skip = true },
