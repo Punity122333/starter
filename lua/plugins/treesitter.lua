@@ -1,30 +1,23 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
+    -- Use lazy loading to defer until the buffer is actually readable
+    event = { "BufReadPost", "BufNewFile" },
+    build = ":TSUpdate",
     opts = {
-      -- Ensure shader language parsers are installed
-      ensure_installed = {
-        "glsl",  -- OpenGL Shading Language
-        "hlsl",  -- High-Level Shading Language (DirectX)
-        "wgsl",  -- WebGPU Shading Language
-      },
-      -- Fix the "attempt to yield across C-call boundary" error
-      -- by disabling the conceal feature that causes issues
+      ensure_installed = { "c", "cpp", "glsl", "hlsl", "wgsl", "lua", "vim" },
+      sync_install = false, -- Never block startup
       highlight = {
         enable = true,
-        -- Disable treesitter for these cases to prevent the C-call error
-        disable = function(lang, buf)
-          local max_filesize = 100 * 1024 -- 100 KB
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-          if ok and stats and stats.size > max_filesize then
-            return true
-          end
+        -- CRITICAL: This stops the C-call boundary errors and improves speed
+        additional_vim_regex_highlighting = false,
+        disable = function(_, buf)
+          local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
+          return ok and stats and stats.size > 100 * 1024 -- 100 KB limit
         end,
       },
-      -- Disable incremental selection to reduce errors
-      incremental_selection = {
-        enable = false,
-      },
+      indent = { enable = false }, -- Indent via Treesitter is often a bottleneck
+      incremental_selection = { enable = false },
     },
   },
 }

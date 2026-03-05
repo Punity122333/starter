@@ -5,7 +5,7 @@ return {
     cond = function()
       return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
     end,
-    event = { "BufReadPre", "BufNewFile" },
+    event = { "BufReadPost"},
     dependencies = {
       "mason.nvim",
     },
@@ -70,7 +70,7 @@ return {
           end,
         },
 
-        clangd = {
+  clangd = {
   filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
   capabilities = {
     offsetEncoding = { "utf-16" },
@@ -85,12 +85,6 @@ return {
     "-j=4",
   },
   single_file_support = true,
-  -- Optimized root detection:
-  root_dir = function(fname)
-    local util = require("lspconfig.util")
-    return util.root_pattern("compile_commands.json", "compile_flags.txt", ".git")(fname) 
-           or vim.fn.getcwd()
-  end,
   on_attach = function(client, bufnr)
     if vim.api.nvim_buf_line_count(bufnr) > 2000 then
       client.server_capabilities.semanticTokensProvider = nil
