@@ -161,13 +161,6 @@ vim.api.nvim_create_autocmd("FileType", {
     )
   end,
 })
-vim.keymap.set("n", "<leader>sy", function()
-  Snacks.picker.lines()
-end, { desc = "Buffer Lines" })
-vim.keymap.set("n", "<leader>sY", function()
-  Snacks.picker.lsp_symbols()
-end, { desc = "LSP Symbols" })
-
 -- Peek Definition (Opens a floating window)
 vim.keymap.set("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek Definition" })
 
@@ -204,7 +197,14 @@ vim.keymap.set("n", "gjp", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { desc = "Pr
 -- Disable macro recording
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
 vim.keymap.set("n", "<leader>[]", function()
+  -- 1. Stop all current LSP clients attached to this buffer
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  for _, client in ipairs(clients) do
+    vim.lsp.stop_client(client.id, true)
+  end
 
-  vim.cmd("LspRestart")
+  -- 2. Force a buffer reload to re-trigger attachment
+  vim.cmd("edit!")
 
-  vim.notify("LSP Restarted", vim.log.levels.INFO, { title = "LSP" })end, { desc = "LSP Panic Button" })
+  vim.notify("LSP Clients refreshed for buffer", vim.log.levels.INFO, { title = "LSP Panic" })
+end, { desc = "LSP Panic Button (Soft Refresh)" })
