@@ -6,7 +6,6 @@ return {
         enabled = true,
         auto_trigger = true,
         keymap = {
-
           accept = "<Tab>",
           accept_word = false,
           accept_line = false,
@@ -15,7 +14,8 @@ return {
           dismiss = "<C-]>",
         },
       },
-      panel = { enabled = true },
+      panel = { enabled = false },
+      cmp = { enabled = false },
     },
   },
 }

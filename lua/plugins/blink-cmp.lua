@@ -1,46 +1,48 @@
+vim.g.load_doxygen_syntax = 1
+
 return {
   "saghen/blink.cmp",
   opts = function(_, opts)
-    return {
+    return vim.tbl_deep_extend("force", opts or {}, {
       completion = {
         trigger = {
           show_on_keyword = true,
           show_on_trigger_character = true,
         },
-        accept = {
-          auto_brackets = {
-            enabled = true,
-          },
-        },
+        accept = { auto_brackets = { enabled = true } },
         menu = {
           auto_show = true,
+          winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
         },
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 100,
           window = {
             border = "none",
+            offset_x = 2,
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine",
           },
         },
       },
-      signature = {
-        enabled = true,
-        window = {
-          border = "none",
-        },
-      },
-
-      snippets = {
-        preset = "default",
-      },
+      -- keep blink signature off so it doesn't overlap noice
+      signature = { enabled = false },
+      
+      snippets = { preset = "default" },
+      
       keymap = {
         preset = "default",
         ["<Up>"] = { "fallback" },
         ["<Down>"] = { "fallback" },
         ["<C-n>"] = { "select_next", "fallback" },
         ["<C-p>"] = { "select_prev", "fallback" },
+        ["<C-Up>"] = { "select_prev", "fallback" },
+        ["<C-Down>"] = { "select_next", "fallback" },
         ["<S-CR>"] = { "accept", "fallback" },
+        
+        -- manual triggers for noice signature help
+        ["<C-S-0>"] = { function() vim.lsp.buf.signature_help() return true end, "fallback" },
+        ["<C-]>"] = { function() vim.lsp.buf.signature_help() return true end, "fallback" },
+        
         ["<Tab>"] = {
           function(cmp)
             local copilot_ok, copilot = pcall(require, "copilot.suggestion")
@@ -48,36 +50,23 @@ return {
               copilot.accept()
               return true
             end
-
-            if cmp.snippet_forward() then
-              return true
-            end
-
+            if cmp.snippet_forward() then return true end
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
             return true
           end,
         },
         ["<S-Tab>"] = { "snippet_backward", "fallback" },
       },
+      
       sources = {
         default = { "lsp", "path", "snippets", "buffer" },
         providers = {
-          lsp = {
-            max_items = 25,
-            timeout_ms = 700,
-          },
-          buffer = {
-            max_items = 25,
-          },
-          snippets = {
-            max_items = 25,
-          },
-          path = {
-            max_items = 25,
-          },
+          lsp = { max_items = 25, timeout_ms = 700 },
+          buffer = { max_items = 25 },
+          snippets = { max_items = 25 },
+          path = { max_items = 25 },
         },
       },
-
-    }
+    })
   end,
 }

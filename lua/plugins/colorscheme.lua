@@ -47,6 +47,8 @@ return {
         hl.BlinkCmpDoc = { bg = "#15151c", blend = 0 }
         hl.BlinkCmpDocBorder = { bg = "#15151c", fg = "#15151c", blend = 0 }
         hl.BlinkCmpDocSeparator = { bg = "#15151c", fg = "#232330", blend = 0 }
+        hl.BlinkCmpMenu = { bg = "#15151c", blend = 0 }
+        hl.BlinkCmpMenuBorder = { bg = "#15151c", fg = "#232330", blend = 0 }
         hl.NoicePopup = { bg = "#15151c", blend = 0 }
         hl.NoicePopupBorder = { bg = "#15151c", fg = "#232330", blend = 0 }
         hl.MsgArea = solid_bg

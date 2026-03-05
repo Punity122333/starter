@@ -168,8 +168,15 @@ local function apply_god_theme()
     vim.api.nvim_set_hl(0, g, { bg = god_hex, force = true })
   end
 
-  local blink =
-    { "BlinkCmpMenu", "BlinkCmpSignatureHelp", "BlinkCmpDoc", "BlinkCmpDocSeparator", "NoiceLspSignatureHelp", "LspSignatureActiveParameter", "NoicePopup" }
+  local blink = {
+    "BlinkCmpMenu",
+    "BlinkCmpSignatureHelp",
+    "BlinkCmpDoc",
+    "BlinkCmpDocSeparator",
+    "NoiceLspSignatureHelp",
+    "LspSignatureActiveParameter",
+    "NoicePopup",
+  }
   for _, g in ipairs(blink) do
     vim.api.nvim_set_hl(0, g, { bg = "#15151c", blend = 0, force = true })
   end
@@ -199,8 +206,9 @@ local function apply_god_theme()
   vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "CursorIM", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#00ff00", force = true })
-  vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 
+  vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+  vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
   local diag_underline_groups = {
     "DiagnosticUnderlineError",
     "DiagnosticUnderlineWarn",
@@ -264,7 +272,6 @@ vim.api.nvim_create_autocmd("BufDelete", {
   desc = "Refresh Avante when a code buffer is deleted",
 })
 
-
 vim.api.nvim_create_autocmd({ "BufAdd", "BufNew", "BufEnter" }, {
   group = vim.api.nvim_create_augroup("GlobalModifiableFix", { clear = true }),
   callback = function(args)
@@ -275,7 +282,6 @@ vim.api.nvim_create_autocmd({ "BufAdd", "BufNew", "BufEnter" }, {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "avante", "avante-input" },
   callback = function(args)
-
     local ok, _ = pcall(vim.treesitter.start, args.buf, "markdown")
     if not ok then
       -- Fallback if the parser isn't installed
@@ -287,3 +293,15 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.concealcursor = "nc"
   end,
 })
+
+-- Top of init.lua
+if vim.env.PROF then
+  -- Adjust this path if your lazy.nvim data is somewhere else
+  local snacks = vim.fn.stdpath("data") .. "/lazy/snacks.nvim"
+  vim.opt.rtp:append(snacks)
+  require("snacks.profiler").startup({
+    startup = {
+      event = "VimEnter", -- Stops profiling once Neovim is ready
+    },
+  })
+end

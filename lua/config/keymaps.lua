@@ -161,3 +161,50 @@ vim.api.nvim_create_autocmd("FileType", {
     )
   end,
 })
+vim.keymap.set("n", "<leader>sy", function()
+  Snacks.picker.lines()
+end, { desc = "Buffer Lines" })
+vim.keymap.set("n", "<leader>sY", function()
+  Snacks.picker.lsp_symbols()
+end, { desc = "LSP Symbols" })
+
+-- Peek Definition (Opens a floating window)
+vim.keymap.set("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek Definition" })
+
+-- Finder (See definition and references in one split UI)
+vim.keymap.set("n", "gh", "<cmd>Lspsaga finder<CR>", { desc = "LSP Finder" })
+
+-- Outline (See all your functions/structs in a side bar)
+vim.keymap.set("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { desc = "LSP Outline" })
+
+-- Hover Doc (Better than the default K)
+vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover Docs" })
+-- Register the group name so Which-Key looks clean
+require("which-key").add({ { "gj", group = "LSP Navigation" } })
+-- Search in current buffer (lines/fuzziness)
+vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Buffer Lines" })
+
+-- Search LSP Symbols (classes, functions, variables)
+vim.keymap.set("n", "<leader>sB", function() Snacks.picker.lsp_symbols() end, { desc = "LSP Symbols" })
+-- Navigation & Hierarchy (The three-letter combos)
+vim.keymap.set("n", "gjd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Goto Definition" })
+vim.keymap.set("n", "gjt", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek Type Definition" })
+vim.keymap.set("n", "gji", "<cmd>Lspsaga incoming_calls<CR>", { desc = "Incoming Calls" })
+vim.keymap.set("n", "gjo", "<cmd>Lspsaga outgoing_calls<CR>", { desc = "Outgoing Calls" })
+
+-- Structure & Symbols
+vim.keymap.set("n", "gjs", "<cmd>Lspsaga outline<CR>", { desc = "Toggle Outline" })
+vim.keymap.set("n", "gjb", "<cmd>Lspsaga symbols_in_winbar<CR>", { desc = "Winbar Symbols" })
+
+-- Diagnostics & Docs
+vim.keymap.set("n", "gjh", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover Doc" })
+vim.keymap.set("n", "gjl", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Buffer Diagnostics" })
+vim.keymap.set("n", "gjn", "<cmd>Lspsaga diagnostic_jump_next<CR>", { desc = "Next Diagnostic" })
+vim.keymap.set("n", "gjp", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { desc = "Prev Diagnostic" })
+-- Disable macro recording
+vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
+vim.keymap.set("n", "<leader>[]", function()
+
+  vim.cmd("LspRestart")
+
+  vim.notify("LSP Restarted", vim.log.levels.INFO, { title = "LSP" })end, { desc = "LSP Panic Button" })

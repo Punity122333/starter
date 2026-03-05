@@ -61,51 +61,42 @@ return {
             ["asm-lsp"] = {
               assembler = "nasm",
               instruction_set = "x86",
-              default_diagnostics = false, -- Disable built-in diagnostics (they're usually wrong)
+              default_diagnostics = false,
             },
           },
-          -- Keep autocomplete/hover but disable the broken diagnostics
           on_attach = function(client, bufnr)
-            -- Disable diagnostics but keep completion and hover
             client.server_capabilities.diagnosticProvider = false
-            -- Disable diagnostics for this buffer (correct API for newer Neovim)
             vim.diagnostic.enable(false, { bufnr = bufnr })
           end,
         },
 
         clangd = {
-          filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-          capabilities = {
-            offsetEncoding = { "utf-16" },
-          },
-
-          cmd = {
-            "clangd",
-            "--background-index",
-            "--clang-tidy",
-            "--query-driver=/usr/bin/g++,/usr/bin/gcc",
-            "--fallback-style=google",
-            "--pch-storage=memory",
-            "-j=4",
-          },
-          single_file_support = true,
-          root_dir = function(fname)
-            local util = require("lspconfig.util")
-            -- Use the new vim.fs API for the git check to stop the deprecation warning
-            local git_root = vim.fs.dirname(vim.fs.find(".git", { path = fname, upward = true })[1])
-
-            return util.root_pattern("compile_commands.json", "compile_flags.txt")(fname) or git_root or vim.fn.getcwd()
-          end,
-          oot_dir = function(fname)
-            return vim.fn.getcwd()
-          end,
-          on_attach = function(client, bufnr)
-            if vim.api.nvim_buf_line_count(bufnr) > 2000 then
-              client.server_capabilities.semanticTokensProvider = nil
-            end
-          end,
-        },
-        -- OmniSharp for C#
+  filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+  capabilities = {
+    offsetEncoding = { "utf-16" },
+  },
+  cmd = {
+    "clangd",
+    "--background-index",
+    "--clang-tidy",
+    "--query-driver=/usr/bin/g++,/usr/bin/gcc",
+    "--fallback-style=google",
+    "--pch-storage=memory",
+    "-j=4",
+  },
+  single_file_support = true,
+  -- Optimized root detection:
+  root_dir = function(fname)
+    local util = require("lspconfig.util")
+    return util.root_pattern("compile_commands.json", "compile_flags.txt", ".git")(fname) 
+           or vim.fn.getcwd()
+  end,
+  on_attach = function(client, bufnr)
+    if vim.api.nvim_buf_line_count(bufnr) > 2000 then
+      client.server_capabilities.semanticTokensProvider = nil
+    end
+  end,
+},
         omnisharp = {
           cmd = {
             "omnisharp",
@@ -118,17 +109,11 @@ return {
           root_dir = function(fname)
             local util = require("lspconfig.util")
             local root = util.root_pattern("*.sln", "*.csproj", "omnisharp.json")(fname)
-
-            -- If no project file found, create a minimal .csproj in the same directory
             if not root then
               local dir = vim.fn.fnamemodify(fname, ":h")
-              -- Get the directory name (e.g., "Test" from "/path/to/Test")
               local dir_name = vim.fn.fnamemodify(dir, ":t")
               local csproj_path = dir .. "/" .. dir_name .. ".csproj"
-
-              -- Check if csproj already exists
               if vim.fn.filereadable(csproj_path) == 0 then
-                -- Create minimal .csproj for standalone files
                 local csproj_content = [[<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -143,353 +128,133 @@ return {
                   file:close()
                 end
               end
-
               return dir
             end
-
             return root
           end,
           handlers = {
             ["textDocument/definition"] = vim.lsp.handlers["textDocument/definition"],
             ["textDocument/completion"] = vim.lsp.with(vim.lsp.handlers["textDocument/completion"], {
-              -- Disable borders and extra UI for faster response
               border = "none",
             }),
           },
           on_attach = function(client, bufnr)
-            -- Disable semantic tokens to fix syntax highlighting issues
             client.server_capabilities.semanticTokensProvider = nil
-
-            -- Optimize completion settings
             if client.server_capabilities.completionProvider then
               client.server_capabilities.completionProvider.triggerCharacters = { ".", ":" }
               client.server_capabilities.completionProvider.resolveProvider = true
             end
-
-            -- Disable document symbol provider for faster performance
             client.server_capabilities.documentSymbolProvider = false
           end,
           settings = {
             FormattingOptions = {
-              EnableEditorConfigSupport = false, -- Faster without EditorConfig
-              OrganizeImports = false, -- Disable for speed
+              EnableEditorConfigSupport = false,
+              OrganizeImports = false,
             },
             RoslynExtensionsOptions = {
-              EnableAnalyzersSupport = false, -- Disable analyzers for faster completion
+              EnableAnalyzersSupport = false,
               EnableImportCompletion = true,
-              AnalyzeOpenDocumentsOnly = true, -- Only analyze current file
+              AnalyzeOpenDocumentsOnly = true,
               EnableDecompilationSupport = false,
             },
-            Sdk = {
-              IncludePrereleases = false,
-            },
-            -- Faster response
-            msbuild = {
-              loadProjectsOnDemand = true,
-            },
+            Sdk = { IncludePrereleases = false },
+            msbuild = { loadProjectsOnDemand = true },
           },
         },
-        -- TypeScript/JavaScript
+
         ts_ls = {
           cmd = { "typescript-language-server", "--stdio" },
           filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
           single_file_support = true,
           root_dir = function(fname)
             local util = require("lspconfig.util")
-            local root = util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname)
-            return root or vim.fn.getcwd()
+            return util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or vim.fn.getcwd()
           end,
         },
-        -- HTML Language Server
-        html = {
-          cmd = { "vscode-html-language-server", "--stdio" },
-          filetypes = { "html", "htm", "htmldjango" },
-          single_file_support = true,
-          root_dir = function(fname)
-            return vim.fn.getcwd()
-          end,
-          on_attach = function(client, bufnr)
-            client.server_capabilities.codeActionProvider = false
-          end,
-        },
-        -- CSS Language Server
-        cssls = {
-          cmd = { "vscode-css-language-server", "--stdio" },
-          filetypes = { "css", "scss", "less" },
-          single_file_support = true,
-          root_dir = function(fname)
-            return vim.fn.getcwd()
-          end,
-        },
-        -- ESLint
-        eslint = {
-          cmd = { "vscode-eslint-language-server", "--stdio" },
-          filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
-          root_dir = function(fname)
-            local util = require("lspconfig.util")
-            -- Only attach if we can find an ESLint config file
-            local root = util.root_pattern(
-              ".eslintrc",
-              ".eslintrc.js",
-              ".eslintrc.cjs",
-              ".eslintrc.yaml",
-              ".eslintrc.yml",
-              ".eslintrc.json"
-            )(fname)
-            -- Also check for eslint in package.json
-            if not root then
-              local package_root = util.root_pattern("package.json")(fname)
-              if package_root then
-                local package_json = package_root .. "/package.json"
-                local file = io.open(package_json, "r")
-                if file then
-                  local content = file:read("*a")
-                  file:close()
-                  -- Only use this root if package.json mentions eslint
-                  if content:match('"eslint"') then
-                    root = package_root
-                  end
-                end
-              end
-            end
-            return root
-          end,
-          single_file_support = false, -- Don't attach to single files without config
-          settings = {
-            validate = "on",
-            packageManager = "npm",
-            useESLintClass = false,
-            experimental = {
-              useFlatConfig = false,
-            },
-            codeAction = {
-              disableRuleComment = {
-                enable = true,
-                location = "separateLine",
-              },
-              showDocumentation = {
-                enable = true,
-              },
-            },
-            codeActionOnSave = {
-              enable = false,
-            },
-            format = false,
-            quiet = false,
-            onIgnoredFiles = "off",
-            rulesCustomizations = {},
-            run = "onType",
-            problems = {
-              shortenToSingleLine = false,
-            },
-            nodePath = "",
-            workingDirectory = {
-              mode = "auto",
-            },
-          },
-          on_attach = function(client, bufnr)
-            client.server_capabilities.codeActionProvider = false
-            client.server_capabilities.documentFormattingProvider = false
-          end,
-        },
+
         lua_ls = {
           filetypes = { "lua" },
-          single_file_support = true,
           on_attach = function(client, bufnr)
             client.server_capabilities.semanticTokensProvider = nil
-            client.server_capabilities.documentFormattingProvider = false
-            client.server_capabilities.documentRangeFormattingProvider = false
-            client.server_capabilities.codeLensProvider = nil
-            client.server_capabilities.documentLinkProvider = nil
-            client.server_capabilities.colorProvider = nil
-            client.server_capabilities.foldingRangeProvider = nil
             client.server_capabilities.documentSymbolProvider = false
           end,
           settings = {
             Lua = {
-              runtime = {
-                version = "LuaJIT",
-                pathStrict = true,
-              },
+              runtime = { version = "LuaJIT" },
               diagnostics = {
-                enable = true,
                 globals = { "vim" },
-                disable = {
-                  "lowercase-global",
-                  "undefined-global",
-                  "missing-fields",
-                  "inject-field",
-                  "param-type-mismatch",
-                  "assign-type-mismatch",
-                  "redundant-parameter",
-                  "cast-local-type",
-                },
-                groupSeverity = {
-                  strong = "Warning",
-                  strict = "Warning",
-                },
-                unusedLocalExclude = { "_*" },
-                neededFileStatus = {
-                  ["codestyle-check"] = "None",
-                  ["spell-check"] = "None",
-                },
-                workspaceDelay = 3000,
-                workspaceRate = 40,
+                disable = { "lowercase-global", "undefined-global", "missing-fields" },
               },
-              workspace = {
-                library = {
-                  vim.fn.expand("$VIMRUNTIME/lua"),
-                  "${3rd}/luv/library",
-                },
-                checkThirdParty = false,
-                maxPreload = 200,
-                preloadFileSize = 50,
-                ignoreDir = { ".git", "node_modules", ".vscode", "test", "tests", "spec" },
-              },
-              completion = {
-                callSnippet = "Replace",
-                displayContext = 0,
-                postfix = "@",
-                workspaceWord = false,
-                showWord = "Disable",
-              },
-              type = {
-                castNumberToInteger = true,
-                weakUnionCheck = true,
-                weakNilCheck = true,
-              },
-              hint = { enable = false },
-              semantic = {
-                enable = false,
-              },
-              codeLens = { enable = false },
+              workspace = { checkThirdParty = false },
               telemetry = { enable = false },
-              window = {
-                progressBar = false,
-                statusBar = false,
-              },
-              misc = {
-                executablePath = "",
-                parameters = { "--loglevel=warning" },
-              },
             },
           },
         },
+
         glsl_analyzer = {
           cmd = { "glsl_analyzer" },
           filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
-          single_file_support = true,
-          root_dir = function(fname)
-            return vim.fn.getcwd()
-          end,
-          capabilities = {
-            textDocument = {
-              publishDiagnostics = {
-                relatedInformation = true,
-                tagSupport = { valueSet = { 1, 2 } },
-              },
-            },
-          },
+          root_dir = function(fname) return vim.fn.getcwd() end,
           on_attach = function(client, bufnr)
-            -- Force enable diagnostics for GLSL files
             vim.diagnostic.enable(true, { bufnr = bufnr })
           end,
         },
-        -- glslls (commented out - uncomment if you have it installed via Mason)
-        -- glslls = {
-        --   cmd = { "glslls", "--stdin" },
-        --   filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
-        --   single_file_support = true,
-        --   root_dir = function(fname)
-        --     return vim.fn.getcwd()
-        --   end,
-        -- },
       },
     },
     config = function(_, opts)
       vim.diagnostic.config(opts.diagnostics)
+      
+      -- THE SNACKS FIX: Global guard against semantic token crashes
+      -- We use an autocmd because it catches attachments across all servers automatically
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if not client then return end
+          
+          local bufnr = args.buf
+          local ft = vim.bo[bufnr].filetype
+          
+          -- Kill semantic tokens in snacks pickers to prevent nil index crash
+          -- Also kills them in massive files (> 10k lines) to keep it snappy
+          if ft == "snacks_picker_preview" or ft == "snacks_picker_input" or vim.api.nvim_buf_line_count(bufnr) > 10000 or ft:find("snacks") then
+            client.server_capabilities.semanticTokensProvider = nil
+          end
+        end,
+      })
 
-      -- Get lspconfig
       local ok, lspconfig = pcall(require, "lspconfig")
-      if not ok then
-        vim.notify("Failed to load lspconfig", vim.log.levels.ERROR)
-        return
-      end
+      if not ok then return end
 
-      -- Get default capabilities - try Blink first, then cmp, then fallback
       local default_capabilities = vim.lsp.protocol.make_client_capabilities()
 
-      -- Try Blink.cmp first (LazyVim's new default)
+      -- Cap compatibility (Blink/Cmp)
       local has_blink, blink = pcall(require, "blink.cmp")
       if has_blink then
         default_capabilities = blink.get_lsp_capabilities(default_capabilities)
       else
-        -- Fallback to nvim-cmp
         local has_cmp, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
         if has_cmp then
           default_capabilities = cmp_nvim_lsp.default_capabilities(default_capabilities)
         end
       end
 
-      -- Ensure completion is explicitly enabled
-      default_capabilities.textDocument.completion.completionItem.snippetSupport = true
-      default_capabilities.textDocument.completion.completionItem.resolveSupport = {
-        properties = { "documentation", "detail", "additionalTextEdits" },
-      }
-
+      -- Loop through and setup servers
       for server_name, server_config in pairs(opts.servers) do
-        -- Skip non-LSP entries that might come from LazyVim or other plugins
-        local skip_servers = {
-          "copilot",
-          "stylua",
-          "*",
-          "tsserver",
-          "ruff",
-          "ruff_lsp",
-        }
-
+        -- Skip non-LSP entries
+        local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp" }
         local should_skip = false
         for _, skip_name in ipairs(skip_servers) do
-          if server_name == skip_name then
-            should_skip = true
-            break
-          end
+          if server_name == skip_name then should_skip = true break end
         end
 
-        if should_skip then
-          goto continue
+        if not should_skip and lspconfig[server_name] then
+          local config = vim.deepcopy(server_config)
+          config.capabilities = vim.tbl_deep_extend("force", {}, default_capabilities, config.capabilities or {})
+          lspconfig[server_name].setup(config)
         end
-
-        -- Create a new config table to avoid modifying the original
-        local config = vim.deepcopy(server_config)
-
-        -- Merge with default capabilities
-        config.capabilities = vim.tbl_deep_extend("force", {}, default_capabilities, config.capabilities or {})
-        -- Check if the server exists in lspconfig before setup
-        if lspconfig[server_name] then
-          local setup_ok, setup_err = pcall(function()
-            lspconfig[server_name].setup(config)
-          end)
-
-          if not setup_ok then
-            vim.notify("Failed to setup '" .. server_name .. "': " .. tostring(setup_err), vim.log.levels.WARN)
-          end
-        end
-
-        ::continue::
       end
     end,
   },
-  {
-    "3rd/image.nvim",
-    cond = function()
-      return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
-    end,
-  },
-  {
-    "nvim-lualine/lualine.nvim",
-    cond = function()
-      return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
-    end,
-  },
+  { "3rd/image.nvim", cond = function() return vim.env.KITTY_SCROLLBACK_NVIM ~= "true" end },
+  { "nvim-lualine/lualine.nvim", cond = function() return vim.env.KITTY_SCROLLBACK_NVIM ~= "true" end },
 }

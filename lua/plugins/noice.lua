@@ -1,6 +1,14 @@
 return {
   "folke/noice.nvim",
   opts = {
+    lsp = {
+      signature = {
+        enabled = true,
+        auto_open = {
+          enabled = true, -- no more auto-popups while typing
+        },
+      },
+    },
     routes = {
       {
         filter = {
@@ -12,7 +20,9 @@ return {
             -- The new semantic tokens crash
             { find = "semanticTokensProvider" },
             { find = "semantic_tokens.lua" },
-            { find = "shared.lua" }
+            { find = "shared.lua" },
+            { find = "Invalid window" },
+            { find = "selected model" },
           },
         },
         opts = { skip = true },

@@ -6,19 +6,23 @@ return {
     build = "make",
     opts = {
       mode = "agentic",
-      provider = "copilot",
+      provider = "gemini",
       instructions_file = "avante.md",
+      -- The top-level gemini key was moved into the providers table below to fix the [DEPRECATED] warning.
       providers = {
+        gemini = {
+          endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+          model = "gemini-3-flash-preview",
+          timeout = 30000,
+          temperature = 0,
+          max_tokens = 8192,
+        },
         copilot = {
           endpoint = "https://api.githubcopilot.com",
-          model = "oswe-vscode-prime",
+          model = "gpt-4o",
           proxy = nil,
           allow_insecure_call = true,
           timeout = 30000,
-          extra_request_body = {
-            temperature = 0,
-            max_tokens = 8192,
-          },
         },
       },
       behaviour = {
