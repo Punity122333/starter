@@ -178,20 +178,20 @@ local function apply_god_theme()
     "NoicePopup",
   }
   for _, g in ipairs(blink) do
-    vim.api.nvim_set_hl(0, g, { bg = "#15151c", blend = 0, force = true })
+    vim.api.nvim_set_hl(0, g, { bg = "#111116", blend = 0, force = true })
   end
-  vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#15151c", fg = "#15151c", blend = 0, force = true })
-  vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
-  vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
-  vim.api.nvim_set_hl(0, "LspInfoBorder", { bg = "#15151c", fg = "#232330", blend = 0, force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { bg = "#111116", fg = "#111116", blend = 0, force = true })
+  vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = "#111116", fg = "#232330", blend = 0, force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#111116", fg = "#232330", blend = 0, force = true })
+  vim.api.nvim_set_hl(0, "LspInfoBorder", { bg = "#111116", fg = "#232330", blend = 0, force = true })
   local sep = { "Split", "Splitter", "Separator", "WinSeparator", "VertSplit" }
   for _, g in ipairs(sep) do
-    vim.api.nvim_set_hl(0, g, { bg = god_hex, blend = 20, fg = "#15151c", force = true })
+    vim.api.nvim_set_hl(0, g, { bg = god_hex, blend = 20, fg = "#111116", force = true })
   end
-  vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = "#15151c", bg = god_hex })
-  vim.api.nvim_set_hl(0, "AvanteSidebarWinHorizontalSeparator", { fg = "#15151c", bg = god_hex })
+  vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = "#111116", bg = god_hex })
+  vim.api.nvim_set_hl(0, "AvanteSidebarWinHorizontalSeparator", { fg = "#111116", bg = god_hex })
   local snacks_selection_bg = "#1a1b26"
-  vim.api.nvim_set_hl(0, "AvantePopup", { bg = "#15151c", force = true })
+  vim.api.nvim_set_hl(0, "AvantePopup", { bg = "#111116", force = true })
   local snack_hls = {
     SnacksPickerSelected = { bg = "NONE", fg = "#88c0d0" },
     SnacksPickerCursorLine = { bg = snacks_selection_bg },
@@ -199,8 +199,8 @@ local function apply_god_theme()
   for group, settings in pairs(snack_hls) do
     vim.api.nvim_set_hl(0, group, settings)
   end
-  vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = "#15151c", force = true })
-  vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = "#15151c", force = true })
+  vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = "#111116", force = true })
+  vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = "#111116", force = true })
 
   vim.api.nvim_set_hl(0, "Cursor", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#00ff00", force = true })
