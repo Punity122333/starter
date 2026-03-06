@@ -23,6 +23,7 @@ return {
             { find = "shared.lua" },
             { find = "Invalid window" },
             { find = "selected model" },
+            { find = "Using" }
           },
         },
         opts = { skip = true },

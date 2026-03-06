@@ -67,6 +67,7 @@ return {
           on_attach = function(client, bufnr)
             client.server_capabilities.diagnosticProvider = false
             vim.diagnostic.enable(false, { bufnr = bufnr })
+            
           end,
         },
 
@@ -86,9 +87,11 @@ return {
   },
   single_file_support = true,
   on_attach = function(client, bufnr)
+    local start = vim.loop.hrtime()
     if vim.api.nvim_buf_line_count(bufnr) > 2000 then
       client.server_capabilities.semanticTokensProvider = nil
     end
+    
   end,
 },
         omnisharp = {

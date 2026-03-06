@@ -206,7 +206,8 @@ local function apply_god_theme()
   vim.api.nvim_set_hl(0, "lCursor", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "CursorIM", { fg = "#000000", bg = "#00ff00", force = true })
   vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#00ff00", force = true })
-
+  vim.api.nvim_set_hl(0, "@module.python", { link = "@type.python" })
+  vim.api.nvim_set_hl(0, "@keyword.import.python", { link = "@keyword.conditional.python" })
   vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
   vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
   local diag_underline_groups = {
@@ -309,3 +310,16 @@ vim.api.nvim_create_user_command("RefreshAll", function()
   vim.cmd("bufdo edit!")
 end, { desc = "Reload all buffers from disk" })
 
+-- Add this to your init.lua
+-- vim.api.nvim_create_autocmd("LspAttach", {
+--   callback = function(args)
+--     local client = vim.lsp.get_client_by_id(args.data.client_id)
+--     if client and client.name == "clangd" then
+--       local start = vim.loop.hrtime()
+--       -- Force a synchronous request to see how long it takes to get a response
+--       vim.lsp.buf_request_sync(args.buf, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, 1000)
+--       local duration = (vim.loop.hrtime() - start) / 1e6
+--       print("Sync request took: " .. duration .. "ms")
+--     end
+--   end,
+-- })
