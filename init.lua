@@ -305,3 +305,7 @@ if vim.env.PROF then
     },
   })
 end
+vim.api.nvim_create_user_command("RefreshAll", function()
+  vim.cmd("bufdo edit!")
+end, { desc = "Reload all buffers from disk" })
+

@@ -19,7 +19,6 @@ return {
           auto_show_delay_ms = 100,
           window = {
             border = "none",
-            offset_x = 2,
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine",
           },
         },
