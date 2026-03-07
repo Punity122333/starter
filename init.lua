@@ -57,19 +57,16 @@ end
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
 package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/lib/lua/5.1/?.so;"
-
+vim.g.VM_SET_STATUS_LINE = 0
 vim.opt.relativenumber = true
 vim.opt.number = true
 vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
 vim.keymap.set("n", "hi", ":Inspect<CR>")
-
+vim.g.VM_set_statusline = 0
 vim.cmd([[
   highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
-         
-  highlight VM_Extend_hl guibg=#224466 gui=italic
-    
-  " This is for the cursors specifically when you are in 'Extend' (Visual) mode
+  highlight VM_Extend_hl guibg=#00f2ff gui=italic
   highlight VM_Cursor_hl guifg=#000000 guibg=#00f2ff
 ]])
 local god_hex = "#1a1b26"
@@ -153,7 +150,6 @@ local function apply_god_theme()
     ::continue::
   end
 
-  -- Force bold highlights for markdown elements
   vim.api.nvim_set_hl(0, "markdownBold", { bold = true, force = true })
   vim.api.nvim_set_hl(0, "@markup.strong", { bold = true, force = true })
   vim.api.nvim_set_hl(0, "@text.strong", { bold = true, force = true })
@@ -234,7 +230,6 @@ local function apply_god_theme()
     vim.api.nvim_set_hl(0, g, { bg = selection_blue, force = true })
   end
 
-  -- Since your font is already bold, we use color to differentiate
   vim.api.nvim_set_hl(0, "markdownBold", { fg = "#ff9e64", bold = true, force = true })
   vim.api.nvim_set_hl(0, "@markup.strong", { fg = "#ff9e64", bold = true, force = true })
   vim.api.nvim_set_hl(0, "DiagnosticUnnecessary", { fg = "#6c7086", strikethrough = true, force = true })
@@ -245,7 +240,6 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
   callback = apply_god_theme,
 })
 
--- Handle bold text concealment for Avante
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "avante", "avante-input" },
   callback = function()
@@ -285,41 +279,47 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function(args)
     local ok, _ = pcall(vim.treesitter.start, args.buf, "markdown")
     if not ok then
-      -- Fallback if the parser isn't installed
       vim.bo[args.buf].syntax = "markdown"
     end
 
-    -- Now concealment actually has something to work with
     vim.opt_local.conceallevel = 2
     vim.opt_local.concealcursor = "nc"
   end,
 })
 
--- Top of init.lua
 if vim.env.PROF then
-  -- Adjust this path if your lazy.nvim data is somewhere else
   local snacks = vim.fn.stdpath("data") .. "/lazy/snacks.nvim"
   vim.opt.rtp:append(snacks)
   require("snacks.profiler").startup({
     startup = {
-      event = "VimEnter", -- Stops profiling once Neovim is ready
+      event = "VimEnter",
     },
   })
 end
 vim.api.nvim_create_user_command("RefreshAll", function()
   vim.cmd("bufdo edit!")
 end, { desc = "Reload all buffers from disk" })
+local vm_augroup = vim.api.nvim_create_augroup("VMLagFix", { clear = true })
 
--- Add this to your init.lua
--- vim.api.nvim_create_autocmd("LspAttach", {
---   callback = function(args)
---     local client = vim.lsp.get_client_by_id(args.data.client_id)
---     if client and client.name == "clangd" then
---       local start = vim.loop.hrtime()
---       -- Force a synchronous request to see how long it takes to get a response
---       vim.lsp.buf_request_sync(args.buf, "textDocument/documentSymbol", { textDocument = vim.lsp.util.make_text_document_params() }, 1000)
---       local duration = (vim.loop.hrtime() - start) / 1e6
---       print("Sync request took: " .. duration .. "ms")
---     end
---   end,
--- })
+vim.api.nvim_create_autocmd("User", {
+  pattern = "visual_multi_start",
+  callback = function()
+    vim.cmd("NoMatchParen")
+    vim.api.nvim_create_autocmd("TextChangedI", {
+      group = vm_augroup,
+      callback = function() return true end
+    })
+    pcall(vim.api.nvim_del_augroup_by_name, "trouble_lsp_buf")
+    pcall(vim.api.nvim_del_augroup_by_name, "noice_lsp_signature")
+  end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "visual_multi_exit",
+  callback = function()
+    vim.cmd("DoMatchParen")
+    vim.api.nvim_del_augroup_by_name("VMLagFix")
+    if pcall(require, "trouble") then require("trouble").setup() end
+    if pcall(require, "noice") then require("noice").setup() end
+  end,
+})

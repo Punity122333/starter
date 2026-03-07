@@ -1,33 +1,3 @@
-local current_model = "claude-haiku-4.5"
-
-local function toggle_avante_model()
-  local ok, avante = pcall(require, "avante")
-  if not ok then
-    return
-  end
-
-  current_model = (current_model == "claude-haiku-4.5") and "claude-4.6-sonnet" or "claude-haiku-4.5"
-
-  avante.setup({
-    provider = "copilot",
-    providers = {
-      copilot = {
-        endpoint = "https://api.githubcopilot.com",
-        model = current_model,
-        proxy = nil,
-        allow_insecure_call = true,
-        timeout = 30000,
-        extra_request_body = {
-          temperature = 0,
-          max_tokens = 8192,
-        },
-      },
-    },
-  })
-
-  vim.notify("Avante Copilot Model: " .. current_model, vim.log.levels.INFO)
-end
-
 vim.api.nvim_create_user_command("WQ", function()
   vim.cmd("silent! wall")
   vim.defer_fn(function()
@@ -71,7 +41,6 @@ vim.keymap.set("i", "<A-j>", "<Down>", { desc = "Move cursor down" })
 vim.keymap.set("i", "<A-k>", "<Up>", { desc = "Move cursor up" })
 vim.keymap.set("i", "<A-l>", "<Right>", { desc = "Move cursor right" })
 
--- Line/Block Movement
 vim.keymap.set("n", "<A-S-j>", "<cmd>m .+1<cr>==", { desc = "Move line down" })
 vim.keymap.set("n", "<A-S-k>", "<cmd>m .-2<cr>==", { desc = "Move line up" })
 vim.keymap.set("i", "<A-S-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move line down" })
@@ -148,63 +117,29 @@ vim.api.nvim_create_user_command("TSRestart", function()
   end
 end, { desc = "Restart Treesitter for current buffer" })
 
-vim.keymap.set("n", "<leader>am", toggle_avante_model, { desc = "avante: toggle copilot model" })
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "avante", "avante-input" },
-  callback = function()
-    vim.keymap.set(
-      "n",
-      "<leader>am",
-      toggle_avante_model,
-      { buffer = true, desc = "avante: toggle copilot model (buffer local)" }
-    )
-  end,
-})
--- Peek Definition (Opens a floating window)
 vim.keymap.set("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek Definition" })
-
--- Finder (See definition and references in one split UI)
 vim.keymap.set("n", "gh", "<cmd>Lspsaga finder<CR>", { desc = "LSP Finder" })
-
--- Outline (See all your functions/structs in a side bar)
 vim.keymap.set("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { desc = "LSP Outline" })
-
--- Hover Doc (Better than the default K)
 vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover Docs" })
--- Register the group name so Which-Key looks clean
 require("which-key").add({ { "gj", group = "LSP Navigation" } })
--- Search in current buffer (lines/fuzziness)
 vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Buffer Lines" })
-
--- Search LSP Symbols (classes, functions, variables)
 vim.keymap.set("n", "<leader>sB", function() Snacks.picker.lsp_symbols() end, { desc = "LSP Symbols" })
--- Navigation & Hierarchy (The three-letter combos)
 vim.keymap.set("n", "gjd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Goto Definition" })
 vim.keymap.set("n", "gjt", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek Type Definition" })
 vim.keymap.set("n", "gji", "<cmd>Lspsaga incoming_calls<CR>", { desc = "Incoming Calls" })
 vim.keymap.set("n", "gjo", "<cmd>Lspsaga outgoing_calls<CR>", { desc = "Outgoing Calls" })
-
--- Structure & Symbols
 vim.keymap.set("n", "gjs", "<cmd>Lspsaga outline<CR>", { desc = "Toggle Outline" })
 vim.keymap.set("n", "gjb", "<cmd>Lspsaga symbols_in_winbar<CR>", { desc = "Winbar Symbols" })
-
--- Diagnostics & Docs
 vim.keymap.set("n", "gjh", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover Doc" })
 vim.keymap.set("n", "gjl", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Buffer Diagnostics" })
 vim.keymap.set("n", "gjn", "<cmd>Lspsaga diagnostic_jump_next<CR>", { desc = "Next Diagnostic" })
 vim.keymap.set("n", "gjp", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { desc = "Prev Diagnostic" })
--- Disable macro recording
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
 vim.keymap.set("n", "<leader>[]", function()
-  -- 1. Stop all current LSP clients attached to this buffer
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   for _, client in ipairs(clients) do
     vim.lsp.stop_client(client.id, true)
   end
-
-  -- 2. Force a buffer reload to re-trigger attachment
   vim.cmd("edit!")
-
   vim.notify("LSP Clients refreshed for buffer", vim.log.levels.INFO, { title = "LSP Panic" })
 end, { desc = "LSP Panic Button (Soft Refresh)" })

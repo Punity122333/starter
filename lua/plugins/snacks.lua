@@ -4,12 +4,12 @@ return {
   lazy = false,
 
   opts = {
-    -- This sets your explorer width to 15%
+   
     explorer = {
       cycle = false,
       win = {
         layout = {
-          position = "right", -- or "left", whichever you prefer
+          position = "right", 
           width = 0.15,
         },
       },

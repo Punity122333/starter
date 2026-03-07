@@ -1,10 +1,27 @@
 return {
   {
-    "mg979/vim-visual-multi",
-    event = "VeryLazy", -- Keep that 300ms boot speed snappy
-    init = function()
-      -- This is where you'd remap stuff if you want it to feel 1:1 like VS Code
-      -- vim.g.VM_maps = { ["Find Under"] = "<C-d>" }
+    "jake-stewart/multicursor.nvim",
+    branch = "main",
+    event = "VeryLazy",
+    config = function()
+      local mc = require("multicursor-nvim")
+      mc.setup({
+        updatetime = 50,
+      })
+
+      -- movement and selection
+      vim.keymap.set({"n", "v"}, "\\k", function() mc.lineAddCursor(-1) end)
+      vim.keymap.set({"n", "v"}, "\\j", function() mc.lineAddCursor(1) end)
+      vim.keymap.set({"n", "v"}, "\\n", function() mc.matchAddCursor(1) end)
+      vim.keymap.set({"n", "v"}, "\\s", function() mc.matchSkipCursor(1) end)
+      vim.keymap.set({"n", "v"}, "\\a", function() mc.matchAllAddCursors() end)
+      vim.keymap.set({"n", "v"}, "\\c", function() mc.clearCursors() end)
+
+      
     end,
+  },
+  {
+    "mg979/vim-visual-multi",
+    enabled = false,
   },
 }

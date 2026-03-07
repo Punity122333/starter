@@ -68,7 +68,7 @@ return {
       },
     },
   },
-  -- SURGICAL FIX: Manually kill Treesitter on Avante buffers to stop the crash
+  
   {
     "yetone/avante.nvim",
     config = function(_, opts)

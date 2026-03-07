@@ -1,10 +1,7 @@
--- Shader language support configuration
 return {
-  -- Add shader file type detection
   {
     "nvim-treesitter/nvim-treesitter",
     opts = function(_, opts)
-      -- Ensure shader file types are recognized
       vim.filetype.add({
         extension = {
           glsl = "glsl",
@@ -37,16 +34,11 @@ return {
       })
     end,
   },
-  
-  -- Add GLSL LSP server (glsl_analyzer) + glslangValidator linter
-  -- Note: glsl_analyzer provides LSP features (completion, hover, etc.)
-  --       glslangValidator provides comprehensive shader validation (via nvim-lint)
   {
     "neovim/nvim-lspconfig",
     optional = true,
     opts = {
       servers = {
-        -- glsl_analyzer - GLSL language server (must be built from source)
         glsl_analyzer = {
           cmd = { "glsl_analyzer" },
           filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
@@ -68,24 +60,6 @@ return {
             }
           },
         },
-        -- glslls - Alternative (commented out, uncomment if installed via :MasonInstall glslls)
-        -- glslls = {
-        --   cmd = { "glslls", "--stdin" },
-        --   filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
-        --   single_file_support = true,
-        --   root_dir = function(fname)
-        --     return vim.fn.getcwd()
-        --   end,
-        --   capabilities = {
-        --     textDocument = {
-        --       completion = {
-        --         completionItem = {
-        --           snippetSupport = true
-        --         }
-        --       }
-        --     }
-        --   },
-        -- },
       },
     },
   },

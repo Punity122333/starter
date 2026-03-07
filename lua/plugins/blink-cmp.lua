@@ -4,6 +4,11 @@ return {
   "saghen/blink.cmp",
   opts = function(_, opts)
     return vim.tbl_deep_extend("force", opts or {}, {
+      -- This is the key change to stop the lag during VM sessions
+      enabled = function()
+        return vim.b.blink_enabled ~= false and vim.bo.buftype ~= "prompt"
+      end,
+      
       completion = {
         trigger = {
           show_on_keyword = true,
@@ -23,9 +28,7 @@ return {
           },
         },
       },
-      -- keep blink signature off so it doesn't overlap noice
       signature = { enabled = false },
-      
       snippets = { preset = "default" },
       
       keymap = {
@@ -38,7 +41,6 @@ return {
         ["<C-Down>"] = { "select_next", "fallback" },
         ["<S-CR>"] = { "accept", "fallback" },
         
-        -- manual triggers for noice signature help
         ["<C-S-0>"] = { function() vim.lsp.buf.signature_help() return true end, "fallback" },
         ["<C-]>"] = { function() vim.lsp.buf.signature_help() return true end, "fallback" },
         

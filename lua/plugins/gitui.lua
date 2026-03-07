@@ -37,7 +37,7 @@ return {
   },
   {
     "lewis6991/gitsigns.nvim",
-    event = "LazyFile", -- Optimization: only loads when you actually open a file
+    event = "LazyFile", 
     opts = {
       signs = {
         add = { text = "▎" },

@@ -14,23 +14,17 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Check if we want to bypass all lazy loading
 local force_all = os.getenv("NO_LAZY") == "1"
 
 require("lazy").setup({
   spec = {
-    -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- import/override with your plugins
     { import = "plugins" },
   },
   defaults = {
-    -- If NO_LAZY=1, this forces EVERY plugin to load on startup
     lazy = not force_all,
     version = false,
   },
-  -- This is the secret sauce:
-  -- It overrides the 'lazy' property on every plugin spec before loading
   concurrency = force_all and 100 or nil,
   performance = {
     cache = { enabled = true },
@@ -49,8 +43,6 @@ require("lazy").setup({
   checker = { enabled = true, notify = false },
   ui = { backdrop = 100 },
 })
-
--- If we are in God Mode, force a manual load of everything right now
 if force_all then
   vim.api.nvim_create_autocmd("User", {
     pattern = "LazyVimStarted",

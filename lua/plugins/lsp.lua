@@ -1,4 +1,3 @@
--- LSP configurations - Direct attachment approach
 return {
   {
     "neovim/nvim-lspconfig",
@@ -67,33 +66,31 @@ return {
           on_attach = function(client, bufnr)
             client.server_capabilities.diagnosticProvider = false
             vim.diagnostic.enable(false, { bufnr = bufnr })
-            
           end,
         },
 
-  clangd = {
-  filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-  capabilities = {
-    offsetEncoding = { "utf-16" },
-  },
-  cmd = {
-    "clangd",
-    "--background-index",
-    "--clang-tidy",
-    "--query-driver=/usr/bin/g++,/usr/bin/gcc",
-    "--fallback-style=google",
-    "--pch-storage=memory",
-    "-j=4",
-  },
-  single_file_support = true,
-  on_attach = function(client, bufnr)
-    local start = vim.loop.hrtime()
-    if vim.api.nvim_buf_line_count(bufnr) > 2000 then
-      client.server_capabilities.semanticTokensProvider = nil
-    end
-    
-  end,
-},
+        clangd = {
+          filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+          capabilities = {
+            offsetEncoding = { "utf-16" },
+          },
+          cmd = {
+            "clangd",
+            "--background-index",
+            "--clang-tidy",
+            "--query-driver=/usr/bin/g++,/usr/bin/gcc",
+            "--fallback-style=google",
+            "--pch-storage=memory",
+            "-j=4",
+          },
+          single_file_support = true,
+          on_attach = function(client, bufnr)
+            local start = vim.loop.hrtime()
+            if vim.api.nvim_buf_line_count(bufnr) > 2000 then
+              client.server_capabilities.semanticTokensProvider = nil
+            end
+          end,
+        },
         omnisharp = {
           cmd = {
             "omnisharp",
@@ -200,19 +197,12 @@ return {
     },
     config = function(_, opts)
       vim.diagnostic.config(opts.diagnostics)
-      
-      -- THE SNACKS FIX: Global guard against semantic token crashes
-      -- We use an autocmd because it catches attachments across all servers automatically
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if not client then return end
-          
           local bufnr = args.buf
           local ft = vim.bo[bufnr].filetype
-          
-          -- Kill semantic tokens in snacks pickers to prevent nil index crash
-          -- Also kills them in massive files (> 10k lines) to keep it snappy
           if ft == "snacks_picker_preview" or ft == "snacks_picker_input" or vim.api.nvim_buf_line_count(bufnr) > 10000 or ft:find("snacks") then
             client.server_capabilities.semanticTokensProvider = nil
           end
@@ -224,7 +214,6 @@ return {
 
       local default_capabilities = vim.lsp.protocol.make_client_capabilities()
 
-      -- Cap compatibility (Blink/Cmp)
       local has_blink, blink = pcall(require, "blink.cmp")
       if has_blink then
         default_capabilities = blink.get_lsp_capabilities(default_capabilities)
@@ -235,9 +224,7 @@ return {
         end
       end
 
-      -- Loop through and setup servers
       for server_name, server_config in pairs(opts.servers) do
-        -- Skip non-LSP entries
         local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp" }
         local should_skip = false
         for _, skip_name in ipairs(skip_servers) do

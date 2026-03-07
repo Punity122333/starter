@@ -13,7 +13,6 @@ return {
     local ls = require("luasnip")
     ls.setup(opts)
 
-    -- Load VSCode-style snippets
     require("luasnip.loaders.from_vscode").lazy_load()
   end,
 }

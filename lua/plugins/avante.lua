@@ -12,7 +12,7 @@ return {
       providers = {
         gemini = {
           endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-          model = "gemini-3-flash-preview",
+          model = "gemini-1.5-pro",
           timeout = 30000,
           temperature = 0,
           max_tokens = 8192,
