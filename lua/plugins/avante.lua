@@ -8,15 +8,8 @@ return {
       mode = "agentic",
       provider = "gemini",
       instructions_file = "avante.md",
-      -- The top-level gemini key was moved into the providers table below to fix the [DEPRECATED] warning.
       providers = {
-        gemini = {
-          endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-          model = "gemini-1.5-pro",
-          timeout = 30000,
-          temperature = 0,
-          max_tokens = 8192,
-        },
+       
         copilot = {
           endpoint = "https://api.githubcopilot.com",
           model = "gpt-4o",
@@ -32,6 +25,7 @@ return {
         auto_set_keymaps = true,
         auto_apply_diff_after_generation = false,
         support_paste_from_clipboard = false,
+        notify = false,
       },
       input = {
         provider = "snacks",

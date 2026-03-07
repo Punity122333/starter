@@ -1,7 +1,6 @@
 vim.keymap.set("n", "<leader>aa", function()
   local ok, err = pcall(require("avante").ask)
   if not ok and not err:match("yield") then
-    vim.notify(err, vim.log.levels.ERROR)
   end
 end)
 local force_all = os.getenv("NO_LAZY") == "1"
@@ -64,8 +63,7 @@ vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
 vim.keymap.set("n", "hi", ":Inspect<CR>")
 vim.g.VM_set_statusline = 0
-vim.cmd([[
-  highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
+vim.cmd([[ highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
   highlight VM_Extend_hl guibg=#00f2ff gui=italic
   highlight VM_Cursor_hl guifg=#000000 guibg=#00f2ff
 ]])
@@ -267,13 +265,6 @@ vim.api.nvim_create_autocmd("BufDelete", {
   desc = "Refresh Avante when a code buffer is deleted",
 })
 
-vim.api.nvim_create_autocmd({ "BufAdd", "BufNew", "BufEnter" }, {
-  group = vim.api.nvim_create_augroup("GlobalModifiableFix", { clear = true }),
-  callback = function(args)
-    vim.bo[args.buf].modifiable = true
-    vim.bo[args.buf].readonly = false
-  end,
-})
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "avante", "avante-input" },
   callback = function(args)
@@ -321,5 +312,14 @@ vim.api.nvim_create_autocmd("User", {
     vim.api.nvim_del_augroup_by_name("VMLagFix")
     if pcall(require, "trouble") then require("trouble").setup() end
     if pcall(require, "noice") then require("noice").setup() end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "cpp" },
+  callback = function(args)
+    vim.cmd("redraw!") -- Force screen paint immediately
+    vim.api.nvim_set_current_buf(args.buf) -- Move cursor to the created buffer
+    -- Then your delayed clangd setup...
   end,
 })
