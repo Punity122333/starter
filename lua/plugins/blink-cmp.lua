@@ -4,11 +4,9 @@ return {
   "saghen/blink.cmp",
   opts = function(_, opts)
     return vim.tbl_deep_extend("force", opts or {}, {
-      -- This is the key change to stop the lag during VM sessions
       enabled = function()
         return vim.b.blink_enabled ~= false and vim.bo.buftype ~= "prompt"
       end,
-      
       completion = {
         trigger = {
           show_on_keyword = true,
@@ -29,8 +27,6 @@ return {
         },
       },
       signature = { enabled = false },
-      snippets = { preset = "default" },
-      
       keymap = {
         preset = "default",
         ["<Up>"] = { "fallback" },
@@ -40,10 +36,24 @@ return {
         ["<C-Up>"] = { "select_prev", "fallback" },
         ["<C-Down>"] = { "select_next", "fallback" },
         ["<S-CR>"] = { "accept", "fallback" },
-        
-        ["<C-S-0>"] = { function() vim.lsp.buf.signature_help() return true end, "fallback" },
-        ["<C-]>"] = { function() vim.lsp.buf.signature_help() return true end, "fallback" },
-        
+        ["C-y"] = { "accept", "fallback" },
+        ["<C-j>"] = { "select_next", "fallback" }, -- next item
+        ["<C-k>"] = { "select_prev", "fallback" },
+        ["<C-CR>"] = { "accept", "fallback" },
+        ["<C-S-0>"] = {
+          function()
+            vim.lsp.buf.signature_help()
+            return true
+          end,
+          "fallback",
+        },
+        ["<C-]>"] = {
+          function()
+            vim.lsp.buf.signature_help()
+            return true
+          end,
+          "fallback",
+        },
         ["<Tab>"] = {
           function(cmp)
             local copilot_ok, copilot = pcall(require, "copilot.suggestion")
@@ -51,20 +61,17 @@ return {
               copilot.accept()
               return true
             end
-            if cmp.snippet_forward() then return true end
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
             return true
           end,
         },
-        ["<S-Tab>"] = { "snippet_backward", "fallback" },
+        ["<S-Tab>"] = { "fallback" },
       },
-      
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
+        default = { "lsp", "path", "buffer" },
         providers = {
           lsp = { max_items = 25, timeout_ms = 700 },
           buffer = { max_items = 25 },
-          snippets = { max_items = 25 },
           path = { max_items = 25 },
         },
       },

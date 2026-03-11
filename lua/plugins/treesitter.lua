@@ -6,12 +6,32 @@ return {
     opts = {
       ensure_installed = { "c", "cpp", "glsl", "hlsl", "wgsl", "lua", "vim" },
       sync_install = false,
+      auto_install = false, -- Prevent auto-install for performance
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
-        disable = function(_, buf)
+        disable = function(lang, buf)
+          -- Disable for large files (by size or line count)
           local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
-          return ok and stats and stats.size > 100 * 1024
+          if ok and stats and stats.size > 100 * 1024 then
+            return true
+          end
+          if vim.wo.diff then
+            return true
+          end
+          -- Disable for specific filetypes (add more as needed)
+          local disabled_filetypes = {
+            "help", "dashboard", "avante", "avante-input", "gitcommit", "markdown", "oil", "TelescopePrompt", "alpha", "NvimTree"
+          }
+          local ft = vim.bo[buf].filetype
+          for _, dft in ipairs(disabled_filetypes) do
+            if ft == dft then return true end
+          end
+          -- Further restrict for C/C++: disable highlighting for long files
+          if (lang == "c" or lang == "cpp") and vim.api.nvim_buf_line_count(buf) > 1000 then
+            return true
+          end
+          return false
         end,
       },
       indent = { enable = false },

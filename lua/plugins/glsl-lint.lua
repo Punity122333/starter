@@ -1,28 +1,32 @@
+local GlslangEvent = { "BufReadPre", "BufNewFile" }
+local GlslangCmd = "glslangValidator"
+local GlslangStream = "stderr"
+local GlslangIgnoreExitcode = true
+local GlslangStageMap = {
+  vert = "vert",
+  frag = "frag",
+  tesc = "tesc",
+  tese = "tese",
+  geom = "geom",
+  comp = "comp",
+  glsl = "vert",
+}
 return {
   {
     "mfussenegger/nvim-lint",
-    event = { "BufReadPre", "BufNewFile" },
+    event = GlslangEvent,
     config = function()
       local lint = require("lint")
       lint.linters.glslangValidator = {
-        cmd = "glslangValidator",
+        cmd = GlslangCmd,
         stdin = false,
         args = function()
           local ext = vim.fn.expand("%:e")
-          local stage_map = {
-            vert = "vert",
-            frag = "frag",
-            tesc = "tesc",
-            tese = "tese",
-            geom = "geom",
-            comp = "comp",
-            glsl = "vert",
-          }
-          local stage = stage_map[ext] or "vert"
+          local stage = GlslangStageMap[ext] or "vert"
           return { "-S", stage, vim.api.nvim_buf_get_name(0) }
         end,
-        stream = "stderr",
-        ignore_exitcode = true,
+        stream = GlslangStream,
+        ignore_exitcode = GlslangIgnoreExitcode,
         parser = function(output, bufnr)
           local diagnostics = {}
           for line in output:gmatch("[^\r\n]+") do

@@ -4,13 +4,13 @@ return {
     cond = function()
       return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
     end,
-    event = { "BufReadPost"},
+    event = { "BufReadPost" },
     dependencies = {
       "mason.nvim",
     },
     opts = {
       diagnostics = {
-        update_in_insert = true,
+        update_in_insert = true, -- Disable diagnostics while typing for performance
         underline = true,
         severity_sort = true,
         virtual_text = {
@@ -34,6 +34,7 @@ return {
           end,
           capabilities = {
             offsetEncoding = { "utf-16" },
+            textDocument = { completion = { completionItem = { snippetSupport = false } } },
           },
           settings = {
             basedpyright = {
@@ -43,7 +44,6 @@ return {
                 reportMissingTypeStubs = false,
                 reportUnknownMemberAccess = false,
                 reportUnknownVariableType = false,
-                reportUnknownArgumentType = false,
                 reportUnannotatedClassAttribute = false,
               },
             },
@@ -81,6 +81,7 @@ return {
             "--query-driver=/usr/bin/g++,/usr/bin/gcc",
             "--fallback-style=google",
             "--pch-storage=memory",
+            "--limit-references=0",
             "-j=4",
           },
           single_file_support = true,
@@ -203,17 +204,20 @@ return {
           if not client then return end
           local bufnr = args.buf
           local ft = vim.bo[bufnr].filetype
-          if ft == "snacks_picker_preview" or ft == "snacks_picker_input" or vim.api.nvim_buf_line_count(bufnr) > 10000 or ft:find("snacks") then
+          -- Disable semantic tokens and document highlights for large files or unwanted filetypes
+          if vim.api.nvim_buf_line_count(bufnr) > 5000 or ft == "snacks_picker_preview" or ft == "snacks_picker_input" or ft:find("snacks") then
             client.server_capabilities.semanticTokensProvider = nil
+            client.server_capabilities.documentHighlightProvider = false
           end
         end,
       })
-
       local ok, lspconfig = pcall(require, "lspconfig")
       if not ok then return end
-
       local default_capabilities = vim.lsp.protocol.make_client_capabilities()
-
+      -- Remove snippet support globally
+      if default_capabilities.textDocument and default_capabilities.textDocument.completion and default_capabilities.textDocument.completion.completionItem then
+        default_capabilities.textDocument.completion.completionItem.snippetSupport = false
+      end
       local has_blink, blink = pcall(require, "blink.cmp")
       if has_blink then
         default_capabilities = blink.get_lsp_capabilities(default_capabilities)
@@ -223,17 +227,19 @@ return {
           default_capabilities = cmp_nvim_lsp.default_capabilities(default_capabilities)
         end
       end
-
       for server_name, server_config in pairs(opts.servers) do
         local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp" }
         local should_skip = false
         for _, skip_name in ipairs(skip_servers) do
           if server_name == skip_name then should_skip = true break end
         end
-
         if not should_skip and lspconfig[server_name] then
           local config = vim.deepcopy(server_config)
           config.capabilities = vim.tbl_deep_extend("force", {}, default_capabilities, config.capabilities or {})
+          -- Remove snippet support for each server
+          if config.capabilities.textDocument and config.capabilities.textDocument.completion and config.capabilities.textDocument.completion.completionItem then
+            config.capabilities.textDocument.completion.completionItem.snippetSupport = false
+          end
           lspconfig[server_name].setup(config)
         end
       end

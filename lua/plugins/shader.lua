@@ -50,7 +50,6 @@ return {
             textDocument = {
               completion = {
                 completionItem = {
-                  snippetSupport = true
                 }
               },
               publishDiagnostics = {

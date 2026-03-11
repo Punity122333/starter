@@ -5,7 +5,7 @@ return {
       signature = {
         enabled = true,
         auto_open = {
-          enabled = true, -- no more auto-popups while typing
+          enabled = false,
         },
       },
     },
@@ -13,11 +13,9 @@ return {
       {
         filter = {
           any = {
-            -- The yield/treesitter noise
             { find = "attempt to yield across C-call boundary" },
             { find = "languagetree.lua" },
             { find = "tree_sitter_markdown_parse_code_blocks" },
-            -- The new semantic tokens crash
             { find = "semanticTokensProvider" },
             { find = "semantic_tokens.lua" },
             { find = "shared.lua" },
@@ -25,11 +23,26 @@ return {
             { find = "selected model" },
             { find = "Using previously selected model" },
             { find = "Using" },
-            { find = "with warnings" }
+            { find = "with warnings" },
           },
         },
         opts = { skip = true },
       },
+    },
+  },
+  keys = {
+    {
+      "<C-k>",
+      function()
+        vim.g._sig_open = not vim.g._sig_open
+        if vim.g._sig_open then
+          vim.lsp.buf.signature_help()
+        else
+          require("noice").cmd("dismiss")
+        end
+      end,
+      mode = { "i", "n" },
+      desc = "Toggle LSP Signature Help",
     },
   },
 }

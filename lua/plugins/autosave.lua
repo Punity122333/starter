@@ -1,3 +1,13 @@
+local ImmediateSaveEvents = { "BufLeave", "FocusLost" }
+local DeferSaveEvents = { "InsertLeave", "TextChanged" }
+local CancelDeferredSaveEvents = { "InsertEnter" }
+local DebounceDelay = 1000
+local ExcludedFiletypes = {
+  "gitcommit",
+  "gitrebase",
+  "hgcommit",
+  "oil",
+}
 return {
   {
     "okuuva/auto-save.nvim",
@@ -5,29 +15,23 @@ return {
     opts = {
       enabled = true,
       trigger_events = {
-        immediate_save = { "BufLeave", "FocusLost" },
-        defer_save = { "InsertLeave", "TextChanged" },
-        cancel_deferred_save = { "InsertEnter" },
+        immediate_save = ImmediateSaveEvents,
+        defer_save = DeferSaveEvents,
+        cancel_deferred_save = CancelDeferredSaveEvents,
       },
-      debounce_delay = 1000,
-      condition = function(buf)
+      debounce_delay = DebounceDelay,
+      condition = function(buffer)
         local fn = vim.fn
         local utils = require("auto-save.utils.data")
-        if fn.getbufvar(buf, "&modifiable") == 1
-          and utils.not_in(fn.getbufvar(buf, "&filetype"), {
-            "gitcommit",
-            "gitrebase",
-            "hgcommit",
-            "oil",
-          })
+        if fn.getbufvar(buffer, "&modifiable") == 1
+          and utils.not_in(fn.getbufvar(buffer, "&filetype"), ExcludedFiletypes)
         then
           return true
         end
         return false
       end,
-      write_all_buffers = false,
       noautocmd = false,
     },
   },
 }
-    
+
