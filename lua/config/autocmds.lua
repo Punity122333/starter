@@ -120,3 +120,12 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.smartindent = true 
   end,
 })
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+  callback = function(args)
+    local lines = vim.api.nvim_buf_line_count(args.buf)
+    if lines > 5000 then
+      vim.b.autoformat = false
+    end
+  end,
+})
