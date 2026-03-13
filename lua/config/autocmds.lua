@@ -74,29 +74,6 @@ vim.api.nvim_create_autocmd("BufDelete", {
 
 local vm_augroup = vim.api.nvim_create_augroup("VMLagFix", { clear = true })
 
-vim.api.nvim_create_autocmd("User", {
-  pattern = "visual_multi_start",
-  callback = function()
-    vim.cmd("NoMatchParen")
-    vim.api.nvim_create_autocmd("TextChangedI", {
-      group = vm_augroup,
-      callback = function() return true end,
-    })
-    pcall(vim.api.nvim_del_augroup_by_name, "trouble_lsp_buf")
-    pcall(vim.api.nvim_del_augroup_by_name, "noice_lsp_signature")
-  end,
-})
-
-vim.api.nvim_create_autocmd("User", {
-  pattern = "visual_multi_exit",
-  callback = function()
-    vim.cmd("DoMatchParen")
-    vim.api.nvim_del_augroup_by_name("VMLagFix")
-    if pcall(require, "trouble") then require("trouble").setup() end
-    if pcall(require, "noice") then require("noice").setup() end
-  end,
-})
-
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "cpp" },
   callback = function(args)
