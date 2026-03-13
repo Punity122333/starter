@@ -2,12 +2,6 @@ local COMMAND_SAVE_AND_QUIT = "WQ"
 local COMMAND_SAVE_AND_QUIT_ALT1 = "Wq"
 local COMMAND_SAVE_AND_QUIT_ALL = "WQA"
 local COMMAND_SAVE_AND_QUIT_ALL_ALT1 = "Wqa"
-local KEYMAP_MOVE_LEFT = "<A-h>"
-local KEYMAP_MOVE_DOWN = "<A-j>"
-local KEYMAP_MOVE_UP = "<A-k>"
-local KEYMAP_MOVE_RIGHT = "<A-l>"
-local KEYMAP_MOVE_LINE_DOWN = "<A-S-j>"
-local KEYMAP_MOVE_LINE_UP = "<A-S-k>"
 
 vim.api.nvim_create_user_command(COMMAND_SAVE_AND_QUIT, function()
   vim.cmd("silent! wall")
@@ -45,17 +39,12 @@ vim.cmd([[
 
 vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
 vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
-vim.keymap.set("i", KEYMAP_MOVE_LEFT, "<Left>", { desc = "Move cursor left" })
-vim.keymap.set("i", KEYMAP_MOVE_DOWN, "<Down>", { desc = "Move cursor down" })
-vim.keymap.set("i", KEYMAP_MOVE_UP, "<Up>", { desc = "Move cursor up" })
-vim.keymap.set("i", KEYMAP_MOVE_RIGHT, "<Right>", { desc = "Move cursor right" })
 
-vim.keymap.set("n", KEYMAP_MOVE_LINE_DOWN, "<cmd>m .+1<cr>==", { desc = "Move line down" })
-vim.keymap.set("n", KEYMAP_MOVE_LINE_UP, "<cmd>m .-2<cr>==", { desc = "Move line up" })
-vim.keymap.set("i", KEYMAP_MOVE_LINE_DOWN, "<esc><cmd>m .+1<cr>==gi", { desc = "Move line down" })
-vim.keymap.set("i", KEYMAP_MOVE_LINE_UP, "<esc><cmd>m .-2<cr>==gi", { desc = "Move line up" })
-vim.keymap.set("v", KEYMAP_MOVE_LINE_DOWN, ":m '>+1<cr>gv=gv", { desc = "Move block down" })
-vim.keymap.set("v", KEYMAP_MOVE_LINE_UP, ":m '<-2<cr>gv=gv", { desc = "Move block up" })
+-- Cursor Movement (Manual keys preserved)
+vim.keymap.set("i", "<A-h>", "<Left>", { desc = "Move cursor left", silent = true })
+vim.keymap.set("i", "<A-j>", "<Down>", { desc = "Move cursor down", silent = true })
+vim.keymap.set("i", "<A-k>", "<Up>", { desc = "Move cursor up", silent = true })
+vim.keymap.set("i", "<A-l>", "<Right>", { desc = "Move cursor right", silent = true })
 
 vim.keymap.set("n", "<leader>fv", function()
   Snacks.terminal(nil, { win = { position = "right", width = 0.25 } })

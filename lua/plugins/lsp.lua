@@ -9,8 +9,9 @@ return {
       "mason.nvim",
     },
     opts = {
+      
       diagnostics = {
-        update_in_insert = true, -- Disable diagnostics while typing for performance
+        update_in_insert = true, 
         underline = true,
         severity_sort = true,
         virtual_text = {
@@ -34,7 +35,7 @@ return {
           end,
           capabilities = {
             offsetEncoding = { "utf-16" },
-            textDocument = { completion = { completionItem = { snippetSupport = false } } },
+            textDocument = { completion = { completionItem = { snippetSupport = true } } },
           },
           settings = {
             basedpyright = {
@@ -49,7 +50,6 @@ return {
             },
           },
         },
-
         asm_lsp = {
           cmd = { "asm-lsp" },
           filetypes = { "asm", "s", "S", "nasm" },
@@ -68,12 +68,8 @@ return {
             vim.diagnostic.enable(false, { bufnr = bufnr })
           end,
         },
-
         clangd = {
           filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-          capabilities = {
-            offsetEncoding = { "utf-16" },
-          },
           cmd = {
             "clangd",
             "--background-index",
@@ -82,14 +78,23 @@ return {
             "--fallback-style=google",
             "--pch-storage=memory",
             "--limit-references=0",
-            "-j=4",
+            "-j=4" 
+          },
+
+          capabilities = {
+            textDocument = {
+              onTypeFormatting = { dynamicRegistration = false },
+              rangeFormatting = { dynamicRegistration = false },
+            },
           },
           single_file_support = true,
           on_attach = function(client, bufnr)
-            local start = vim.loop.hrtime()
+            
             if vim.api.nvim_buf_line_count(bufnr) > 2000 then
               client.server_capabilities.semanticTokensProvider = nil
             end
+            
+            client.server_capabilities.documentFormattingProvider = false
           end,
         },
         omnisharp = {
@@ -156,7 +161,6 @@ return {
             msbuild = { loadProjectsOnDemand = true },
           },
         },
-
         ts_ls = {
           cmd = { "typescript-language-server", "--stdio" },
           filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
@@ -166,7 +170,6 @@ return {
             return util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname) or vim.fn.getcwd()
           end,
         },
-
         lua_ls = {
           filetypes = { "lua" },
           on_attach = function(client, bufnr)
@@ -185,11 +188,12 @@ return {
             },
           },
         },
-
         glsl_analyzer = {
           cmd = { "glsl_analyzer" },
           filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
-          root_dir = function(fname) return vim.fn.getcwd() end,
+          root_dir = function(fname)
+            return vim.fn.getcwd()
+          end,
           on_attach = function(client, bufnr)
             vim.diagnostic.enable(true, { bufnr = bufnr })
           end,
@@ -198,26 +202,49 @@ return {
     },
     config = function(_, opts)
       vim.diagnostic.config(opts.diagnostics)
+
+      local timer = vim.loop.new_timer()
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if not client then return end
-          local bufnr = args.buf
-          local ft = vim.bo[bufnr].filetype
-          -- Disable semantic tokens and document highlights for large files or unwanted filetypes
-          if vim.api.nvim_buf_line_count(bufnr) > 5000 or ft == "snacks_picker_preview" or ft == "snacks_picker_input" or ft:find("snacks") then
-            client.server_capabilities.semanticTokensProvider = nil
-            client.server_capabilities.documentHighlightProvider = false
+          if not client then
+            return
+          end
+
+          if timer then
+            timer:stop()
+            timer:start(100, 0, function()
+              vim.schedule(function()
+                local bufnr = args.buf
+                if not vim.api.nvim_buf_is_valid(bufnr) then
+                  return
+                end
+                local ft = vim.bo[bufnr].filetype
+
+                if vim.api.nvim_buf_line_count(bufnr) > 5000 or ft:find("snacks") then
+                  client.server_capabilities.semanticTokensProvider = nil
+                  client.server_capabilities.documentHighlightProvider = false
+                end
+              end)
+            end)
           end
         end,
       })
+
       local ok, lspconfig = pcall(require, "lspconfig")
-      if not ok then return end
-      local default_capabilities = vim.lsp.protocol.make_client_capabilities()
-      -- Remove snippet support globally
-      if default_capabilities.textDocument and default_capabilities.textDocument.completion and default_capabilities.textDocument.completion.completionItem then
-        default_capabilities.textDocument.completion.completionItem.snippetSupport = false
+      if not ok then
+        return
       end
+      local default_capabilities = vim.lsp.protocol.make_client_capabilities()
+
+      if
+        default_capabilities.textDocument
+        and default_capabilities.textDocument.completion
+        and default_capabilities.textDocument.completion.completionItem
+      then
+        default_capabilities.textDocument.completion.completionItem.snippetSupport = true
+      end
+
       local has_blink, blink = pcall(require, "blink.cmp")
       if has_blink then
         default_capabilities = blink.get_lsp_capabilities(default_capabilities)
@@ -227,24 +254,42 @@ return {
           default_capabilities = cmp_nvim_lsp.default_capabilities(default_capabilities)
         end
       end
+
       for server_name, server_config in pairs(opts.servers) do
         local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp" }
         local should_skip = false
         for _, skip_name in ipairs(skip_servers) do
-          if server_name == skip_name then should_skip = true break end
+          if server_name == skip_name then
+            should_skip = true
+            break
+          end
         end
         if not should_skip and lspconfig[server_name] then
           local config = vim.deepcopy(server_config)
           config.capabilities = vim.tbl_deep_extend("force", {}, default_capabilities, config.capabilities or {})
-          -- Remove snippet support for each server
-          if config.capabilities.textDocument and config.capabilities.textDocument.completion and config.capabilities.textDocument.completion.completionItem then
-            config.capabilities.textDocument.completion.completionItem.snippetSupport = false
+
+          if
+            config.capabilities.textDocument
+            and config.capabilities.textDocument.completion
+            and config.capabilities.textDocument.completion.completionItem
+          then
+            config.capabilities.textDocument.completion.completionItem.snippetSupport = true
           end
           lspconfig[server_name].setup(config)
         end
       end
     end,
   },
-  { "3rd/image.nvim", cond = function() return vim.env.KITTY_SCROLLBACK_NVIM ~= "true" end },
-  { "nvim-lualine/lualine.nvim", cond = function() return vim.env.KITTY_SCROLLBACK_NVIM ~= "true" end },
+  {
+    "3rd/image.nvim",
+    cond = function()
+      return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
+    end,
+  },
+  {
+    "nvim-lualine/lualine.nvim",
+    cond = function()
+      return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
+    end,
+  },
 }
