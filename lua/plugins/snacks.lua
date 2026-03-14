@@ -13,6 +13,7 @@ return {
       },
     },
     picker = {
+      enabled = true,
       icons = {
         selected = "󰄲 ",
         unselected = "󰄱 ",
@@ -24,15 +25,27 @@ return {
       live_grep = {
         args = { "--color=never", "--no-heading", "--with-filename", "--line-number", "--column", "--smart-case" },
       },
-      keys = {
-        {
-          "<leader>gg",
-          function()
-            Snacks.terminal("gitui")
-          end,
-          desc = "GitUI",
-        },
-      },
+    },
+    
+    input = { enabled = true },
+    scroll = { enabled = true },
+    statuscolumn = { enabled = true },
+    words = { enabled = true },
+  },
+  keys = {
+    {
+      "<leader>gg",
+      function() Snacks.terminal("gitui") end,
+      desc = "GitUI",
     },
   },
+  init = function()
+    
+    vim.ui.select = function(...)
+      return require("snacks").picker.select(...)
+    end
+    vim.ui.input = function(...)
+      return require("snacks").input(...)
+    end
+  end,
 }

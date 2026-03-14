@@ -12,6 +12,8 @@ local COLOR_DIAGNOSTIC_UNNECESSARY = "#6c7086"
 
 local force_all = os.getenv("NO_LAZY") == "1"
 
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
 if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
   vim.g.loaded_matchit = 1
   vim.g.loaded_netrwPlugin = 1
