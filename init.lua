@@ -301,3 +301,21 @@ vim.api.nvim_create_user_command("Format", function(args)
     range = range,
   })
 end, { range = true })
+
+-- Force Lspsaga to wait for the UI to be ready
+local saga_preview = require("lspsaga.definition")
+
+-- Wrap the actual internal function
+local old_init = saga_preview.init_definition
+saga_preview.init_definition = function(self, ...)
+  -- 1. Disable screen updates for the duration of the jump
+  vim.opt.lazyredraw = true
+  
+  -- 2. Execute original logic
+  old_init(self, ...)
+  
+  -- 3. Re-enable redraws after a tiny buffer-settling period
+  vim.schedule(function()
+    vim.opt.lazyredraw = false
+  end)
+end

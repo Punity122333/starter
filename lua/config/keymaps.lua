@@ -40,7 +40,6 @@ vim.cmd([[
 vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
 vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
 
--- Cursor Movement (Manual keys preserved)
 vim.keymap.set("i", "<A-h>", "<Left>", { desc = "Move cursor left", silent = true })
 vim.keymap.set("i", "<A-j>", "<Down>", { desc = "Move cursor down", silent = true })
 vim.keymap.set("i", "<A-k>", "<Up>", { desc = "Move cursor up", silent = true })
@@ -115,27 +114,38 @@ vim.api.nvim_create_user_command("TSRestart", function()
   end
 end, { desc = "Restart Treesitter for current buffer" })
 
-vim.keymap.set("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { desc = "Peek Definition" })
-vim.keymap.set("n", "gh", "<cmd>Lspsaga finder<CR>", { desc = "LSP Finder" })
+local function wrap_saga(cmd)
+  return function()
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    local win = vim.api.nvim_open_win(bufnr, false, {
+      relative = 'editor', width = 1, height = 1, row = 0, col = 0, style = 'minimal'
+    })
+    vim.cmd("silent! " .. cmd)
+    vim.defer_fn(function()
+      if vim.api.nvim_win_is_valid(win) then
+        vim.api.nvim_win_close(win, true)
+      end
+    end, 50)
+  end
+end
+
+vim.keymap.set("n", "gh", wrap_saga("Lspsaga finder"), { desc = "LSP Finder" })
+vim.keymap.set("n", "K", wrap_saga("Lspsaga hover_doc"), { desc = "Hover Docs" })
+vim.keymap.set("n", "gjd", wrap_saga("Lspsaga goto_definition"), { desc = "Goto Definition" })
+vim.keymap.set("n", "gjt", wrap_saga("Lspsaga peek_type_definition"), { desc = "Peek Type Definition" })
+vim.keymap.set("n", "gji", wrap_saga("Lspsaga incoming_calls"), { desc = "Incoming Calls" })
+vim.keymap.set("n", "gjo", wrap_saga("Lspsaga outgoing_calls"), { desc = "Outgoing Calls" })
+vim.keymap.set("n", "gjn", wrap_saga("Lspsaga diagnostic_jump_next"), { desc = "Next Diagnostic" })
+vim.keymap.set("n", "gjp", wrap_saga("Lspsaga diagnostic_jump_prev"), { desc = "Prev Diagnostic" })
+
 vim.keymap.set("n", "<leader>lo", "<cmd>Lspsaga outline<CR>", { desc = "LSP Outline" })
-vim.keymap.set("n", "K", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover Docs" })
-require("which-key").add({ { "gj", group = "LSP Navigation" } })
-vim.keymap.set("n", "<leader>sb", function()
-  Snacks.picker.lines()
-end, { desc = "Buffer Lines" })
-vim.keymap.set("n", "<leader>sB", function()
-  Snacks.picker.lsp_symbols()
-end, { desc = "LSP Symbols" })
-vim.keymap.set("n", "gjd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Goto Definition" })
-vim.keymap.set("n", "gjt", "<cmd>Lspsaga peek_type_definition<CR>", { desc = "Peek Type Definition" })
-vim.keymap.set("n", "gji", "<cmd>Lspsaga incoming_calls<CR>", { desc = "Incoming Calls" })
-vim.keymap.set("n", "gjo", "<cmd>Lspsaga outgoing_calls<CR>", { desc = "Outgoing Calls" })
 vim.keymap.set("n", "gjs", "<cmd>Lspsaga outline<CR>", { desc = "Toggle Outline" })
 vim.keymap.set("n", "gjb", "<cmd>Lspsaga symbols_in_winbar<CR>", { desc = "Winbar Symbols" })
-vim.keymap.set("n", "gjh", "<cmd>Lspsaga hover_doc<CR>", { desc = "Hover Doc" })
 vim.keymap.set("n", "gjl", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Buffer Diagnostics" })
-vim.keymap.set("n", "gjn", "<cmd>Lspsaga diagnostic_jump_next<CR>", { desc = "Next Diagnostic" })
-vim.keymap.set("n", "gjp", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { desc = "Prev Diagnostic" })
+
+require("which-key").add({ { "gj", group = "LSP Navigation" } })
+vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Buffer Lines" })
+vim.keymap.set("n", "<leader>sB", function() Snacks.picker.lsp_symbols() end, { desc = "LSP Symbols" })
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
 vim.keymap.set("n", "<leader>[]", function()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
