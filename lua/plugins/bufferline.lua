@@ -20,8 +20,8 @@ return {
         options = {
           always_show_bufferline = false,
           indicator = {
-            icon = '▎',
-            style = 'icon',
+            icon = "▎",
+            style = "icon",
           },
           separator_style = "thin",
           diagnostics = "nvim_lsp",
@@ -48,14 +48,14 @@ return {
           separator_selected = { fg = GodBg, bg = GodBg },
           indicator_selected = {
             fg = LightBlue,
-            bg = GodBg
+            bg = GodBg,
           },
           buffer_visible = { bg = GodBg },
           buffer_selected = {
             bg = GodBg,
             fg = LightBlue,
             bold = true,
-            italic = false
+            italic = false,
           },
           offset_separator = { fg = GodBg, bg = GodBg },
           numbers = { fg = "#7aa2f7", bg = GodBg, bold = true },
@@ -76,3 +76,4 @@ return {
     end,
   },
 }
+

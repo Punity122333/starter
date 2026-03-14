@@ -232,6 +232,8 @@ local function apply_god_theme()
   vim.api.nvim_set_hl(0, "@keyword.import.python", { link = "@keyword.conditional.python" })
   vim.api.nvim_set_hl(0, "@lsp.type.namespace.python", { link = "@module.python" })
   vim.api.nvim_set_hl(0, "@lsp.type.variable", { fg = "#9CDCFE" })
+
+  vim.api.nvim_set_hl(0, "@variable", { fg = "#9CDCFE" })
   vim.api.nvim_set_hl(0, "@lsp.type.macro.cpp", { fg = "#3497E7" })
   vim.api.nvim_set_hl(0, "GrugFarResultsMatch", { link = "@type.builtin.cpp" })
   vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
@@ -284,3 +286,18 @@ end, { desc = "Reload all buffers from disk" })
 
 vim.api.nvim_set_hl(0, "LspKindFile", { bg = "NONE", force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
+
+vim.api.nvim_create_user_command("Format", function(args)
+  local range = nil
+  if args.count ~= -1 then
+    range = {
+      start = { args.line1, 0 },
+      ["end"] = { args.line2, 0 },
+    }
+  end
+  require("conform").format({
+    async = true,
+    lsp_fallback = true,
+    range = range,
+  })
+end, { range = true })

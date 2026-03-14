@@ -1,6 +1,6 @@
 vim.opt.timeoutlen = 130
 vim.opt.ttimeoutlen = 10
-
+vim.g.autoformat = false
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
 function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
   opts = opts or {}
@@ -54,6 +54,22 @@ vim.api.nvim_create_autocmd("User", {
     hl(0, "AlphaFooter", { fg = "#565f89" })
   end,
 })
-vim.schedule(function()
-  vim.opt.clipboard = "unnamedplus"
-end)
+vim.opt.clipboard = "unnamedplus"
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
+if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
+  vim.g.loaded_matchit = 1
+  vim.g.loaded_netrwPlugin = 1
+end
+vim.opt.foldenable = false
+vim.env.PATH = vim.fn.expand("~/.npm-global/bin:") .. vim.env.PATH
+vim.env.PATH = vim.fn.expand("~/.local/bin:") .. vim.env.PATH
+vim.env.PATH = vim.fn.expand("~/.local/share/nvim/mason/bin:") .. vim.env.PATH
+vim.opt.relativenumber = true
+vim.opt.number = true
+vim.g.VM_theme = "neon"
+vim.opt.concealcursor = ""
+vim.g.VM_SET_STATUS_LINE = 0
+vim.g.VM_set_statusline = 0

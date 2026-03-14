@@ -7,7 +7,7 @@ return {
       cycle = false,
       win = {
         layout = {
-          position = "right", 
+          position = "right",
           width = 0.15,
         },
       },
@@ -26,21 +26,22 @@ return {
         args = { "--color=never", "--no-heading", "--with-filename", "--line-number", "--column", "--smart-case" },
       },
     },
-    
+
     input = { enabled = true },
-    scroll = { enabled = true },
+    scroll = { enabled = false },
     statuscolumn = { enabled = true },
     words = { enabled = true },
   },
   keys = {
     {
       "<leader>gg",
-      function() Snacks.terminal("gitui") end,
+      function()
+        Snacks.terminal("gitui")
+      end,
       desc = "GitUI",
     },
   },
   init = function()
-    
     vim.ui.select = function(...)
       return require("snacks").picker.select(...)
     end
@@ -49,3 +50,4 @@ return {
     end
   end,
 }
+

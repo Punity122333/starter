@@ -56,11 +56,27 @@ return {
         },
         ["<Tab>"] = {
           function(cmp)
+
+if vim.snippet and vim.snippet.active({ direction = 1 }) then
+      vim.schedule(function()
+        vim.snippet.jump(1)
+      end)
+      return true
+    end
+            -- 1. Try LSP snippet placeholder jump (prioritize this)
+            if vim.lsp and vim.lsp.buf and vim.lsp.buf.jump_forward then
+              local ok, jumped = pcall(vim.lsp.buf.jump_forward)
+              if ok and jumped then
+                return true
+              end
+            end
+            -- 2. Copilot suggestion
             local copilot_ok, copilot = pcall(require, "copilot.suggestion")
             if copilot_ok and copilot.is_visible() then
               copilot.accept()
               return true
             end
+            -- 3. Fallback: insert tab
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
             return true
           end,

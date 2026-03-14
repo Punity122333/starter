@@ -1,7 +1,7 @@
 return {
   "stevearc/conform.nvim",
-  event = { "BufWritePre" },
-  cmd = { "ConformInfo" },
+  -- Removed event = { "BufWritePre" } so it doesn't auto-run
+  cmd = { "ConformInfo"},
   opts = {
     formatters_by_ft = {
       lua = { "stylua" },
@@ -30,5 +30,6 @@ return {
       toml = { "taplo" },
       yaml = { "yamlfmt" },
     },
+    format_on_save = false,
   },
 }

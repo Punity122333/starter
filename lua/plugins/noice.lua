@@ -30,6 +30,7 @@ return {
             { find = "nvim_buf_set_extmark" },
             { find = "rustaceanvim" },
             { find = "clipboard" },
+            { find = "promise" },
           },
         },
         opts = { skip = true },
