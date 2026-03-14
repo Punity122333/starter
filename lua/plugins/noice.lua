@@ -29,6 +29,7 @@ return {
             { find = "lines moved" },
             { find = "nvim_buf_set_extmark" },
             { find = "rustaceanvim" },
+            { find = "clipboard" },
           },
         },
         opts = { skip = true },
