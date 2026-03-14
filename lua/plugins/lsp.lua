@@ -256,7 +256,7 @@ return {
       end
 
       for server_name, server_config in pairs(opts.servers) do
-        local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp" }
+        local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp", "rust_analyzer" }
         local should_skip = false
         for _, skip_name in ipairs(skip_servers) do
           if server_name == skip_name then

@@ -27,6 +27,8 @@ return {
             { find = "repo map" },
             { find = "lines indented" },
             { find = "lines moved" },
+            { find = "nvim_buf_set_extmark" },
+            { find = "rustaceanvim" },
           },
         },
         opts = { skip = true },
