@@ -78,6 +78,7 @@ vim.cmd([[ highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
   highlight VM_Extend_hl guibg=#00f2ff gui=italic
   highlight VM_Cursor_hl guifg=#000000 guibg=#00f2ff
 ]])
+
 local function apply_god_theme()
   local buf = vim.api.nvim_get_current_buf()
   local line_count = vim.api.nvim_buf_line_count(buf)

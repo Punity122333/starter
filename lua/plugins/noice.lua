@@ -39,7 +39,7 @@ return {
   },
   keys = {
     {
-      "<C-k>",
+      "<C-S-k>",
       function()
         vim.g._sig_open = not vim.g._sig_open
         if vim.g._sig_open then

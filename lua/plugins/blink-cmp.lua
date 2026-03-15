@@ -21,7 +21,7 @@ return {
           auto_show = true,
           auto_show_delay_ms = 100,
           window = {
-            border = "none",
+            border = "rounded",
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine",
           },
         },
@@ -37,7 +37,7 @@ return {
         ["<C-Down>"] = { "select_next", "fallback" },
         ["<S-CR>"] = { "accept", "fallback" },
         ["C-y"] = { "accept", "fallback" },
-        ["<C-j>"] = { "select_next", "fallback" }, -- next item
+        ["<C-j>"] = { "select_next", "fallback" },
         ["<C-k>"] = { "select_prev", "fallback" },
         ["<C-CR>"] = { "accept", "fallback" },
         ["<C-S-0>"] = {
@@ -56,27 +56,23 @@ return {
         },
         ["<Tab>"] = {
           function(cmp)
-
-if vim.snippet and vim.snippet.active({ direction = 1 }) then
-      vim.schedule(function()
-        vim.snippet.jump(1)
-      end)
-      return true
-    end
-            -- 1. Try LSP snippet placeholder jump (prioritize this)
+            if vim.snippet and vim.snippet.active({ direction = 1 }) then
+              vim.schedule(function()
+                vim.snippet.jump(1)
+              end)
+              return true
+            end
             if vim.lsp and vim.lsp.buf and vim.lsp.buf.jump_forward then
               local ok, jumped = pcall(vim.lsp.buf.jump_forward)
               if ok and jumped then
                 return true
               end
             end
-            -- 2. Copilot suggestion
             local copilot_ok, copilot = pcall(require, "copilot.suggestion")
             if copilot_ok and copilot.is_visible() then
               copilot.accept()
               return true
             end
-            -- 3. Fallback: insert tab
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Tab>", true, false, true), "n", false)
             return true
           end,
@@ -84,13 +80,13 @@ if vim.snippet and vim.snippet.active({ direction = 1 }) then
         ["<S-Tab>"] = { "fallback" },
       },
       sources = {
+        -- 'lsp' will automatically pick up r_ls (rnvimserver)
         default = { "lsp", "path", "buffer" },
         providers = {
           lsp = { max_items = 25, timeout_ms = 700 },
           buffer = { max_items = 25 },
           path = { max_items = 25 },
         },
-      },
-    })
+      },    })
   end,
 }

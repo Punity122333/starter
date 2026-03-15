@@ -38,7 +38,20 @@ return {
               text_align = "left",
               padding = 0,
             },
+            {
+              filetype = "rconsole",
+              text = "R Console",
+              highlight = "Directory",
+              text_align = "left",
+              padding = 0,
+            },
           },
+          filter_callback = function(buf_number, buf_numbers)
+            if vim.bo[buf_number].filetype == "rconsole" then
+              return false
+            end
+            return true
+          end,
         },
         highlights = {
           fill = { bg = GodBg },
