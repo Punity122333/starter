@@ -1,11 +1,30 @@
 return {
   "folke/noice.nvim",
   opts = {
+    presets = {
+      lsp_doc_border = true,
+    },
     lsp = {
       signature = {
         enabled = true,
         auto_open = {
           enabled = false,
+        },
+        border = {
+          style = "rounded",
+        },
+      },
+    },
+    views = {
+      popup = {
+        border = {
+          style = "rounded",
+        },
+        win_options = {
+          winhighlight = {
+            Normal = "NoicePopup",
+            FloatBorder = "NoicePopupBorder",
+          },
         },
       },
     },

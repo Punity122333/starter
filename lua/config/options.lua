@@ -16,7 +16,6 @@ function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
   return bufnr, winnr
 end
 
-local group = vim.api.nvim_create_augroup("TransparentEdges", { clear = true })
 
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
   group = group,
@@ -38,8 +37,6 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
     hl(0, "BlinkCmpSignatureHelp", { bg = "#15151c", blend = 0 })
     hl(0, "BlinkCmpSignatureHelpBorder", { bg = "#15151c", fg = "#232330", blend = 0 })
     hl(0, "BlinkCmpSignatureHelpActiveParameter", { bg = "#15151c", bold = true, blend = 0 })
-    hl(0, "NoicePopup", { bg = "#15151c", blend = 0 })
-    hl(0, "NoicePopupBorder", { bg = "#15151c", fg = "#232330", blend = 0 })
     hl(0, "LspInfoBorder", { bg = "#15151c", fg = "#232330", blend = 0 })
   end,
 })
@@ -52,8 +49,10 @@ vim.api.nvim_create_autocmd("User", {
     hl(0, "AlphaButtons", { fg = "#bb9af7" })
     hl(0, "AlphaShortcut", { fg = "#ff9e64" })
     hl(0, "AlphaFooter", { fg = "#565f89" })
+
   end,
 })
+
 vim.opt.clipboard = "unnamedplus"
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
@@ -73,3 +72,13 @@ vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
 vim.g.VM_SET_STATUS_LINE = 0
 vim.g.VM_set_statusline = 0
+
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
+vim.g.loaded_node_provider = 0
+vim.g.loaded_python3_provider = 0
+if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
+  vim.g.loaded_matchit = 1
+  vim.g.loaded_netrwPlugin = 1
+end
+vim.opt.foldenable = false

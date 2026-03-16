@@ -43,50 +43,23 @@ return {
       servers = {
 
         basedpyright = {
-
           mason = false,
-
           cmd = { "/home/pxnity/.local/bin/basedpyright-langserver", "--stdio" },
-
-          filetypes = { "python" },
-
-          single_file_support = true,
-
-          root_dir = function(fname)
-            local util = require("lspconfig.util")
-
-            return util.root_pattern("requirements.txt", "pyproject.toml", ".git")(fname) or vim.fn.getcwd()
-          end,
-
-          capabilities = {
-
-            offsetEncoding = { "utf-16" },
-
-            textDocument = { completion = { completionItem = { snippetSupport = true } } },
-          },
-
           settings = {
-
             basedpyright = {
-
               analysis = {
-
                 typeCheckingMode = "basic",
-
                 diagnosticMode = "openFilesOnly",
-
                 reportMissingTypeStubs = false,
-
                 reportUnknownMemberAccess = false,
-
                 reportUnknownVariableType = false,
-
                 reportUnannotatedClassAttribute = false,
+                autoImportCompletions = false,
+                indexing = false,
               },
             },
           },
         },
-
         asm_lsp = {
 
           cmd = { "asm-lsp" },
@@ -117,49 +90,23 @@ return {
         },
 
         clangd = {
-
-          filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
-
           cmd = {
-
             "clangd",
-
             "--background-index",
-
             "--clang-tidy",
-
             "--query-driver=/usr/bin/g++,/usr/bin/gcc",
-
             "--fallback-style=google",
-
             "--pch-storage=memory",
-
             "--limit-references=0",
-
             "-j=4",
           },
-
-          capabilities = {
-
-            textDocument = {
-
-              onTypeFormatting = { dynamicRegistration = false },
-
-              rangeFormatting = { dynamicRegistration = false },
-            },
-          },
-
-          single_file_support = true,
-
           on_attach = function(client, bufnr)
             if vim.api.nvim_buf_line_count(bufnr) > 2000 then
               client.server_capabilities.semanticTokensProvider = nil
             end
-
             client.server_capabilities.documentFormattingProvider = false
           end,
         },
-
         omnisharp = {
 
           cmd = {
@@ -227,10 +174,9 @@ return {
 
             ["textDocument/completion"] = vim.lsp.with(vim.lsp.handlers["textDocument/completion"], {
 
-              border = "none",
+              border = "rounded",
             }),
           },
-
           on_attach = function(client, bufnr)
             client.server_capabilities.semanticTokensProvider = nil
 
@@ -285,35 +231,43 @@ return {
         },
 
         lua_ls = {
-
-          filetypes = { "lua" },
-
+          cmd = { "/home/pxnity/.local/share/nvim/mason/bin/lua-language-server" },
           on_attach = function(client, bufnr)
-            client.server_capabilities.semanticTokensProvider = nil
+            -- Kill all diagnostics for this client
+            client.server_capabilities.diagnosticProvider = false
+            vim.diagnostic.enable(false, { bufnr = bufnr })
 
+            client.server_capabilities.semanticTokensProvider = nil
             client.server_capabilities.documentSymbolProvider = false
           end,
-
           settings = {
-
             Lua = {
-
               runtime = { version = "LuaJIT" },
-
+              -- FORCE DIAGONISTICS TO BE LAZY
               diagnostics = {
-
                 globals = { "vim" },
-
                 disable = { "lowercase-global", "undefined-global", "missing-fields" },
+                -- THIS STOPS THE "DIAGNOSING" LOOP
+                neededFileStatus = {
+                  ["codestyle-check"] = "None",
+                  ["unused-local"] = "None",
+                },
               },
-
-              workspace = { checkThirdParty = false },
-
+              workspace = {
+                checkThirdParty = false,
+                library = {
+                  vim.env.VIMRUNTIME,
+                  vim.fn.stdpath("config") .. "/lua",
+                },
+                ignoreDir = { "**/node_modules", "**/lazy" },
+                preloadFileSize = 0,
+                -- ADD THIS TO PREVENT WORKSPACE RE-SCANNING
+                libraryStatus = "None",
+              },
               telemetry = { enable = false },
             },
           },
         },
-
         glsl_analyzer = {
 
           cmd = { "glsl_analyzer" },
@@ -334,7 +288,7 @@ return {
     config = function(_, opts)
       vim.diagnostic.config(opts.diagnostics)
 
-      local timer = vim.loop.new_timer()
+      -- local timer = vim.loop.new_timer()
 
       vim.api.nvim_create_autocmd("LspAttach", {
 
@@ -343,28 +297,6 @@ return {
 
           if not client then
             return
-          end
-
-          if timer then
-            timer:stop()
-
-            timer:start(100, 0, function()
-              vim.schedule(function()
-                local bufnr = args.buf
-
-                if not vim.api.nvim_buf_is_valid(bufnr) then
-                  return
-                end
-
-                local ft = vim.bo[bufnr].filetype
-
-                if vim.api.nvim_buf_line_count(bufnr) > 5000 or ft:find("snacks") then
-                  client.server_capabilities.semanticTokensProvider = nil
-
-                  client.server_capabilities.documentHighlightProvider = false
-                end
-              end)
-            end)
           end
         end,
       })
@@ -399,7 +331,8 @@ return {
       end
 
       for server_name, server_config in pairs(opts.servers) do
-        local skip_servers = { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp", "rust_analyzer", "r_language_server" }
+        local skip_servers =
+          { "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp", "rust_analyzer", "r_language_server" }
 
         local should_skip = false
 

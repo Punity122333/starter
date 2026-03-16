@@ -1,6 +1,7 @@
 return {
   "rmagatti/goto-preview",
   event = "BufEnter",
+  dependencies = { "rmagatti/logger.nvim" },
   config = function()
     require("goto-preview").setup({
       width = 120,
@@ -16,6 +17,7 @@ return {
         end, { buffer = true, silent = true, desc = "Close Preview" })
       end,
       post_close_hook = nil,
+
       references = {
         provider = "telescope",
         telescope = require("telescope.themes").get_dropdown({ hide_preview = false }),
@@ -49,3 +51,4 @@ return {
     },
   },
 }
+

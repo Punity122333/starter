@@ -1,32 +1,16 @@
 local COLOR_BACKGROUND_PRIMARY = "#1a1b26"
 local COLOR_SELECTION_BLUE = "#28344a"
-local COLOR_BACKGROUND_SECONDARY = "#111116"
-local COLOR_FOREGROUND_ACCENT = "#111116"
-local COLOR_FOREGROUND_SECONDARY = "#232330"
-local COLOR_CURSOR_FOREGROUND = "#000000"
-local COLOR_CURSOR_BACKGROUND = "#00ff00"
-local COLOR_SNACKS_SELECTION_BG = "#1a1b26"
-local COLOR_SNACKS_PICKER_SELECTED = "#88c0d0"
 local COLOR_MARKDOWN_BOLD = "#ff9e64"
 local COLOR_DIAGNOSTIC_UNNECESSARY = "#6c7086"
 
 local force_all = os.getenv("NO_LAZY") == "1"
-
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_ruby_provider = 0
-vim.g.loaded_node_provider = 0
-vim.g.loaded_python3_provider = 0
-if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
-  vim.g.loaded_matchit = 1
-  vim.g.loaded_netrwPlugin = 1
-end
-vim.opt.foldenable = false
 
 vim.env.PATH = vim.fn.expand("~/.npm-global/bin:") .. vim.env.PATH
 vim.env.PATH = vim.fn.expand("~/.local/bin:") .. vim.env.PATH
 vim.env.PATH = vim.fn.expand("~/.local/share/nvim/mason/bin:") .. vim.env.PATH
 
 require("config.lazy")
+require("config.highlights")
 
 vim.defer_fn(function()
   pcall(require, "lspconfig")
@@ -74,10 +58,6 @@ vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
 vim.keymap.set("n", "hi", ":Inspect<CR>")
 vim.g.VM_set_statusline = 0
-vim.cmd([[ highlight VM_Cursor guifg=#000000 guibg=#00f2ff gui=bold
-  highlight VM_Extend_hl guibg=#00f2ff gui=italic
-  highlight VM_Cursor_hl guifg=#000000 guibg=#00f2ff
-]])
 
 local function apply_god_theme()
   local buf = vim.api.nvim_get_current_buf()
@@ -127,9 +107,10 @@ local function apply_god_theme()
       or name:find("Rainbow")
       or name:find("LazyReason")
       or name:find("Lsp")
+      or name:find("TroubleCount")
 
     local is_active_selector = name:find("Selected") and (name:find("SnacksPicker") or name:find("Telescope"))
-
+      or name:find("RenderMarkdown")
     if is_active_selector or name == "CursorLine" then
       vim.api.nvim_set_hl(0, name, { bg = COLOR_SELECTION_BLUE, fg = hl.fg, force = true })
     else
@@ -155,90 +136,8 @@ local function apply_god_theme()
     end
     ::continue::
   end
-
-  vim.api.nvim_set_hl(0, "markdownBold", { bold = true, force = true })
-  vim.api.nvim_set_hl(0, "@markup.strong", { bold = true, force = true })
-  vim.api.nvim_set_hl(0, "@text.strong", { bold = true, force = true })
-
-  local sel_groups = { "BlinkCmpMenuSelection", "PmenuSel", "CmpItemAbbrSelected", "TelescopeSelection" }
-  for _, g in ipairs(sel_groups) do
-    vim.api.nvim_set_hl(0, g, { bg = COLOR_SELECTION_BLUE, force = true })
-  end
-
-  local float_groups = { "NormalFloat", "FloatTitle", "MsgArea", "StatusLine", "StatusLineNC" }
-  for _, g in ipairs(float_groups) do
-    vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_PRIMARY, force = true })
-  end
-
-  local blink = {
-    "BlinkCmpMenu",
-    "BlinkCmpSignatureHelp",
-    "BlinkCmpDoc",
-    "BlinkCmpDocSeparator",
-    "NoiceLspSignatureHelp",
-    "LspSignatureActiveParameter",
-    "NoicePopup",
-  }
-  for _, g in ipairs(blink) do
-    vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_SECONDARY, blend = 0, force = true })
-  end
-  vim.api.nvim_set_hl(
-    0,
-    "BlinkCmpDocBorder",
-    { bg = COLOR_BACKGROUND_SECONDARY, fg = COLOR_BACKGROUND_SECONDARY, blend = 0, force = true }
-  )
-  vim.api.nvim_set_hl(
-    0,
-    "NoicePopupBorder",
-    { bg = COLOR_BACKGROUND_SECONDARY, fg = COLOR_FOREGROUND_SECONDARY, blend = 0, force = true }
-  )
-  vim.api.nvim_set_hl(
-    0,
-    "BlinkCmpSignatureHelpBorder",
-    { bg = COLOR_BACKGROUND_SECONDARY, fg = COLOR_FOREGROUND_SECONDARY, blend = 0, force = true }
-  )
-  vim.api.nvim_set_hl(
-    0,
-    "LspInfoBorder",
-    { bg = COLOR_BACKGROUND_SECONDARY, fg = COLOR_FOREGROUND_SECONDARY, blend = 0, force = true }
-  )
-  local sep = { "Split", "Splitter", "Separator", "WinSeparator", "VertSplit" }
-  for _, g in ipairs(sep) do
-    vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_PRIMARY, blend = 20, fg = COLOR_FOREGROUND_ACCENT, force = true })
-  end
-  vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = COLOR_FOREGROUND_ACCENT, bg = COLOR_BACKGROUND_PRIMARY })
-  vim.api.nvim_set_hl(
-    0,
-    "AvanteSidebarWinHorizontalSeparator",
-    { fg = COLOR_FOREGROUND_ACCENT, bg = COLOR_BACKGROUND_PRIMARY }
-  )
-  vim.api.nvim_set_hl(0, "AvantePopup", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
-
-  vim.api.nvim_set_hl(0, "AvantePopupHint", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
-  local snack_hls = {
-    SnacksPickerSelected = { bg = "NONE", fg = COLOR_SNACKS_PICKER_SELECTED },
-    SnacksPickerCursorLine = { bg = COLOR_SNACKS_SELECTION_BG },
-  }
-  for group, settings in pairs(snack_hls) do
-    vim.api.nvim_set_hl(0, group, settings)
-  end
-  vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
-  vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
-
-  vim.api.nvim_set_hl(0, "Cursor", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND, force = true })
-  vim.api.nvim_set_hl(0, "lCursor", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND, force = true })
-  vim.api.nvim_set_hl(0, "CursorIM", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND, force = true })
-  vim.api.nvim_set_hl(0, "TermCursor", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND, force = true })
-  vim.api.nvim_set_hl(0, "@module.python", { link = "@type.python" })
-  vim.api.nvim_set_hl(0, "@keyword.import.python", { link = "@keyword.conditional.python" })
-  vim.api.nvim_set_hl(0, "@lsp.type.namespace.python", { link = "@module.python" })
-  vim.api.nvim_set_hl(0, "@lsp.type.variable", { fg = "#9CDCFE" })
-
-  vim.api.nvim_set_hl(0, "@variable", { fg = "#9CDCFE" })
-  vim.api.nvim_set_hl(0, "@lsp.type.macro.cpp", { fg = "#3497E7" })
-  vim.api.nvim_set_hl(0, "GrugFarResultsMatch", { link = "@type.builtin.cpp" })
-  vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
-  vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
+  vim.api.nvim_set_hl(0, "Cursor", { fg = "#000000", bg = "#00FF00" })
+  vim.api.nvim_set_hl(0, "CursorInsert", { fg = "#000000", bg = "#00FF00" })
   local diag_underline_groups = {
     "DiagnosticUnderlineError",
     "DiagnosticUnderlineWarn",
@@ -250,7 +149,6 @@ local function apply_god_theme()
     local existing = vim.api.nvim_get_hl(0, { name = g })
     vim.api.nvim_set_hl(0, g, { sp = existing.sp, underline = true, bg = "NONE", force = true })
   end
-
   local illuminate_groups = {
     "IlluminatedWordText",
     "IlluminatedWordRead",
@@ -303,19 +201,14 @@ vim.api.nvim_create_user_command("Format", function(args)
   })
 end, { range = true })
 
--- Force Lspsaga to wait for the UI to be ready
 local saga_preview = require("lspsaga.definition")
 
--- Wrap the actual internal function
 local old_init = saga_preview.init_definition
 saga_preview.init_definition = function(self, ...)
-  -- 1. Disable screen updates for the duration of the jump
   vim.opt.lazyredraw = true
-  
-  -- 2. Execute original logic
+
   old_init(self, ...)
-  
-  -- 3. Re-enable redraws after a tiny buffer-settling period
+
   vim.schedule(function()
     vim.opt.lazyredraw = false
   end)

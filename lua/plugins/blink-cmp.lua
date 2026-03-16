@@ -15,11 +15,14 @@ return {
         accept = { auto_brackets = { enabled = true } },
         menu = {
           auto_show = true,
+          border = "rounded",
+          scrollbar = false,
           winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
         },
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 100,
+          scrollbar = false,
           window = {
             border = "rounded",
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine",
