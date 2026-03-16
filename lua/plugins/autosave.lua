@@ -22,7 +22,6 @@ return {
       },
       debounce_delay = DebounceDelay,
       condition = function(buffer)
-        -- Prevent saving while a snippet is active to stop format-on-save from breaking jumps
         if vim.snippet and vim.snippet.active({ direction = 1 }) then
           return false
         end

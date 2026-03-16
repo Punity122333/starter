@@ -48,6 +48,7 @@ if vim.fn.has("wayland") == 1 then
     cache_enabled = 1,
   }
 end
+
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
 package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
 package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/lib/lua/5.1/?.so;"
@@ -110,7 +111,6 @@ local function apply_god_theme()
       or name:find("TroubleCount")
 
     local is_active_selector = name:find("Selected") and (name:find("SnacksPicker") or name:find("Telescope"))
-      or name:find("RenderMarkdown")
     if is_active_selector or name == "CursorLine" then
       vim.api.nvim_set_hl(0, name, { bg = COLOR_SELECTION_BLUE, fg = hl.fg, force = true })
     else
@@ -212,4 +212,13 @@ saga_preview.init_definition = function(self, ...)
   vim.schedule(function()
     vim.opt.lazyredraw = false
   end)
+end
+local original_notify = vim.notify
+vim.notify = function(msg, level, opts)
+    if type(msg) == "string" and msg:find("Avante") then
+        return
+
+    end
+    
+    original_notify(msg, level, opts)
 end

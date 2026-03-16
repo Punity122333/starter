@@ -82,3 +82,4 @@ if vim.env.KITTY_SCROLLBACK_NVIM == "true" then
   vim.g.loaded_netrwPlugin = 1
 end
 vim.opt.foldenable = false
+vim.o.winborder = "rounded"

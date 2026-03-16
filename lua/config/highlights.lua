@@ -60,9 +60,9 @@ vim.api.nvim_set_hl(
   "AvanteSidebarWinHorizontalSeparator",
   { fg = COLOR_FOREGROUND_ACCENT, bg = COLOR_BACKGROUND_PRIMARY }
 )
-vim.api.nvim_set_hl(0, "AvantePopup", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
+vim.api.nvim_set_hl(0, "AvantePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = true, blend = 0 })
 
-vim.api.nvim_set_hl(0, "AvantePopupHint", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
+vim.api.nvim_set_hl(0, "AvantePopupHint", { bg = COLOR_BACKGROUND_PRIMARY, force = true, blend = 0 })
 local snack_hls = {
   SnacksPickerSelected = { bg = "NONE", fg = COLOR_SNACKS_PICKER_SELECTED },
   SnacksPickerCursorLine = { bg = COLOR_SNACKS_SELECTION_BG },
@@ -70,8 +70,13 @@ local snack_hls = {
 for group, settings in pairs(snack_hls) do
   vim.api.nvim_set_hl(0, group, settings)
 end
-vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
-vim.api.nvim_set_hl(0, "AvantePromptInputBorder", { bg = COLOR_BACKGROUND_SECONDARY, force = true, blend = 0 })
+vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = COLOR_BACKGROUND_PRIMARY, force = true, blend = 0 })
+
+vim.api.nvim_set_hl(
+  0,
+  "AvantePromptInputBorder",
+  { bg = COLOR_BACKGROUND_PRIMARY, fg = "#27a1b9", force = true, blend = 0 }
+)
 vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 
 vim.api.nvim_set_hl(0, "BlinkCmpDoc", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
@@ -84,10 +89,8 @@ vim.api.nvim_set_hl(0, "@module.python", { link = "@type.python" })
 vim.api.nvim_set_hl(0, "@keyword.import.python", { link = "@keyword.conditional.python" })
 vim.api.nvim_set_hl(0, "@lsp.type.namespace.python", { link = "@module.python" })
 vim.api.nvim_set_hl(0, "@lsp.type.variable", { fg = "#9CDCFE" })
-
 vim.api.nvim_set_hl(0, "@variable", { fg = "#9CDCFE" })
 vim.api.nvim_set_hl(0, "@lsp.type.macro.cpp", { fg = "#3497E7" })
 vim.api.nvim_set_hl(0, "GrugFarResultsMatch", { link = "@type.builtin.cpp" })
 vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
-

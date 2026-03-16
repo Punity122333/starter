@@ -45,7 +45,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
--- Avante filetype settings (combined)
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "avante", "avante-input" },
   callback = function()
@@ -106,3 +105,4 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     end
   end,
 })
+

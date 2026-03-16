@@ -48,7 +48,7 @@ return {
           settings = {
             basedpyright = {
               analysis = {
-                typeCheckingMode = "basic",
+                typeCheckingMode = "strict",
                 diagnosticMode = "openFilesOnly",
                 reportMissingTypeStubs = false,
                 reportUnknownMemberAccess = false,
@@ -233,7 +233,6 @@ return {
         lua_ls = {
           cmd = { "/home/pxnity/.local/share/nvim/mason/bin/lua-language-server" },
           on_attach = function(client, bufnr)
-            -- Kill all diagnostics for this client
             client.server_capabilities.diagnosticProvider = false
             vim.diagnostic.enable(false, { bufnr = bufnr })
 
@@ -243,16 +242,15 @@ return {
           settings = {
             Lua = {
               runtime = { version = "LuaJIT" },
-              -- FORCE DIAGONISTICS TO BE LAZY
               diagnostics = {
                 globals = { "vim" },
                 disable = { "lowercase-global", "undefined-global", "missing-fields" },
-                -- THIS STOPS THE "DIAGNOSING" LOOP
                 neededFileStatus = {
                   ["codestyle-check"] = "None",
                   ["unused-local"] = "None",
                 },
               },
+              checkThirdParty = false,
               workspace = {
                 checkThirdParty = false,
                 library = {
@@ -261,7 +259,6 @@ return {
                 },
                 ignoreDir = { "**/node_modules", "**/lazy" },
                 preloadFileSize = 0,
-                -- ADD THIS TO PREVENT WORKSPACE RE-SCANNING
                 libraryStatus = "None",
               },
               telemetry = { enable = false },

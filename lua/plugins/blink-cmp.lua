@@ -22,8 +22,8 @@ return {
         documentation = {
           auto_show = true,
           auto_show_delay_ms = 100,
-          scrollbar = false,
           window = {
+            scrollbar = false,
             border = "rounded",
             winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine",
           },
@@ -90,6 +90,7 @@ return {
           buffer = { max_items = 25 },
           path = { max_items = 25 },
         },
-      },    })
+      },
+    })
   end,
 }

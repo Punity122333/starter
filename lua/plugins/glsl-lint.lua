@@ -46,6 +46,7 @@ return {
                 message = msg:gsub("^'([^']+)'%s*:%s*", ""),
                 severity = diagnostic_severity,
                 source = "glslangValidator",
+                
               })
             end
           end

@@ -5,11 +5,13 @@ return {
     version = false,
     build = "make",
     opts = {
+      notify = false,
       mode = "agentic",
       provider = "gemini",
       instructions_file = "avante.md",
+      
       providers = {
-       
+
         copilot = {
           endpoint = "https://api.githubcopilot.com",
           model = "gpt-4o",
@@ -51,6 +53,14 @@ return {
           enabled = true,
           align = "center",
           rounded = true,
+        },
+        border = "rounded",
+        ask = {
+          start_insert = false,
+          border = "rounded", -- or "single", "double", "solid"
+        },
+        edit = {
+          border = "rounded", -- or "single", "double", "solid"
         },
       },
       suggestion = {
