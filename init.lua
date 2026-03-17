@@ -160,7 +160,6 @@ local function apply_god_theme()
   for _, g in ipairs(illuminate_groups) do
     vim.api.nvim_set_hl(0, g, { bg = COLOR_SELECTION_BLUE, force = true })
   end
-
   vim.api.nvim_set_hl(0, "markdownBold", { fg = COLOR_MARKDOWN_BOLD, bold = true, force = true })
   vim.api.nvim_set_hl(0, "@markup.strong", { fg = COLOR_MARKDOWN_BOLD, bold = true, force = true })
   vim.api.nvim_set_hl(
@@ -169,6 +168,9 @@ local function apply_god_theme()
     { fg = COLOR_DIAGNOSTIC_UNNECESSARY, strikethrough = true, force = true }
   )
   vim.api.nvim_set_hl(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { fg = "#27a1b9", bg = COLOR_BACKGROUND_PRIMARY, force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
+  vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 end
 
 local GROUP_GOD_THEME_PERSISTENCE = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })
@@ -215,10 +217,8 @@ saga_preview.init_definition = function(self, ...)
 end
 local original_notify = vim.notify
 vim.notify = function(msg, level, opts)
-    if type(msg) == "string" and msg:find("Avante") then
-        return
-
-    end
-    
-    original_notify(msg, level, opts)
+  if type(msg) == "string" and msg:find("Avante") then
+    return
+  end
+  original_notify(msg, level, opts)
 end

@@ -56,94 +56,95 @@ return {
       },
     },
   },
+  config = function(_, opts)
+    require("noice").setup(opts)
+
+    local function is_in_function_call()
+      local node = vim.treesitter.get_node()
+      while node do
+        local type = node:type()
+        if type == "arguments" or type == "parameter_list" or type == "argument_list" then
+          return true
+        end
+        node = node:parent()
+      end
+      return false
+    end
+
+    local function get_sig_win()
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        local config = vim.api.nvim_win_get_config(win)
+        if config.relative ~= "" then
+          local buf = vim.api.nvim_win_get_buf(win)
+          local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+          if ft == "lsp_signature" or ft == "noice" then
+            return win
+          end
+        end
+      end
+      return nil
+    end
+
+    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+      group = vim.api.nvim_create_augroup("SignatureAutoClose", { clear = true }),
+      callback = function()
+        if get_sig_win() and not is_in_function_call() then
+          require("noice").cmd("dismiss")
+        end
+      end,
+    })
+  end,
   keys = {
     {
       "<C-;>",
       function()
-        local function is_signature_open()
+        local function get_sig_win()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)
             if config.relative ~= "" then
               local buf = vim.api.nvim_win_get_buf(win)
-              local ft = vim.api.nvim_buf_get_option(buf, "filetype")
+              local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
               if ft == "lsp_signature" or ft == "noice" then
-                return true
+                return win
               end
             end
           end
-          return false
+          return nil
         end
-        local max_attempts = 3
-        local attempts = 0
-        vim.g._sig_open = not vim.g._sig_open
-        if vim.g._sig_open then
-          local timer = vim.loop.new_timer()
-          local function try_open()
-            attempts = attempts + 1
-            if not is_signature_open() then
-              vim.lsp.buf.signature_help()
-              if attempts < max_attempts then
-                timer:start(60, 0, vim.schedule_wrap(try_open))
-              else
-                timer:stop()
-                timer:close()
-              end
-            else
-              timer:stop()
-              timer:close()
-            end
-          end
-          try_open()
-        else
+
+        if get_sig_win() then
           require("noice").cmd("dismiss")
+        else
+          vim.lsp.buf.signature_help()
         end
       end,
       mode = { "i", "n" },
-      desc = "Toggle LSP Signature Help (robust)",
+      desc = "Toggle LSP Signature Help",
     },
     {
       "<C-,>",
       function()
-        local function is_signature_open()
+        local function get_sig_win()
           for _, win in ipairs(vim.api.nvim_list_wins()) do
             local config = vim.api.nvim_win_get_config(win)
             if config.relative ~= "" then
               local buf = vim.api.nvim_win_get_buf(win)
-              local ft = vim.api.nvim_buf_get_option(buf, "filetype")
+              local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
               if ft == "lsp_signature" or ft == "noice" then
-                return true
+                return win
               end
             end
           end
-          return false
+          return nil
         end
-        local max_attempts = 3
-        local attempts = 0
-        vim.g._sig_open = not vim.g._sig_open
-        if vim.g._sig_open then
-          local timer = vim.loop.new_timer()
-          local function try_open()
-            attempts = attempts + 1
-            if not is_signature_open() then
-              vim.lsp.buf.signature_help()
-              if attempts < max_attempts then
-                timer:start(60, 0, vim.schedule_wrap(try_open))
-              else
-                timer:stop()
-                timer:close()
-              end
-            else
-              timer:stop()
-              timer:close()
-            end
-          end
-          try_open()
-        else
+
+        if get_sig_win() then
           require("noice").cmd("dismiss")
+        else
+          vim.lsp.buf.signature_help()
         end
       end,
       mode = { "i", "n" },
-      desc = "Toggle LSP Signature Help (robust)",
-    },
-  },
+      desc = "Toggle LSP Signature Help",
+    },  },
 }
