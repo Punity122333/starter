@@ -169,3 +169,4 @@ vim.keymap.set("n", "<leader>ml", "dm<leader>", { desc = "Clear local marks" })
 
 vim.keymap.set("n", "<leader>fm", "<cmd>Format<cr>", { desc = "Format file manually" })
 vim.keymap.set('n', '<leader>mb', ':set list!<CR>', { noremap = true, silent = true, desc = 'Toggle listchars' })
+vim.keymap.set("i", "<C-f>", "<C-t>", { desc = "Indent line" })
