@@ -47,6 +47,7 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
     hl(0, "EndOfBuffer", { bg = HIGHLIGHT_NONE })
     hl(0, "StatusLine", { bg = HIGHLIGHT_NONE })
     hl(0, "StatusLineNC", { bg = HIGHLIGHT_NONE })
+
     hl(0, "SnacksScratch", { bg = HIGHLIGHT_NONE })
     hl(0, "SnacksBackdrop", { bg = HIGHLIGHT_NONE })
     hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_SIGNATURE_BG, blend = 0 })
@@ -98,3 +99,4 @@ if vim.env[KITTY_SCROLLBACK_NVIM] == TRUE then
 end
 vim.opt.foldenable = false
 vim.o.winborder = BORDER_ROUNDED
+
