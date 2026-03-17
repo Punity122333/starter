@@ -204,7 +204,7 @@ vim.api.nvim_create_user_command("Format", function(args)
     range = range,
   })
 end, { range = true })
-											
+
 local saga_preview = require("lspsaga.definition")
 
 local old_init = saga_preview.init_definition

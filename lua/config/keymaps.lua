@@ -1,5 +1,4 @@
 local COMMAND_SAVE_AND_QUIT = "WQ"
-
 local COMMAND_SAVE_AND_QUIT_ALT1 = "Wq"
 local COMMAND_SAVE_AND_QUIT_ALL = "WQA"
 local COMMAND_SAVE_AND_QUIT_ALL_ALT1 = "Wqa"
@@ -169,4 +168,4 @@ vim.keymap.set("n", "<leader>md", "dm<leader>", { desc = "Clear all marks" })
 vim.keymap.set("n", "<leader>ml", "dm<leader>", { desc = "Clear local marks" })
 
 vim.keymap.set("n", "<leader>fm", "<cmd>Format<cr>", { desc = "Format file manually" })
-
+vim.keymap.set('n', '<leader>mb', ':set list!<CR>', { noremap = true, silent = true, desc = 'Toggle listchars' })

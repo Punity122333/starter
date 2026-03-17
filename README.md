@@ -3,20 +3,13 @@ Refer to the [documentation](https://lazyvim.github.io/installation) to get star
 
 ------------------------------------------------------------------------------------------------------------------------
 
-
-
 # LazyVim Starter Template
+
+<!--toc:start-->
+- [LazyVim Starter Template](#lazyvim-starter-template)
+<!--toc:end-->
 
 This is a starter template for [LazyVim](https://github.com/LazyVim/LazyVim). 
 It provides a minimal setup to quickly get you started with LazyVim and begin configuring your Neovim environment to your liking.
 
 Happy coding with LazyVim!
-
-sskdsakdjkdjdkjfkdfjkdjfdkfjdkjfdkjfdkjfdkjfdkfdkjfdkjfdkfjdkjfdkfjdkfjdkfjdkjfdkjfdkjfdkjfdkjfkdjfkdjfdkjfdkjfdkjfdkjfdkffdfdfd
-dfdkfjdkfdjfkdjfkdjksfjskjfkjdkfjdkfjdkjfdkfjdkfdkfjdkfjdkkkkkkkdfdfdfddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-ddddddddddddddddddddddddddddddd
-ddddddddddddddddddddddddddddddddddd
-dddddddddddddddddddddddddddd
-ddddddddddddddddddddddddddd
-
-

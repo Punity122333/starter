@@ -1,7 +1,6 @@
 return {
   "tigion/swap.nvim",
   keys = {
-    -- Mapping these under <leader>C to keep your refactoring namespace clean
     {
       "<leader>Ci",
       function()

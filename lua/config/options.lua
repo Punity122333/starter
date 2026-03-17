@@ -86,12 +86,7 @@ vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
 vim.g.VM_SET_STATUS_LINE = 0
 vim.g.VM_set_statusline = 0
-vim.opt.listchars.tab = "  "
-vim.opt.list = true
-vim.opt.expandtab = false
 vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
 
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0

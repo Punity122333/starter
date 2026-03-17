@@ -1,6 +1,5 @@
 return {
   "stevearc/conform.nvim",
-  -- Removed event = { "BufWritePre" } so it doesn't auto-run
   cmd = { "ConformInfo"},
   opts = {
     formatters_by_ft = {
