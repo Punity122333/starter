@@ -2,6 +2,8 @@ local COLOR_BACKGROUND_PRIMARY = "#1a1b26"
 local COLOR_SELECTION_BLUE = "#28344a"
 local COLOR_MARKDOWN_BOLD = "#ff9e64"
 local COLOR_DIAGNOSTIC_UNNECESSARY = "#6c7086"
+local CURSOR_FG = "#000000"
+local CURSOR_BG = "#00ff00"
 
 local force_all = os.getenv("NO_LAZY") == "1"
 
@@ -136,8 +138,8 @@ local function apply_god_theme()
     end
     ::continue::
   end
-  vim.api.nvim_set_hl(0, "Cursor", { fg = "#000000", bg = "#00FF00" })
-  vim.api.nvim_set_hl(0, "CursorInsert", { fg = "#000000", bg = "#00FF00" })
+  vim.api.nvim_set_hl(0, "Cursor", { fg = CURSOR_FG, bg = CURSOR_BG })
+  vim.api.nvim_set_hl(0, "CursorInsert", { fg = CURSOR_FG, bg = CURSOR_BG })
   local diag_underline_groups = {
     "DiagnosticUnderlineError",
     "DiagnosticUnderlineWarn",
@@ -202,7 +204,7 @@ vim.api.nvim_create_user_command("Format", function(args)
     range = range,
   })
 end, { range = true })
-
+											
 local saga_preview = require("lspsaga.definition")
 
 local old_init = saga_preview.init_definition
