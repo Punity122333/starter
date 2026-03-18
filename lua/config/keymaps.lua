@@ -171,7 +171,7 @@ vim.keymap.set('n', '<leader>mb', ':set list!<CR>', { noremap = true, silent = t
 vim.keymap.set("i", "<C-f>", "<C-t>", { desc = "Indent line" })
 vim.keymap.set("n", "S", function()
   require("flash").treesitter({
-    search = { multi_window = false, wrap = true }, 
+    search = { multi_window = false, wrap = true },
     jump = { pos = "start" },
     action = function(match)
       vim.api.nvim_win_set_cursor(match.win, match.pos)
@@ -185,7 +185,6 @@ end, { desc = "Flash Treesitter Visual Selection" })
 vim.keymap.set("n", "<leader>uH", function()
   vim.opt.list = not vim.opt.list:get()
   local status = vim.opt.list:get() and "Enabled" or "Disabled"
-  
   vim.notify("Hidden Characters " .. status, vim.log.levels.INFO, {
     title = "UI Toggle",
   })
@@ -200,3 +199,10 @@ function _lazygit_toggle()
 end
 
 vim.keymap.set("n", "<leader>lg", "<cmd>lua _lazygit_toggle()<cr>", { desc = "ToggleTerm Lazygit" })
+local opts = { noremap = true, silent = true }
+
+vim.keymap.set('n', '<leader>t<Up>', '<cmd>ToggleTerm direction=horizontal<cr>', opts)
+vim.keymap.set('n', '<leader>t<Down>', '<cmd>ToggleTerm direction=horizontal<cr>', opts)
+
+vim.keymap.set('n', '<leader>t<Left>', '<cmd>ToggleTerm direction=vertical<cr>', opts)
+vim.keymap.set('n', '<leader>t<Right>', '<cmd>ToggleTerm direction=vertical<cr>', opts)

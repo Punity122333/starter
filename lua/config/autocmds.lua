@@ -131,13 +131,23 @@ vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 })
 
 local snacks_refresh_group = vim.api.nvim_create_augroup("SnacksExplorerRefresh", { clear = true })
+local refresh_timer = nil
 
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
     group = snacks_refresh_group,
     callback = function()
-        local explorers = require("snacks").picker.get({ source = "explorer" })
-        for _, picker in ipairs(explorers) do
-            picker:find() 
+        if refresh_timer then
+            vim.fn.timer_stop(refresh_timer)
         end
+        
+        refresh_timer = vim.fn.timer_start(500, function()
+            local snacks = package.loaded["snacks"]
+            if not snacks then return end
+            
+            local explorers = snacks.picker.get({ source = "explorer" })
+            for _, picker in ipairs(explorers) do
+                picker:find() 
+            end
+        end)
     end,
 })

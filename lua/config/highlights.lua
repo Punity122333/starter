@@ -8,12 +8,11 @@ local COLOR_CURSOR_FOREGROUND = "#000000"
 local COLOR_CURSOR_BACKGROUND = "#00ff00"
 local COLOR_SNACKS_SELECTION_BG = "#1a1b26"
 local COLOR_SNACKS_PICKER_SELECTED = "#88c0d0"
-local COLOR_NOICE_BORDER = "#27a1b9"
+local COLOR_BORDER = "#27a1b9"
 local COLOR_MASON_HIGHLIGHT = "#e0af68"
 local COLOR_MASON_MUTED = "#27a1b9"
 local COLOR_LSP_TYPE_VARIABLE = "#9CDCFE"
 local COLOR_LSP_TYPE_MACRO_CPP = "#3497E7"
-local COLOR_SELECTION_BLUE = "#28344a"
 vim.api.nvim_set_hl(0, "markdownBold", { bold = true, force = true })
 vim.api.nvim_set_hl(0, "@markup.strong", { bold = true, force = true })
 vim.api.nvim_set_hl(0, "@text.strong", { bold = true, force = true })
@@ -35,16 +34,16 @@ local blink = {
 for _, g in ipairs(blink) do
   vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_SECONDARY, blend = 0, force = true })
 end
-vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = NONE, fg = COLOR_NOICE_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 
-vim.api.nvim_set_hl(0, "NoicePopupBorderSearch", { bg = NONE, fg = COLOR_NOICE_BORDER, blend = 0, force = true })
-vim.api.nvim_set_hl(0, "NoicePopupBorderInput", { bg = NONE, fg = COLOR_NOICE_BORDER, blend = 0, force = true })
-vim.api.nvim_set_hl(0, "NoicePopupTitleSearch", { bg = NONE, fg = COLOR_NOICE_BORDER, blend = 0, force = true })
-vim.api.nvim_set_hl(0, "NoicePopupTitleInput", { bg = NONE, fg = COLOR_NOICE_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "NoicePopupBorderSearch", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "NoicePopupBorderInput", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "NoicePopupTitleSearch", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "NoicePopupTitleInput", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpDocSeparator", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "Pmenu", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
-vim.api.nvim_set_hl(0, "NoicePopupmenuBorder", { bg = NONE, fg = COLOR_NOICE_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "NoicePopupmenuBorder", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 
 vim.api.nvim_set_hl(0, "NoicePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
@@ -79,7 +78,7 @@ vim.api.nvim_set_hl(0, "AvantePromptInput", { bg = COLOR_BACKGROUND_PRIMARY, for
 vim.api.nvim_set_hl(
   0,
   "AvantePromptInputBorder",
-  { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_NOICE_BORDER, force = true, blend = 0 }
+  { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true, blend = 0 }
 )
 vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "MasonHeader", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
@@ -88,8 +87,8 @@ vim.api.nvim_set_hl(0, "MasonHighlightBlockBold", { fg = COLOR_MASON_HIGHLIGHT, 
 vim.api.nvim_set_hl(0, "MasonMutedBlock", { fg = COLOR_MASON_MUTED, force = true })
 
 vim.api.nvim_set_hl(0, "BlinkCmpDoc", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
-vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { fg = COLOR_NOICE_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true })
-vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { fg = COLOR_NOICE_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { fg = COLOR_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { fg = COLOR_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "Cursor", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND, force = true })
@@ -105,3 +104,6 @@ vim.api.nvim_set_hl(0, "@lsp.type.macro.cpp", { fg = COLOR_LSP_TYPE_MACRO_CPP })
 vim.api.nvim_set_hl(0, "GrugFarResultsMatch", { link = "@type.builtin.cpp" })
 vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "ToggleTerm1FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
+vim.api.nvim_set_hl(0, "ToggleTerm2FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
+vim.cmd.highlight("MyTerminalBorder guifg=#1a1b26")
