@@ -16,7 +16,6 @@ return {
       vim.keymap.set({"n", "v"}, "\\s", function() mc.matchSkipCursor(1) end)
       vim.keymap.set({"n", "v"}, "\\a", function() mc.matchAllAddCursors() end)
       vim.keymap.set({"n", "v"}, "\\c", function() mc.clearCursors() end)
-      vim.keymap.set({"n", "v"}, "<Esc>", function() mc.clearCursors() end)
     end,
   },
   {
