@@ -191,3 +191,13 @@ vim.keymap.set("n", "<leader>uH", function()
     title = "UI Toggle",
   })
 end, { desc = "Toggle List / NoList" })
+vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm direction=float<cr>", { desc = "ToggleTerm Float" })
+
+local Terminal = require('toggleterm.terminal').Terminal
+local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+
+function _lazygit_toggle()
+  lazygit:toggle()
+end
+
+vim.keymap.set("n", "<leader>lg", "<cmd>lua _lazygit_toggle()<cr>", { desc = "ToggleTerm Lazygit" })
