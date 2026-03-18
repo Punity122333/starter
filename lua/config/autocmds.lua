@@ -105,11 +105,39 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     end
   end,
 })
+
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(args)
         local client = vim.lsp.get_client_by_id(args.data.client_id)
         if client and client.name == "rust-analyzer" then
             client.offset_encoding = "utf-8"
+        end
+    end,
+})
+
+vim.opt.updatetime = 1000 
+
+local rust_clippy_group = vim.api.nvim_create_augroup("RustAutoClippy", { clear = true })
+
+vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+    group = rust_clippy_group,
+    pattern = "*.rs",
+    callback = function()
+        if vim.bo.modified then
+            vim.cmd("silent! noautocmd write")
+            vim.cmd("RustLsp flyCheck")
+        end
+    end,
+})
+
+local snacks_refresh_group = vim.api.nvim_create_augroup("SnacksExplorerRefresh", { clear = true })
+
+vim.api.nvim_create_autocmd("DiagnosticChanged", {
+    group = snacks_refresh_group,
+    callback = function()
+        local explorers = require("snacks").picker.get({ source = "explorer" })
+        for _, picker in ipairs(explorers) do
+            picker:find() 
         end
     end,
 })

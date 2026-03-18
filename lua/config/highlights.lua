@@ -13,7 +13,7 @@ local COLOR_MASON_HIGHLIGHT = "#e0af68"
 local COLOR_MASON_MUTED = "#27a1b9"
 local COLOR_LSP_TYPE_VARIABLE = "#9CDCFE"
 local COLOR_LSP_TYPE_MACRO_CPP = "#3497E7"
-
+local COLOR_SELECTION_BLUE = "#28344a"
 vim.api.nvim_set_hl(0, "markdownBold", { bold = true, force = true })
 vim.api.nvim_set_hl(0, "@markup.strong", { bold = true, force = true })
 vim.api.nvim_set_hl(0, "@text.strong", { bold = true, force = true })

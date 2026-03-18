@@ -92,7 +92,7 @@ vim.keymap.del("n", "<leader>gg")
 
 vim.keymap.set("n", "<leader>pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
 vim.keymap.set("n", "<leader>ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })
-vim.keymap.set("n", "<leader>pvpdf", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
+vim.keymap.set("n", "<leader>pdf", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
 
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
 
@@ -170,3 +170,24 @@ vim.keymap.set("n", "<leader>ml", "dm<leader>", { desc = "Clear local marks" })
 vim.keymap.set("n", "<leader>fm", "<cmd>Format<cr>", { desc = "Format file manually" })
 vim.keymap.set('n', '<leader>mb', ':set list!<CR>', { noremap = true, silent = true, desc = 'Toggle listchars' })
 vim.keymap.set("i", "<C-f>", "<C-t>", { desc = "Indent line" })
+vim.keymap.set("n", "S", function()
+  require("flash").treesitter({
+    search = { multi_window = false, wrap = true }, 
+    jump = { pos = "start" },
+    action = function(match)
+      vim.api.nvim_win_set_cursor(match.win, match.pos)
+    end,
+    label = { before = true, after = false },
+  })
+end, { desc = "Global Treesitter Jump" })
+vim.keymap.set({"n", "x", "o"}, "<leader>]", function()
+  require("flash").treesitter()
+end, { desc = "Flash Treesitter Visual Selection" })
+vim.keymap.set("n", "<leader>uH", function()
+  vim.opt.list = not vim.opt.list:get()
+  local status = vim.opt.list:get() and "Enabled" or "Disabled"
+  
+  vim.notify("Hidden Characters " .. status, vim.log.levels.INFO, {
+    title = "UI Toggle",
+  })
+end, { desc = "Toggle List / NoList" })

@@ -1,6 +1,6 @@
 return {
     "mrcjkb/rustaceanvim",
-    version = "^5", -- v2 is pretty old for 2026, ^5 is the move
+    version = "^8", 
     ft = { "rust" },
     config = function()
         vim.g.rustaceanvim = {
@@ -10,7 +10,6 @@ return {
                     caps.offsetEncoding = { "utf-8" }
                     return caps
                 end)(),
-                -- your other settings here
             },
         }
     end,
