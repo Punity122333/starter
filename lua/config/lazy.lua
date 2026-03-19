@@ -45,6 +45,7 @@ require("lazy").setup({
   checker = { enabled = true, notify = false },
   ui = { backdrop = 100, border = "rounded" },
 })
+
 if force_all then
   vim.api.nvim_create_autocmd("User", {
     pattern = "LazyVimStarted",

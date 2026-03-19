@@ -1,18 +1,5 @@
-local BufferKeys = {
-  { "<leader>ba", "<cmd>BufferLineGoToBuffer 1<cr>", desc = "Go to buffer A (1st)" },
-  { "<leader>bs", "<cmd>BufferLineGoToBuffer 2<cr>", desc = "Go to buffer S (2nd)" },
-  { "<leader>bd", "<cmd>BufferLineGoToBuffer 3<cr>", desc = "Go to buffer D (3rd)" },
-  { "<leader>bf", "<cmd>BufferLineGoToBuffer 4<cr>", desc = "Go to buffer F (4th)" },
-  { "<leader>bg", "<cmd>BufferLineGoToBuffer 5<cr>", desc = "Go to buffer G (5th)" },
-  { "<leader>bh", "<cmd>BufferLineGoToBuffer 6<cr>", desc = "Go to buffer H (6th)" },
-  { "<leader>bj", "<cmd>BufferLineGoToBuffer 7<cr>", desc = "Go to buffer J (7th)" },
-  { "<leader>bk", "<cmd>BufferLineGoToBuffer 8<cr>", desc = "Go to buffer K (8th)" },
-  { "<leader>bl", "<cmd>BufferLineGoToBuffer 9<cr>", desc = "Go to buffer L (9th)" },
-  { "<leader>b;", "<cmd>BufferLineGoToBuffer 10<cr>", desc = "Go to buffer ; (10th)" },
-  { "<leader>b'", "<cmd>BufferLineGoToBuffer 11<cr>", desc = "Go to buffer ' (11th)" },
-}
-local GodBg = "#1a1b26"
-local LightBlue = "#82aaff"
+local BackgroundColor = "#1a1b26"
+local AccentColor = "#82aaff"
 return {
   {
     "akinsho/bufferline.nvim",
@@ -27,10 +14,10 @@ return {
           },
           separator_style = "thin",
           diagnostics = "nvim_lsp",
-          numbers = function(numberopts)
-            local lettermap = { "a", "s", "d", "f", "g", "h", "j", "k", "l" }
-            local letter = lettermap[numberopts.ordinal] or tostring(numberopts.ordinal)
-            return string.format("%d (%s)", numberopts.ordinal, letter)
+          numbers = function(numberOptions)
+            local keyMapping = { "a", "s", "d", "f", "g", "h", "j", "k", "l" }
+            local keyLabel = keyMapping[numberOptions.ordinal] or tostring(numberOptions.ordinal)
+            return string.format("%d (%s)", numberOptions.ordinal, keyLabel)
           end,
           offsets = {
             {
@@ -48,44 +35,44 @@ return {
               padding = 0,
             },
           },
-          filter_callback = function(buf_number, buf_numbers)
-            if vim.bo[buf_number].filetype == "rconsole" then
+          filter_callback = function(bufferNumber, bufferNumbers)
+            if vim.bo[bufferNumber].filetype == "rconsole" then
               return false
             end
             return true
           end,
         },
         highlights = {
-          fill = { bg = godbg },
-          background = { bg = godbg },
-          separator = { fg = godbg, bg = godbg },
-          separator_visible = { fg = godbg, bg = godbg },
-          separator_selected = { fg = godbg, bg = godbg },
+          fill = { bg = BackgroundColor },
+          background = { bg = BackgroundColor },
+          separator = { fg = BackgroundColor, bg = BackgroundColor },
+          separator_visible = { fg = BackgroundColor, bg = BackgroundColor },
+          separator_selected = { fg = BackgroundColor, bg = BackgroundColor },
           indicator_selected = {
-            fg = lightblue,
-            bg = godbg,
+            fg = AccentColor,
+            bg = BackgroundColor,
           },
-          buffer_visible = { bg = godbg },
+          buffer_visible = { bg = BackgroundColor },
           buffer_selected = {
-            bg = godbg,
-            fg = lightblue,
+            bg = BackgroundColor,
+            fg = AccentColor,
             bold = true,
             italic = false,
           },
-          offset_separator = { fg = godbg, bg = godbg },
-          numbers = { fg = "#7aa2f7", bg = godbg, bold = true },
-          numbers_selected = { fg = "#fa7355", bg = godbg, bold = true },
-          close_button = { bg = godbg },
-          close_button_visible = { bg = godbg },
-          close_button_selected = { bg = godbg },
-          modified = { bg = godbg },
-          modified_visible = { bg = godbg },
-          modified_selected = { bg = godbg },
-          hint_visible = { bg = godbg },
-          info_visible = { bg = godbg },
-          warning_visible = { bg = godbg },
-          error_visible = { bg = godbg },
-          diagnostic_visible = { bg = godbg },
+          offset_separator = { fg = BackgroundColor, bg = BackgroundColor },
+          numbers = { fg = "#7aa2f7", bg = BackgroundColor, bold = true },
+          numbers_selected = { fg = "#fa7355", bg = BackgroundColor, bold = true },
+          close_button = { bg = BackgroundColor },
+          close_button_visible = { bg = BackgroundColor },
+          close_button_selected = { bg = BackgroundColor },
+          modified = { bg = BackgroundColor },
+          modified_visible = { bg = BackgroundColor },
+          modified_selected = { bg = BackgroundColor },
+          hint_visible = { bg = BackgroundColor },
+          info_visible = { bg = BackgroundColor },
+          warning_visible = { bg = BackgroundColor },
+          error_visible = { bg = BackgroundColor },
+          diagnostic_visible = { bg = BackgroundColor },
         },
       }
     end,

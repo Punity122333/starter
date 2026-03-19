@@ -30,12 +30,13 @@ end
 local blink = {
   "BlinkCmpDocSeparator",
   "NoiceLspSignatureHelp",
+
 }
 for _, g in ipairs(blink) do
   vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_SECONDARY, blend = 0, force = true })
 end
-vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 
+vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupBorderSearch", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupBorderInput", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupTitleSearch", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
@@ -44,28 +45,31 @@ vim.api.nvim_set_hl(0, "LspSignatureActiveParameter", { bg = COLOR_BACKGROUND_PR
 vim.api.nvim_set_hl(0, "BlinkCmpDocSeparator", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "Pmenu", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupmenuBorder", { bg = NONE, fg = COLOR_BORDER, blend = 0, force = true })
-
 vim.api.nvim_set_hl(0, "NoicePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
+
 vim.api.nvim_set_hl(
   0,
   "LspInfoBorder",
   { bg = COLOR_BACKGROUND_SECONDARY, fg = COLOR_FOREGROUND_SECONDARY, blend = 0, force = true }
 )
+
 local sep = { "Split", "Splitter", "Separator", "WinSeparator", "VertSplit" }
 for _, g in ipairs(sep) do
   vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_PRIMARY, blend = 20, fg = COLOR_FOREGROUND_ACCENT, force = true })
 end
+
 vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { fg = COLOR_FOREGROUND_ACCENT, bg = COLOR_BACKGROUND_PRIMARY })
 vim.api.nvim_set_hl(
   0,
   "AvanteSidebarWinHorizontalSeparator",
   { fg = COLOR_FOREGROUND_ACCENT, bg = COLOR_BACKGROUND_PRIMARY }
 )
-vim.api.nvim_set_hl(0, "AvantePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = true, blend = 0 })
 
+vim.api.nvim_set_hl(0, "AvantePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = true, blend = 0 })
 vim.api.nvim_set_hl(0, "AvantePopupHint", { bg = COLOR_BACKGROUND_PRIMARY, force = true, blend = 0 })
+
 local snack_hls = {
   SnacksPickerSelected = { bg = "NONE", fg = COLOR_SNACKS_PICKER_SELECTED },
   SnacksPickerCursorLine = { bg = COLOR_SNACKS_SELECTION_BG },
@@ -85,7 +89,6 @@ vim.api.nvim_set_hl(0, "MasonHeader", { bg = COLOR_BACKGROUND_PRIMARY, force = t
 vim.api.nvim_set_hl(0, "MasonHeaderSecondary", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "MasonHighlightBlockBold", { fg = COLOR_MASON_HIGHLIGHT, force = true })
 vim.api.nvim_set_hl(0, "MasonMutedBlock", { fg = COLOR_MASON_MUTED, force = true })
-
 vim.api.nvim_set_hl(0, "BlinkCmpDoc", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { fg = COLOR_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { fg = COLOR_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true })
@@ -102,8 +105,10 @@ vim.api.nvim_set_hl(0, "@lsp.type.variable", { fg = COLOR_LSP_TYPE_VARIABLE })
 vim.api.nvim_set_hl(0, "@variable", { fg = COLOR_LSP_TYPE_VARIABLE })
 vim.api.nvim_set_hl(0, "@lsp.type.macro.cpp", { fg = COLOR_LSP_TYPE_MACRO_CPP })
 vim.api.nvim_set_hl(0, "GrugFarResultsMatch", { link = "@type.builtin.cpp" })
-vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
 vim.api.nvim_set_hl(0, "ToggleTerm1FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
 vim.api.nvim_set_hl(0, "ToggleTerm2FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
 vim.cmd.highlight("MyTerminalBorder guifg=#1a1b26")
+
+vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+

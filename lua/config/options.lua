@@ -56,6 +56,7 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
     hl(0, "LspInfoBorder", { bg = COLOR_SIGNATURE_BG, fg = COLOR_SIGNATURE_BORDER, blend = 0 })
   end,
 })
+
 vim.g.lazygit_config = false
 vim.api.nvim_create_autocmd("User", {
   pattern = "AlphaReady",
@@ -76,6 +77,7 @@ if vim.env[KITTY_SCROLLBACK_NVIM] == TRUE then
   vim.g.loaded_matchit = 1
   vim.g.loaded_netrwPlugin = 1
 end
+
 vim.opt.foldenable = false
 vim.env.PATH = vim.fn.expand(NPM_GLOBAL_BIN) .. vim.env.PATH
 vim.env.PATH = vim.fn.expand(LOCAL_BIN) .. vim.env.PATH
@@ -94,10 +96,12 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
 vim.g.loaded_python3_provider = 0
+
 if vim.env[KITTY_SCROLLBACK_NVIM] == TRUE then
   vim.g.loaded_matchit = 1
   vim.g.loaded_netrwPlugin = 1
 end
+
 vim.opt.foldenable = false
 vim.o.winborder = BORDER_ROUNDED
 vim.opt.lazyredraw = true
