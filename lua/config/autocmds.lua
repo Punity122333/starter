@@ -151,3 +151,10 @@ vim.api.nvim_create_autocmd("DiagnosticChanged", {
         end)
     end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "avante",
+  callback = function()
+    vim.opt_local.modifiable = true
+  end,
+})

@@ -50,6 +50,7 @@ return {
             { find = "rustaceanvim" },
             { find = "clipboard" },
             { find = "promise" },
+            { find = "split" },
           },
         },
         opts = { skip = true },
