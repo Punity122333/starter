@@ -206,6 +206,7 @@ vim.keymap.set('n', '<leader>t<Down>', '<cmd>ToggleTerm direction=horizontal<cr>
 vim.keymap.set('n', '<leader>t<Left>', '<cmd>ToggleTerm direction=vertical<cr>', opts)
 vim.keymap.set('n', '<leader>t<Right>', '<cmd>ToggleTerm direction=vertical<cr>', opts)
 
+vim.keymap.set('o', 'f', 'f', { remap = true })
 pcall(vim.keymap.del, "n", "<leader>sb")
 vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Search Current Buffer" })
 
