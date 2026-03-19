@@ -143,7 +143,6 @@ vim.keymap.set("n", "gjb", "<cmd>Lspsaga symbols_in_winbar<CR>", { desc = "Winba
 vim.keymap.set("n", "gjl", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Buffer Diagnostics" })
 
 require("which-key").add({ { "gj", group = "LSP Navigation" } })
-vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Buffer Lines" })
 vim.keymap.set("n", "<leader>sB", function() Snacks.picker.lsp_symbols() end, { desc = "LSP Symbols" })
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
 vim.keymap.set("n", "<leader>[]", function()
@@ -206,3 +205,6 @@ vim.keymap.set('n', '<leader>t<Down>', '<cmd>ToggleTerm direction=horizontal<cr>
 
 vim.keymap.set('n', '<leader>t<Left>', '<cmd>ToggleTerm direction=vertical<cr>', opts)
 vim.keymap.set('n', '<leader>t<Right>', '<cmd>ToggleTerm direction=vertical<cr>', opts)
+
+pcall(vim.keymap.del, "n", "<leader>sb")
+vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Search Current Buffer" })
