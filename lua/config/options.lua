@@ -68,7 +68,6 @@ vim.api.nvim_create_autocmd("User", {
   end,
 })
 
-vim.opt.clipboard = "unnamedplus"
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
@@ -101,4 +100,5 @@ if vim.env[KITTY_SCROLLBACK_NVIM] == TRUE then
 end
 vim.opt.foldenable = false
 vim.o.winborder = BORDER_ROUNDED
-
+vim.opt.lazyredraw = true
+vim.g.loaded_matchparen = 1

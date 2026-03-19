@@ -1,18 +1,12 @@
 local ImmediateSaveEvents = { "BufLeave", "FocusLost" }
 local DeferSaveEvents = { "InsertLeave", "TextChanged" }
 local CancelDeferredSaveEvents = { "InsertEnter" }
-local DebounceDelay = 1000
-local ExcludedFiletypes = {
-  "gitcommit",
-  "gitrebase",
-  "hgcommit",
-  "oil",
-}
+local DebounceDelay = 20000 
 
 return {
   {
     "okuuva/auto-save.nvim",
-    event = { "InsertLeave", "TextChanged" },
+    event = { "InsertLeave", "BufReadPre" }, 
     opts = {
       enabled = true,
       trigger_events = {
@@ -22,21 +16,29 @@ return {
       },
       debounce_delay = DebounceDelay,
       condition = function(buffer)
+        local mode = vim.api.nvim_get_mode().mode
+        if mode == 'no' or mode == 'i' or mode == 'v' or mode == 'c' then 
+          return false 
+        end
+
         if vim.snippet and vim.snippet.active({ direction = 1 }) then
           return false
         end
 
         local fn = vim.fn
         local utils = require("auto-save.utils.data")
-        if
-          fn.getbufvar(buffer, "&modifiable") == 1
-          and utils.not_in(fn.getbufvar(buffer, "&filetype"), ExcludedFiletypes)
-        then
+        
+        -- 3. Filetype check
+        local ft = fn.getbufvar(buffer, "&filetype")
+        local ExcludedFiletypes = { "gitcommit", "gitrebase", "hgcommit", "oil" }
+
+        if fn.getbufvar(buffer, "&modifiable") == 1 and utils.not_in(ft, ExcludedFiletypes) then
           return true
         end
         return false
       end,
-      noautocmd = false,
+      noautocmd = true, 
+      write_all_buffers = false,
     },
   },
 }

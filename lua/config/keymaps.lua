@@ -197,7 +197,7 @@ function _lazygit_toggle()
   lazygit:toggle()
 end
 
-vim.keymap.set("n", "<leader>lg", "<cmd>lua _lazygit_toggle()<cr>", { desc = "ToggleTerm Lazygit" })
+vim.keymap.set("n", "<leader>\\\\", "<cmd>lua _lazygit_toggle()<cr>", { desc = "ToggleTerm Lazygit" })
 local opts = { noremap = true, silent = true }
 
 vim.keymap.set('n', '<leader>t<Up>', '<cmd>ToggleTerm direction=horizontal<cr>', opts)
@@ -208,3 +208,4 @@ vim.keymap.set('n', '<leader>t<Right>', '<cmd>ToggleTerm direction=vertical<cr>'
 
 pcall(vim.keymap.del, "n", "<leader>sb")
 vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Search Current Buffer" })
+

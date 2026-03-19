@@ -1,9 +1,6 @@
--- Fixes the "is not in runtimepath" error from checkhealth
--- Expanding the path ensures Neovim finds the parser queries (.scm files)
 vim.opt.rtp:prepend(vim.fn.expand("~/.local/share/nvim/site"))
 
 return {
-  -- The injection handler: specialized for /* lang */ comments in strings
   {
     "TheNoeTrevino/roids.nvim",
     event = { "BufReadPost", "BufNewFile" },
@@ -15,12 +12,10 @@ return {
     end,
   },
 
-  -- The main Treesitter engine
   {
     "nvim-treesitter/nvim-treesitter",
     event = { "BufReadPost", "BufNewFile" },
     build = ":TSUpdate",
-    -- Lazy handles passing these opts to the plugin's internal setup
     opts = {
       ensure_installed = { 
         "c", "cpp", "lua", "vim", "vimdoc", "query",
@@ -31,9 +26,7 @@ return {
       auto_install = true,
       highlight = { 
         enable = true,
-        -- Set to false so TS takes full control over the colors
         additional_vim_regex_highlighting = false,
-        -- Keep your performance logic for large files
         disable = function(lang, buf)
           local ok, stats = pcall(vim.uv.fs_stat, vim.api.nvim_buf_get_name(buf))
           if ok and stats and stats.size > 100 * 1024 then
@@ -56,7 +49,7 @@ return {
           return false
         end,
       },
-      indent = { enable = true },
+      indent = { enable = false },
     },
   },
 }

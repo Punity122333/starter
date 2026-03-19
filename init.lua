@@ -4,7 +4,6 @@ local COLOR_MARKDOWN_BOLD = "#ff9e64"
 local COLOR_DIAGNOSTIC_UNNECESSARY = "#6c7086"
 local CURSOR_FG = "#000000"
 local CURSOR_BG = "#00ff00"
--- Force UTF-8 globally for all LSP clients before they even initialize
 local force_all = os.getenv("NO_LAZY") == "1"
 
 vim.env.PATH = vim.fn.expand("~/.npm-global/bin:") .. vim.env.PATH
