@@ -210,22 +210,4 @@ vim.keymap.set('o', 'f', 'f', { remap = true })
 pcall(vim.keymap.del, "n", "<leader>sb")
 vim.keymap.set("n", "<leader>sb", function() Snacks.picker.lines() end, { desc = "Search Current Buffer" })
 
-local maps = {
-  ["a"] = 1,
-  ["s"] = 2,
-  ["d"] = 3,
-  ["f"] = 4,
-  ["g"] = 5,
-  ["h"] = 6,
-  ["j"] = 7,
-  ["k"] = 8,
-  ["l"] = 9,
-  [";"] = 10,
-  ["'"] = 11,
-}
 
-for key, index in pairs(maps) do
-  vim.keymap.set("n", "<leader>b" .. key, "<cmd>BufferLineGoToBuffer " .. index .. "<cr>", {
-    desc = "Go to buffer " .. key .. " (" .. index .. ")",
-  })
-end

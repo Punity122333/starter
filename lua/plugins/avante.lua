@@ -8,10 +8,8 @@ return {
       notify = false,
       mode = "agentic",
       provider = "gemini",
-      instructions_file = "avante.md",
-      
+      instructions_file = "avante.md",      
       providers = {
-
         copilot = {
           endpoint = "https://api.githubcopilot.com",
           model = "gpt-4o",
