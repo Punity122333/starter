@@ -158,3 +158,20 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.modifiable = true
   end,
 })
+
+local ignore_messages = {
+  "E21: Cannot make changes, 'modifiable' is off",
+  "E242: Can't split a window while closing another",
+}
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "MsgShow",
+  callback = function()
+    local msg = vim.v.event.msg
+    for _, filter in ipairs(ignore_messages) do
+      if msg:find(filter, 1, true) then
+        return true 
+      end
+    end
+  end,
+})
