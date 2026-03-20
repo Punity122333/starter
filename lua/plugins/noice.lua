@@ -5,6 +5,9 @@ return {
       lsp_doc_border = true,
     },
     lsp = {
+      progress = {
+        enabled = false,
+      },
       signature = {
         enabled = true,
         auto_open = {
@@ -95,7 +98,6 @@ return {
     vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
       group = vim.api.nvim_create_augroup("SignatureAutoClose", { clear = true }),
       callback = function()
-        -- skip while any LSP client is still indexing
         for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
           if client.progress and not vim.tbl_isempty(client.progress) then
             return

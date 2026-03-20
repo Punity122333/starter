@@ -14,9 +14,6 @@ return {
         enable = false,
       },
     })
-    -- remove lspsaga's operator-pending mappings so mini.ai keeps control
-    pcall(vim.keymap.del, "o", "i")
-    pcall(vim.keymap.del, "o", "a")
   end,
   dependencies = {
     "nvim-treesitter/nvim-treesitter",

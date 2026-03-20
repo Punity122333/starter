@@ -28,7 +28,6 @@ return {
         local fn = vim.fn
         local utils = require("auto-save.utils.data")
         
-        -- 3. Filetype check
         local ft = fn.getbufvar(buffer, "&filetype")
         local ExcludedFiletypes = { "gitcommit", "gitrebase", "hgcommit", "oil" }
 
