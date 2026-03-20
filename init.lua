@@ -210,18 +210,6 @@ vim.api.nvim_create_user_command("Format", function(args)
 	})
 end, { range = true })
 
-local saga_preview = require("lspsaga.definition")
-
-local old_init = saga_preview.init_definition
-saga_preview.init_definition = function(self, ...)
-	vim.opt.lazyredraw = true
-
-	old_init(self, ...)
-
-	vim.schedule(function()
-		vim.opt.lazyredraw = false
-	end)
-end
 local original_notify = vim.notify
 vim.notify = function(msg, level, opts)
 	if type(msg) == "string" and msg:find("Avante") then

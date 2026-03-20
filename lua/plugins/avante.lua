@@ -8,7 +8,7 @@ return {
       notify = false,
       mode = "agentic",
       provider = "gemini",
-      instructions_file = "avante.md",      
+      instructions_file = "avante.md",
       providers = {
         copilot = {
           endpoint = "https://api.githubcopilot.com",
@@ -55,10 +55,10 @@ return {
         border = "rounded",
         ask = {
           start_insert = false,
-          border = "rounded", -- or "single", "double", "solid"
+          border = "rounded",
         },
         edit = {
-          border = "rounded", -- or "single", "double", "solid"
+          border = "rounded",
         },
       },
       suggestion = {

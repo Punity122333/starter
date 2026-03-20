@@ -78,40 +78,38 @@ return {
 					end,
 				},
 
-lua_ls = {
-                    cmd = { "/home/pxnity/.local/share/nvim/mason/bin/lua-language-server" },
-                    on_attach = function(client, bufnr)
-                        client.server_capabilities.diagnosticProvider = false
-                        vim.diagnostic.enable(false, { bufnr = bufnr })
-                        client.server_capabilities.semanticTokensProvider = nil
-                        client.server_capabilities.documentSymbolProvider = false
-                    end,
-                    settings = {
-                        Lua = {
-                            runtime = { version = "LuaJIT" },
-                            diagnostics = {
-                                globals = { "vim" },
-                                disable = { "lowercase-global", "undefined-global", "missing-fields" },
-                                neededFileStatus = {
-                                    ["codestyle-check"] = "None",
-                                    ["unused-local"] = "None",
-                                },
-                            },
-                            checkThirdParty = false,
-                            workspace = {
-                                checkThirdParty = false,
-                                library = {
-                                    vim.env.VIMRUNTIME,
-                                    vim.fn.stdpath("config") .. "/lua",
-                                },
-                                ignoreDir = { "**/node_modules", "**/lazy" },
-                                preloadFileSize = 0,
-                                libraryStatus = "None",
-                            },
-                            telemetry = { enable = false },
-                        },
-                    },
-                },				omnisharp = {
+				lua_ls = {
+					cmd = { "/home/pxnity/.local/share/nvim/mason/bin/lua-language-server" },
+					on_attach = function(client, bufnr)
+						client.server_capabilities.diagnosticProvider = false
+						vim.diagnostic.enable(false, { bufnr = bufnr })
+						client.server_capabilities.semanticTokensProvider = nil
+						client.server_capabilities.documentSymbolProvider = false
+					end,
+					settings = {
+						Lua = {
+							runtime = { version = "LuaJIT" },
+							diagnostics = {
+								globals = { "vim" },
+								disable = { "lowercase-global", "undefined-global", "missing-fields" },
+							},
+							checkThirdParty = false,
+							workspace = {
+								checkThirdParty = false,
+								-- remove vim.env.VIMRUNTIME from library — this is the main cause of heavy indexing
+								library = {
+									vim.fn.stdpath("config") .. "/lua",
+								},
+								ignoreDir = { "**/node_modules", "**/lazy" },
+								preloadFileSize = 0,
+								maxPreload = 0, -- don't preload anything
+								libraryStatus = "None",
+							},
+							telemetry = { enable = false },
+						},
+					},
+				},
+				omnisharp = {
 					cmd = {
 						"omnisharp",
 						"--languageserver",
