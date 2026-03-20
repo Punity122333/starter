@@ -32,8 +32,6 @@ function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
 end
 
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
----@diagnostic disable-next-line: undefined-global
-  group = group,
   pattern = "*",
   callback = function()
     local hl = vim.api.nvim_set_hl

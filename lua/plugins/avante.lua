@@ -20,7 +20,7 @@ return {
       },
       behaviour = {
         enable_cursor_planning_mode = true,
-        auto_suggestions = false,
+        auto_suggestions = true,
         auto_set_highlight_group = true,
         auto_set_keymaps = true,
         auto_apply_diff_after_generation = false,

@@ -15,7 +15,7 @@ return {
     config = function(_, opts)
       local autopairs = require("nvim-autopairs")
       autopairs.setup(opts)
-      local ok, blink = pcall(require, "blink.cmp")
     end,
-  },
+  }
+  ,
 }

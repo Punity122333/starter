@@ -1,5 +1,4 @@
 return {
-  
     {
     "windwp/nvim-ts-autotag",
     ft = { "html", "javascript", "typescript", "javascriptreact", "typescriptreact", "xml", "css" },
@@ -13,9 +12,4 @@ return {
       })
     end,
   },
-  {
-    "windwp/nvim-autopairs",
-    event = "InsertEnter",
-    config = true,
-  },
-}
+ }

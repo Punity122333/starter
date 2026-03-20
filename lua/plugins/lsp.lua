@@ -194,6 +194,24 @@ return {
 						vim.diagnostic.enable(true, { bufnr = bufnr })
 					end,
 				},
+				cssls = {
+					filetypes = {
+						"css",
+						"scss",
+						"less",
+						"typescript",
+						"typescriptreact",
+						"javascript",
+						"javascriptreact",
+					},
+					settings = {
+						css = { validate = true },
+						scss = { validate = true },
+					},
+					init_options = {
+						provideFormatter = true,
+					},
+				},
 			},
 		},
 		config = function(_, opts)

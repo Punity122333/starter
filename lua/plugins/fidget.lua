@@ -22,7 +22,7 @@ return {
         zindex = 45,
         max_width = 50,
         max_height = 1,
-        x_padding = 1,
+        x_padding = 0,
         y_padding = 1,
         align = "bottom",
         relative = "editor",
