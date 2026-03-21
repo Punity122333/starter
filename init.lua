@@ -180,6 +180,10 @@ local function apply_theme_god_mode()
 	vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 
 	vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = NONE, force = true })
+	vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = NONE, force = true })
+	vim.api.nvim_set_hl(0, "StatusLine", { bg = "#16161e", force = true })
+	vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "#16161e", force = true })
+
 end
 
 local GROUP_THEME_PERSISTENCE_GOD_MODE = vim.api.nvim_create_augroup("ThemePersistenceGodMode", { clear = true })
@@ -219,4 +223,3 @@ vim.notify = function(message, level, options)
 	end
 	function_notify_original(message, level, options)
 end
-

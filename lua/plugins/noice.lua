@@ -60,6 +60,7 @@ return {
             { find = "promise" },
             { find = "split" },
             { find = "modifiable" },
+            { find = "decoding suggestions" },
           },
         },
         opts = { skip = true },

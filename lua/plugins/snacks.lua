@@ -4,9 +4,8 @@ return {
 	lazy = false,
 	opts = {
 		explorer = {
-
+			enabled = true,
 			cycle = false,
-			replace_netrw = true,
 			win = {
 				layout = {
 					position = "right",
@@ -32,6 +31,7 @@ return {
 					"--line-number",
 					"--column",
 					"--smart-case",
+          
 				},
 			},
 		},
@@ -40,6 +40,7 @@ return {
 		scroll = { enabled = false },
 		statuscolumn = { enabled = true },
 		words = { enabled = true },
+		image = { enabled = true },
 	},
 	keys = {
 		{
@@ -50,12 +51,4 @@ return {
 			desc = "GitUI",
 		},
 	},
-	init = function()
-		vim.ui.select = function(...)
-			return require("snacks").picker.select(...)
-		end
-		vim.ui.input = function(...)
-			return require("snacks").input(...)
-		end
-	end,
 }

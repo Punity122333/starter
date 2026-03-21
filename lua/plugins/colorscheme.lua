@@ -4,10 +4,10 @@ local TOKYONIGHT_DIM_INACTIVE = false
 local SIDEBARS_STYLE = "normal"
 local FLOATS_STYLE = "normal"
 local NIGHT_BG = "#1a1b26"
+local STATUSLINE_BG = "#16161e"
 local LIGHT_BLUE = "#82aaff"
 local SOLID_BG = { bg = NIGHT_BG, blend = 0 }
 local BORDER_HIGHLIGHT = "border_highlight"
-
 return {
   {
     "folke/tokyonight.nvim",
@@ -21,6 +21,9 @@ return {
         sidebars = SIDEBARS_STYLE,
         floats = FLOATS_STYLE,
       },
+      on_colors = function(c)
+        c.bg_statusline = STATUSLINE_BG
+      end,
       on_highlights = function(hl, c)
         hl["@variable"] = { fg = LIGHT_BLUE }
         hl["@variable.builtin"] = { fg = LIGHT_BLUE }

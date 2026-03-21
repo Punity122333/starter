@@ -175,6 +175,7 @@ vim.api.nvim_create_autocmd("User", {
     end
   end,
 })
+
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   callback = function(args)
     local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
@@ -183,3 +184,4 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
     end
   end,
 })
+
