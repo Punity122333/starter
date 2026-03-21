@@ -1,10 +1,10 @@
 local COLOR_BACKGROUND_PRIMARY = "#1a1b26"
-local COLOR_SELECTION_BLUE = "#28344a"
-local COLOR_MARKDOWN_BOLD = "#ff9e64"
-local COLOR_DIAGNOSTIC_UNNECESSARY = "#6c7086"
-local CURSOR_FG = "#000000"
-local CURSOR_BG = "#00ff00"
-local force_all = os.getenv("NO_LAZY") == "1"
+local COLOR_BACKGROUND_SELECTION_BLUE = "#28344a"
+local COLOR_FOREGROUND_MARKDOWN_BOLD = "#ff9e64"
+local COLOR_UNUSED_DIAGNOSTIC = "#6c7086"
+local COLOR_CURSOR_FOREGROUND = "#000000"
+local COLOR_CURSOR_BACKGROUND = "#00ff00"
+local FLAG_FORCE_ALL = os.getenv("NO_LAZY") == "1"
 
 vim.env.PATH = vim.fn.expand("~/.npm-global/bin:") .. vim.env.PATH
 vim.env.PATH = vim.fn.expand("~/.local/bin:") .. vim.env.PATH
@@ -16,23 +16,23 @@ require("config.highlights")
 vim.defer_fn(function()
 	pcall(require, "lspconfig")
 
-	local ft = vim.bo.filetype
-	if ft ~= "" and ft ~= "lazy" and ft ~= "dashboard" then
-		if not force_all then
+	local filetype = vim.bo.filetype
+	if filetype ~= "" and filetype ~= "lazy" and filetype ~= "dashboard" then
+		if not FLAG_FORCE_ALL then
 			vim.cmd("doautocmd BufEnter")
 		end
 	end
 end, 300)
 
 vim.keymap.set("n", "<leader>mi", function()
-	local pos = vim.fn.getmousepos()
-	if pos.winid == 0 then
+	local mouse_position = vim.fn.getmousepos()
+	if mouse_position.winid == 0 then
 		return
 	end
 
-	local buf = vim.api.nvim_win_get_buf(pos.winid)
-	local inspect_info = vim.inspect_pos(buf, pos.line - 1, pos.column - 1)
-	print(vim.inspect(inspect_info))
+	local buffer = vim.api.nvim_win_get_buf(mouse_position.winid)
+	local inspection_info = vim.inspect_pos(buffer, mouse_position.line - 1, mouse_position.column - 1)
+	print(vim.inspect(inspection_info))
 end, { desc = "Inspect under mouse" })
 
 if vim.fn.has("wayland") == 1 then
@@ -56,20 +56,20 @@ package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/li
 vim.g.VM_SET_STATUS_LINE = 0
 vim.opt.relativenumber = true
 vim.opt.number = true
-vim.g.VM_theme = "neon"
+vim.g.VM_THEME = "neon"
 vim.opt.concealcursor = ""
 vim.keymap.set("n", "hi", ":Inspect<CR>")
-vim.g.VM_set_statusline = 0
+vim.g.VM_SET_STATUSLINE = 0
 
-local function apply_god_theme()
-	local buf = vim.api.nvim_get_current_buf()
-	local line_count = vim.api.nvim_buf_line_count(buf)
-	local lines = vim.api.nvim_buf_get_lines(buf, 0, math.min(line_count, 100), false)
-	local is_sacred_content = false
+local function apply_theme_god_mode()
+	local buffer = vim.api.nvim_get_current_buf()
+	local line_count = vim.api.nvim_buf_line_count(buffer)
+	local lines = vim.api.nvim_buf_get_lines(buffer, 0, math.min(line_count, 100), false)
+	local flag_sacred_content = false
 
 	for _, line in ipairs(lines) do
 		if line:find("Avante") or line:find("Ask") then
-			is_sacred_content = true
+			flag_sacred_content = true
 			break
 		end
 	end
@@ -115,22 +115,22 @@ local function apply_god_theme()
 
 		local is_active_selector = name:find("Selected") and (name:find("SnacksPicker") or name:find("Telescope"))
 		if is_active_selector or name == "CursorLine" then
-			vim.api.nvim_set_hl(0, name, { bg = COLOR_SELECTION_BLUE, fg = hl.fg, force = true })
+			vim.api.nvim_set_hl(0, name, { bg = COLOR_BACKGROUND_SELECTION_BLUE, fg = hl.fg, force = true })
 		else
 			if hl.bg and not is_protected_name then
-				if is_sacred_content then
+				if flag_sacred_content then
 					goto continue
 				end
-				local bg_color = COLOR_BACKGROUND_PRIMARY
+				local color_background = COLOR_BACKGROUND_PRIMARY
 				if name:find("BlinkCmpKind") then
-					bg_color = "NONE"
+					color_background = "NONE"
 				elseif name:find("SnacksPicker") and not name:find("Selected") then
-					bg_color = "NONE"
+					color_background = "NONE"
 				elseif name:find("Profiler") or name:find("Benchmark") then
-					bg_color = "NONE"
+					color_background = "NONE"
 				end
 				vim.api.nvim_set_hl(0, name, {
-					bg = bg_color,
+					bg = color_background,
 					fg = hl.fg,
 					blend = 0,
 					force = true,
@@ -139,18 +139,18 @@ local function apply_god_theme()
 		end
 		::continue::
 	end
-	vim.api.nvim_set_hl(0, "Cursor", { fg = CURSOR_FG, bg = CURSOR_BG })
-	vim.api.nvim_set_hl(0, "CursorInsert", { fg = CURSOR_FG, bg = CURSOR_BG })
-	local diag_underline_groups = {
+	vim.api.nvim_set_hl(0, "Cursor", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND })
+	vim.api.nvim_set_hl(0, "CursorInsert", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND })
+	local diagnostic_underline_groups = {
 		"DiagnosticUnderlineError",
 		"DiagnosticUnderlineWarn",
 		"DiagnosticUnderlineInfo",
 		"DiagnosticUnderlineHint",
 		"DiagnosticUnderlineOk",
 	}
-	for _, g in ipairs(diag_underline_groups) do
-		local existing = vim.api.nvim_get_hl(0, { name = g })
-		vim.api.nvim_set_hl(0, g, { sp = existing.sp, underline = true, bg = "NONE", force = true })
+	for _, group in ipairs(diagnostic_underline_groups) do
+		local existing = vim.api.nvim_get_hl(0, { name = group })
+		vim.api.nvim_set_hl(0, group, { sp = existing.sp, underline = true, bg = "NONE", force = true })
 	end
 	local illuminate_groups = {
 		"IlluminatedWordText",
@@ -160,15 +160,15 @@ local function apply_god_theme()
 		"LspReferenceRead",
 		"LspReferenceWrite",
 	}
-	for _, g in ipairs(illuminate_groups) do
-		vim.api.nvim_set_hl(0, g, { bg = COLOR_SELECTION_BLUE, force = true })
+	for _, group in ipairs(illuminate_groups) do
+		vim.api.nvim_set_hl(0, group, { bg = COLOR_BACKGROUND_SELECTION_BLUE, force = true })
 	end
-	vim.api.nvim_set_hl(0, "markdownBold", { fg = COLOR_MARKDOWN_BOLD, bold = true, force = true })
-	vim.api.nvim_set_hl(0, "@markup.strong", { fg = COLOR_MARKDOWN_BOLD, bold = true, force = true })
+	vim.api.nvim_set_hl(0, "MarkdownBold", { fg = COLOR_FOREGROUND_MARKDOWN_BOLD, bold = true, force = true })
+	vim.api.nvim_set_hl(0, "@MarkupStrong", { fg = COLOR_FOREGROUND_MARKDOWN_BOLD, bold = true, force = true })
 	vim.api.nvim_set_hl(
 		0,
 		"DiagnosticUnnecessary",
-		{ fg = COLOR_DIAGNOSTIC_UNNECESSARY, strikethrough = true, force = true }
+		{ fg = COLOR_UNUSED_DIAGNOSTIC, strikethrough = true, force = true }
 	)
 	vim.api.nvim_set_hl(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
 	vim.api.nvim_set_hl(
@@ -178,15 +178,17 @@ local function apply_god_theme()
 	)
 	vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 	vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
+
+	vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = NONE, force = true })
 end
 
-local GROUP_GOD_THEME_PERSISTENCE = vim.api.nvim_create_augroup("GodThemePersistence", { clear = true })
+local GROUP_THEME_PERSISTENCE_GOD_MODE = vim.api.nvim_create_augroup("ThemePersistenceGodMode", { clear = true })
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
-	group = GROUP_GOD_THEME_PERSISTENCE,
-	callback = apply_god_theme,
+	group = GROUP_THEME_PERSISTENCE_GOD_MODE,
+	callback = apply_theme_god_mode,
 })
 
-apply_god_theme()
+apply_theme_god_mode()
 
 vim.api.nvim_create_user_command("RefreshAll", function()
 	vim.cmd("bufdo edit!")
@@ -195,12 +197,12 @@ end, { desc = "Reload all buffers from disk" })
 vim.api.nvim_set_hl(0, "LspKindFile", { bg = "NONE", force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
 
-vim.api.nvim_create_user_command("Format", function(args)
+vim.api.nvim_create_user_command("Format", function(arguments)
 	local range = nil
-	if args.count ~= -1 then
+	if arguments.count ~= -1 then
 		range = {
-			start = { args.line1, 0 },
-			["end"] = { args.line2, 0 },
+			start = { arguments.line1, 0 },
+			["end"] = { arguments.line2, 0 },
 		}
 	end
 	require("conform").format({
@@ -210,11 +212,11 @@ vim.api.nvim_create_user_command("Format", function(args)
 	})
 end, { range = true })
 
-local original_notify = vim.notify
-vim.notify = function(msg, level, opts)
-	if type(msg) == "string" and msg:find("Avante") then
+local function_notify_original = vim.notify
+vim.notify = function(message, level, options)
+	if type(message) == "string" and message:find("Avante") then
 		return
 	end
-	original_notify(msg, level, opts)
+	function_notify_original(message, level, options)
 end
 

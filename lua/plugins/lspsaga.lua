@@ -1,23 +1,29 @@
 return {
-  "nvimdev/lspsaga.nvim",
-  event = "LspAttach",
-  config = function()
-    require("lspsaga").setup({
-      ui = {
-        border = "rounded",
-        devicon = true,
-      },
-      symbol_in_winbar = {
-        enable = false,
-      },
-      lightbulb = {
-        enable = false,
-      },
-    })
-  end,
-  dependencies = {
-    "nvim-treesitter/nvim-treesitter",
-    "nvim-tree/nvim-web-devicons",
-  },
-  animate = false,
+	"nvimdev/lspsaga.nvim",
+	event = "LspAttach",
+	config = function()
+		require("lspsaga").setup({
+			ui = {
+				border = "rounded",
+				devicon = true,
+			},
+			symbol_in_winbar = {
+				enable = false,
+			},
+			lightbulb = {
+				enable = false,
+			},
+			beacon = {
+				enable = false,
+			},
+			outline = {
+				auto_preview = false,
+			},
+		})
+	end,
+	dependencies = {
+		"nvim-treesitter/nvim-treesitter",
+		"nvim-tree/nvim-web-devicons",
+	},
+	animate = false,
 }

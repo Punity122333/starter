@@ -108,6 +108,8 @@ vim.api.nvim_set_hl(0, "GrugFarResultsMatch", { link = "@type.builtin.cpp" })
 vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
 vim.api.nvim_set_hl(0, "ToggleTerm1FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
 vim.api.nvim_set_hl(0, "ToggleTerm2FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
+vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
+
 vim.cmd.highlight("MyTerminalBorder guifg=#1a1b26")
 
 vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"

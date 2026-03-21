@@ -1,3 +1,11 @@
+local function is_online()
+  local result = vim.system(
+    { "curl", "-s", "--max-time", "1", "-o", "/dev/null", "-w", "%{http_code}", "https://1.1.1.1" },
+    { text = true }
+  ):wait()
+  return result.stdout ~= nil and result.stdout ~= "000"
+end
+
 return {
   {
     "yetone/avante.nvim",
@@ -15,7 +23,7 @@ return {
           model = "gpt-4o",
           proxy = nil,
           allow_insecure_call = true,
-          timeout = 30000,
+          timeout = 5000,
         },
       },
       behaviour = {
@@ -62,10 +70,43 @@ return {
         },
       },
       suggestion = {
-        throttle = 300,
-        debounce = 150,
+        throttle = 1000,
+        debounce = 500,
       },
     },
+    config = function(_, opts)
+      require("avante").setup(opts)
+
+      vim.api.nvim_create_autocmd("InsertEnter", {
+        callback = function()
+          if not is_online() then
+            local ok, suggestion = pcall(require, "avante.suggestion")
+            if ok and suggestion.stop then
+              pcall(suggestion.stop)
+            end
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "AvantePostSetup",
+        once = true,
+        callback = function()
+          local ok, suggestion = pcall(require, "avante.suggestion")
+          if not ok then return end
+
+          if suggestion._suggest then
+            local original = suggestion._suggest
+            suggestion._suggest = function(...)
+              if not is_online() then return end
+              local ok2, err = pcall(original, ...)
+              if not ok2 then
+              end
+            end
+          end
+        end,
+      })
+    end,
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "stevearc/dressing.nvim",
