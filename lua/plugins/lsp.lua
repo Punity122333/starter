@@ -79,7 +79,6 @@ return {
 				},
 
 				lua_ls = {
-					cmd = { "/home/pxnity/.local/share/nvim/mason/bin/lua-language-server" },
 					on_attach = function(client, bufnr)
 						client.server_capabilities.diagnosticProvider = false
 						vim.diagnostic.enable(false, { bufnr = bufnr })
