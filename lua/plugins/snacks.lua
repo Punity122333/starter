@@ -13,6 +13,12 @@ return {
 				},
 			},
 		},
+    styles = {
+      backdrop = {
+        transparent = false,
+        blend = 0,
+      },
+    },
 		picker = {
 			enabled = true,
 			icons = {
@@ -22,6 +28,10 @@ return {
 			},
 			layout = {
 				preset = "default",
+				preview = false,
+				layout = {
+					backdrop = true,
+				},
 			},
 			live_grep = {
 				args = {
@@ -31,11 +41,25 @@ return {
 					"--line-number",
 					"--column",
 					"--smart-case",
-          
+				},
+			},
+			exclude = {
+				".git",
+				"node_modules",
+				"**/*.lock",
+				"package.json",
+			},
+			sources = {
+				grep = {
+					finder = function(opts, ctx)
+						if #(ctx.filter.search or "") < 3 then
+							return {}
+						end
+						return require("snacks.picker.source.grep").grep(opts, ctx)
+					end,
 				},
 			},
 		},
-
 		input = { enabled = true },
 		scroll = { enabled = false },
 		statuscolumn = { enabled = true },

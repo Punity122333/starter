@@ -1,225 +1,259 @@
-local COLOR_BACKGROUND_PRIMARY = "#1a1b26"
-local COLOR_BACKGROUND_SELECTION_BLUE = "#28344a"
-local COLOR_FOREGROUND_MARKDOWN_BOLD = "#ff9e64"
+local COLOR_BG_PRIMARY = "#1a1b26"
+local COLOR_BG_SELECTION = "#28344a"
+local COLOR_FG_MARKDOWN_BOLD = "#ff9e64"
 local COLOR_UNUSED_DIAGNOSTIC = "#6c7086"
-local COLOR_CURSOR_FOREGROUND = "#000000"
-local COLOR_CURSOR_BACKGROUND = "#00ff00"
+local COLOR_CURSOR_FG = "#000000"
+local COLOR_CURSOR_BG = "#00ff00"
 local FLAG_FORCE_ALL = os.getenv("NO_LAZY") == "1"
 
-vim.env.PATH = vim.fn.expand("~/.npm-global/bin:") .. vim.env.PATH
-vim.env.PATH = vim.fn.expand("~/.local/bin:") .. vim.env.PATH
-vim.env.PATH = vim.fn.expand("~/.local/share/nvim/mason/bin:") .. vim.env.PATH
+-- ─── path ────────────────────────────────────────────────────────────────────
+
+do
+	local home = vim.fn.expand("~")
+	vim.env.PATH = table.concat({
+		home .. "/.npm-global/bin",
+		home .. "/.local/bin",
+		home .. "/.local/share/nvim/mason/bin",
+		vim.env.PATH,
+	}, ":")
+	local lr = home .. "/.luarocks"
+	package.path = package.path .. ";" .. lr .. "/share/lua/5.1/?/init.lua;" .. lr .. "/share/lua/5.1/?.lua;"
+	package.cpath = package.cpath .. ";" .. lr .. "/lib/lua/5.1/?.so;"
+end
+
+-- ─── treesitter / render-markdown snacks guard ───────────────────────────────
+
+local orig_ts_start = vim.treesitter.start
+vim.treesitter.start = function(buf, lang)
+	buf = buf or vim.api.nvim_get_current_buf()
+	if vim.bo[buf].filetype:match("^snacks_") then
+		vim.bo[buf].syntax = "on"
+		return
+	end
+	orig_ts_start(buf, lang)
+end
+
+local ok, rm = pcall(require, "render-markdown")
+if ok then
+	local orig_rm_attach = rm.attach
+	rm.attach = function(buf)
+		buf = buf or vim.api.nvim_get_current_buf()
+		if vim.bo[buf].filetype:match("^snacks_") then
+			return
+		end
+		orig_rm_attach(buf)
+	end
+end
+
+-- ─── options / globals ───────────────────────────────────────────────────────
+
+vim.opt.relativenumber = true
+vim.opt.number = true
+vim.opt.concealcursor = ""
+
+vim.g.VM_THEME = "neon"
+vim.g.VM_SET_STATUSLINE = 0
+
+-- ─── clipboard (wayland) ─────────────────────────────────────────────────────
+
+if vim.fn.has("wayland") == 1 then
+	vim.g.clipboard = {
+		name = "wl-clipboard",
+		copy = { ["+"] = "wl-copy", ["*"] = "wl-copy" },
+		paste = { ["+"] = "wl-paste", ["*"] = "wl-paste" },
+		cache_enabled = 1,
+	}
+end
+
+-- ─── lazy / highlights ───────────────────────────────────────────────────────
 
 require("config.lazy")
 require("config.highlights")
 
 vim.defer_fn(function()
 	pcall(require, "lspconfig")
-
-	local filetype = vim.bo.filetype
-	if filetype ~= "" and filetype ~= "lazy" and filetype ~= "dashboard" then
-		if not FLAG_FORCE_ALL then
-			vim.cmd("doautocmd BufEnter")
-		end
+	local ft = vim.bo.filetype
+	if not FLAG_FORCE_ALL and ft ~= "" and ft ~= "lazy" and ft ~= "dashboard" then
+		vim.cmd("doautocmd BufEnter")
 	end
 end, 300)
 
+-- ─── keymaps ─────────────────────────────────────────────────────────────────
+
+vim.keymap.set("n", "hi", ":Inspect<CR>")
+
 vim.keymap.set("n", "<leader>mi", function()
-	local mouse_position = vim.fn.getmousepos()
-	if mouse_position.winid == 0 then
+	local mp = vim.fn.getmousepos()
+	if mp.winid == 0 then
 		return
 	end
-
-	local buffer = vim.api.nvim_win_get_buf(mouse_position.winid)
-	local inspection_info = vim.inspect_pos(buffer, mouse_position.line - 1, mouse_position.column - 1)
-	print(vim.inspect(inspection_info))
+	local buf = vim.api.nvim_win_get_buf(mp.winid)
+	print(vim.inspect(vim.inspect_pos(buf, mp.line - 1, mp.column - 1)))
 end, { desc = "Inspect under mouse" })
 
-if vim.fn.has("wayland") == 1 then
-	vim.g.clipboard = {
-		name = "wl-clipboard",
-		copy = {
-			["+"] = "wl-copy",
-			["*"] = "wl-copy",
-		},
-		paste = {
-			["+"] = "wl-paste",
-			["*"] = "wl-paste",
-		},
-		cache_enabled = 1,
-	}
+-- ─── commands ────────────────────────────────────────────────────────────────
+
+vim.api.nvim_create_user_command("RefreshAll", "bufdo edit!", { desc = "Reload all buffers from disk" })
+
+vim.api.nvim_create_user_command("Format", function(args)
+	require("conform").format({
+		async = true,
+		lsp_fallback = true,
+		range = args.count ~= -1 and { start = { args.line1, 0 }, ["end"] = { args.line2, 0 } } or nil,
+	})
+end, { range = true })
+
+-- ─── notify filter ───────────────────────────────────────────────────────────
+
+local orig_notify = vim.notify
+vim.notify = function(msg, level, opts)
+	if type(msg) == "string" and msg:find("Avante") then
+		return
+	end
+	orig_notify(msg, level, opts)
 end
 
-package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
-package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
-package.cpath = package.cpath .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/lib/lua/5.1/?.so;"
-vim.g.VM_SET_STATUS_LINE = 0
-vim.opt.relativenumber = true
-vim.opt.number = true
-vim.g.VM_THEME = "neon"
-vim.opt.concealcursor = ""
-vim.keymap.set("n", "hi", ":Inspect<CR>")
-vim.g.VM_SET_STATUSLINE = 0
+-- ─── theme ───────────────────────────────────────────────────────────────────
 
-local function apply_theme_god_mode()
-	local buffer = vim.api.nvim_get_current_buf()
-	local line_count = vim.api.nvim_buf_line_count(buffer)
-	local lines = vim.api.nvim_buf_get_lines(buffer, 0, math.min(line_count, 100), false)
-	local flag_sacred_content = false
+-- Names whose background must not be flattened to the primary bg.
+local PROTECTED_PATTERNS = {
+	"Border",
+	"Prompt",
+	"Visual",
+	"CursorLine",
+	"Search",
+	"Pmenu",
+	"Cmp",
+	"Blink",
+	"Float",
+	"Kind",
+	"Menu",
+	"Wild",
+	"Noice",
+	"Lsp",
+	"LSP",
+	"lsp",
+	"Msg",
+	"Diagnostic",
+	"lualine",
+	"StatusLine",
+	"Completion",
+	"completion",
+	"snippet",
+	"Snippet",
+	"NormalFloat",
+	"Muted",
+	"Text",
+	"Avante",
+	"Ask",
+	"VM",
+	"Rainbow",
+	"LazyReason",
+	"TroubleCount",
+}
 
-	for _, line in ipairs(lines) do
-		if line:find("Avante") or line:find("Ask") then
-			flag_sacred_content = true
-			break
+local function is_protected(name)
+	for _, p in ipairs(PROTECTED_PATTERNS) do
+		if name:find(p, 1, true) then
+			return true
 		end
 	end
+	return false
+end
 
-	local highlights = vim.api.nvim_get_hl(0, {})
-	for name, hl in pairs(highlights) do
-		local is_protected_name = name:find("Border")
-			or name:find("Prompt")
-			or name:find("Visual")
-			or name:find("CursorLine")
-			or name:find("Search")
-			or name:find("Pmenu")
-			or name:find("Cmp")
-			or name:find("Blink")
-			or name:find("Float")
-			or name:find("Kind")
-			or name:find("Menu")
-			or name:find("Wild")
-			or name:find("Noice")
-			or name:find("Lsp")
-			or name:find("Msg")
-			or name:find("Diagnostic")
-			or name:find("lualine")
-			or name:find("StatusLine")
-			or name:find("Completion")
-			or name:find("completion")
-			or name:find("LSP")
-			or name:find("lsp")
-			or name:find("snippet")
-			or name:find("Snippet")
-			or name:find("NormalFloat")
-			or name:find("Muted")
-			or name:find("Text")
-			or name:find("Avante")
-			or name:find("Ask")
-			or name:find("VM")
-			or name:find("Rainbow")
-			or name:find("LazyReason")
-			or name:find("Lsp")
-			or name:find("TroubleCount")
-		vim.api.nvim_set_hl(0, "SnacksPickerSelected", { bg = NONE, fg = "#27a1b9", force = true })
-		vim.api.nvim_set_hl(0, "SnacksPickerUnselected", { bg = NONE, force = true })
+local SELECTION_NAMES = { SnacksPickerCursorLine = true, TelescopeSelection = true, CursorLine = true }
 
-		local is_active_selector = name:find("Selected") and (name:find("SnacksPicker") or name:find("Telescope"))
-		if is_active_selector or name == "CursorLine" then
-			vim.api.nvim_set_hl(0, name, { bg = COLOR_BACKGROUND_SELECTION_BLUE, fg = hl.fg, force = true })
-		else
-			if hl.bg and not is_protected_name then
-				if flag_sacred_content then
-					goto continue
-				end
-				local color_background = COLOR_BACKGROUND_PRIMARY
-				if name:find("BlinkCmpKind") then
-					color_background = "NONE"
-				elseif name:find("SnacksPicker") and not name:find("Selected") then
-					color_background = "NONE"
-				elseif name:find("Profiler") or name:find("Benchmark") then
-					color_background = "NONE"
-				end
-				vim.api.nvim_set_hl(0, name, {
-					bg = color_background,
-					fg = hl.fg,
-					blend = 0,
-					force = true,
-				})
-			end
+local function apply_theme()
+	local set = vim.api.nvim_set_hl
+
+	-- Flatten all non-protected highlight backgrounds.
+	for name, hl in pairs(vim.api.nvim_get_hl(0, {})) do
+		if not hl.bg then
+			goto continue
 		end
+
+		if
+			SELECTION_NAMES[name]
+			or (
+				name:find("Selected", 1, true)
+				and (name:find("SnacksPicker", 1, true) or name:find("Telescope", 1, true))
+			)
+		then
+			set(0, name, { bg = COLOR_BG_SELECTION, fg = hl.fg, force = true })
+			goto continue
+		end
+
+		if is_protected(name) then
+			goto continue
+		end
+
+		local bg = COLOR_BG_PRIMARY
+		if
+			name:find("BlinkCmpKind", 1, true)
+			or (name:find("SnacksPicker", 1, true) and not name:find("Selected", 1, true))
+			or name:find("Profiler", 1, true)
+			or name:find("Benchmark", 1, true)
+		then
+			bg = "NONE"
+		end
+
+		set(0, name, { bg = bg, fg = hl.fg, blend = 0, force = true })
 		::continue::
 	end
-	vim.api.nvim_set_hl(0, "Cursor", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND })
-	vim.api.nvim_set_hl(0, "CursorInsert", { fg = COLOR_CURSOR_FOREGROUND, bg = COLOR_CURSOR_BACKGROUND })
-	local diagnostic_underline_groups = {
-		"DiagnosticUnderlineError",
-		"DiagnosticUnderlineWarn",
-		"DiagnosticUnderlineInfo",
-		"DiagnosticUnderlineHint",
-		"DiagnosticUnderlineOk",
-	}
-	for _, group in ipairs(diagnostic_underline_groups) do
-		local existing = vim.api.nvim_get_hl(0, { name = group })
-		vim.api.nvim_set_hl(0, group, { sp = existing.sp, underline = true, bg = "NONE", force = true })
+
+	-- Picker selection
+	set(0, "SnacksPickerSelected", { bg = "NONE", fg = "#27a1b9", force = true })
+	set(0, "SnacksPickerUnselected", { bg = "NONE", force = true })
+
+	-- Cursor
+	set(0, "Cursor", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG })
+	set(0, "CursorInsert", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG })
+
+	-- Diagnostics
+	for _, g in ipairs({ "Error", "Warn", "Info", "Hint", "Ok" }) do
+		local existing = vim.api.nvim_get_hl(0, { name = "DiagnosticUnderline" .. g })
+		set(0, "DiagnosticUnderline" .. g, { sp = existing.sp, underline = true, bg = "NONE", force = true })
 	end
-	local illuminate_groups = {
+	set(0, "DiagnosticUnnecessary", { fg = COLOR_UNUSED_DIAGNOSTIC, strikethrough = true, force = true })
+
+	-- Illuminate / LSP references
+	for _, g in ipairs({
 		"IlluminatedWordText",
 		"IlluminatedWordRead",
 		"IlluminatedWordWrite",
 		"LspReferenceText",
-		"LspReferenceRead",
-		"LspReferenceWrite",
-	}
-	for _, group in ipairs(illuminate_groups) do
-		vim.api.nvim_set_hl(0, group, { bg = COLOR_BACKGROUND_SELECTION_BLUE, force = true })
+	}) do
+		set(0, g, { bg = COLOR_BG_SELECTION, force = true })
 	end
-	vim.api.nvim_set_hl(0, "MarkdownBold", { fg = COLOR_FOREGROUND_MARKDOWN_BOLD, bold = true, force = true })
-	vim.api.nvim_set_hl(0, "@MarkupStrong", { fg = COLOR_FOREGROUND_MARKDOWN_BOLD, bold = true, force = true })
-	vim.api.nvim_set_hl(
-		0,
-		"DiagnosticUnnecessary",
-		{ fg = COLOR_UNUSED_DIAGNOSTIC, strikethrough = true, force = true }
-	)
-	vim.api.nvim_set_hl(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
-	vim.api.nvim_set_hl(
-		0,
-		"BlinkCmpSignatureHelpBorder",
-		{ fg = "#27a1b9", bg = COLOR_BACKGROUND_PRIMARY, force = true }
-	)
-	vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
-	vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
+	set(0, "LspReferenceRead", { bg = "NONE", force = true })
+	set(0, "LspReferenceWrite", { bg = "NONE", force = true })
 
-	vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = NONE, force = true })
-	vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = NONE, force = true })
-	vim.api.nvim_set_hl(0, "StatusLine", { bg = "#16161e", force = true })
-	vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "#16161e", force = true })
+	-- Markdown / markup
+	set(0, "MarkdownBold", { fg = COLOR_FG_MARKDOWN_BOLD, bold = true, force = true })
+	set(0, "@MarkupStrong", { fg = COLOR_FG_MARKDOWN_BOLD, bold = true, force = true })
 
+	-- Blink signature
+	set(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
+	set(0, "LspKindFile", { bg = "NONE", force = true })
+	set(0, "BlinkCmpSignatureHelpBorder", { fg = "#27a1b9", bg = COLOR_BG_PRIMARY, force = true })
+	set(0, "BlinkCmpSignatureHelp", { bg = COLOR_BG_PRIMARY, force = true })
+	set(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BG_PRIMARY, force = true })
+
+	-- Status line
+	set(0, "StatusLine", { bg = "#16161e", force = true })
+	set(0, "StatusLineNC", { bg = "#16161e", force = true })
+
+	-- rg picker preview
+	set(0, "RgPreviewLine", { bg = "#7aa2f7", fg = "#1a1b26", bold = false })
+	set(0, "RgPreviewLineCur", { bg = "#e07840", fg = "#1a1b26", bold = false })
+	set(0, "SnacksBackdrop", { bg = "#1a1b26", blend = 0, force = true })
 end
 
-local GROUP_THEME_PERSISTENCE_GOD_MODE = vim.api.nvim_create_augroup("ThemePersistenceGodMode", { clear = true })
-vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter", "BufWinEnter" }, {
-	group = GROUP_THEME_PERSISTENCE_GOD_MODE,
-	callback = apply_theme_god_mode,
+-- Only run on ColorScheme + VimEnter; BufWinEnter fires far too often for
+-- a full highlight table walk.
+vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
+	group = vim.api.nvim_create_augroup("ThemeGodMode", { clear = true }),
+	callback = apply_theme,
 })
 
-apply_theme_god_mode()
-
-vim.api.nvim_create_user_command("RefreshAll", function()
-	vim.cmd("bufdo edit!")
-end, { desc = "Reload all buffers from disk" })
-
-vim.api.nvim_set_hl(0, "LspKindFile", { bg = "NONE", force = true })
-vim.api.nvim_set_hl(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
-
-vim.api.nvim_create_user_command("Format", function(arguments)
-	local range = nil
-	if arguments.count ~= -1 then
-		range = {
-			start = { arguments.line1, 0 },
-			["end"] = { arguments.line2, 0 },
-		}
-	end
-	require("conform").format({
-		async = true,
-		lsp_fallback = true,
-		range = range,
-	})
-end, { range = true })
-
-local function_notify_original = vim.notify
-vim.notify = function(message, level, options)
-	if type(message) == "string" and message:find("Avante") then
-		return
-	end
-	function_notify_original(message, level, options)
-end
+apply_theme()

@@ -34,7 +34,7 @@ return {
             return true
           end
           local disabled_filetypes = {
-            "help", "dashboard", "avante", "avante-input", "gitcommit", "markdown", "oil", "TelescopePrompt", "alpha", "NvimTree"
+            "help", "dashboard", "avante", "avante-input", "gitcommit", "markdown", "oil", "TelescopePrompt", "alpha", "NvimTree", "snacks_picker_list", "snacks_picker_preview",
           }
           local ft = vim.bo[buf].filetype
           for _, dft in ipairs(disabled_filetypes) do

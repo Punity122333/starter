@@ -25,6 +25,20 @@ return {
       sections = DashboardSections,
       preset = {
         header = DashboardHeader,
+        keys = {
+          -- Mapping picture keybinds to snipe actions
+          { icon = " ", key = "f", desc = "Find File", action = function() require("snipe.nav").files() end },
+          { icon = " ", key = "g", desc = "Find Text", action = function() require("snipe.rg").rg() end },
+          { icon = " ", key = "r", desc = "Recent Files", action = function() require("snipe.nav").oldfiles() end },
+          { icon = "󰉋 ", key = "p", desc = "Projects", action = function() require("snipe.nav").projects() end },
+          -- Add other picture example actions
+          { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+          { icon = "⚙ ", key = "c", desc = "Config", action = ":Telescope find_files cwd=~/.config/nvim" }, -- beyond snipe
+          { icon = " ", key = "s", desc = "Restore Session", action = ":SessionManager load_session" }, -- beyond snipe
+          { icon = "󰒲 ", key = "x", desc = "Lazy Extras", action = ":Lazy extras" },
+          { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
+          { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+        },
       },
     },
   },

@@ -241,3 +241,4 @@ vim.keymap.set("n", "<leader>sb", function()
 end, { desc = "Search Current Buffer" })
 
 vim.keymap.set("n", "<leader>rb", "<cmd>edit!<cr>", { desc = "Refresh Buffer" })
+
