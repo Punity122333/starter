@@ -5,7 +5,6 @@ vim.api.nvim_set_hl(0, "SignColumn", { bg = COLOR_NONE })
 vim.api.nvim_set_hl(0, "LineNr", { fg = COLOR_LINE_NUMBER, bg = COLOR_NONE })
 vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = COLOR_NONE, bg = COLOR_NONE })
 
--- Buffer-local code action timer
 local codeaction_timers = {}
 vim.api.nvim_create_autocmd("LspAttach", {
 	callback = function(args)

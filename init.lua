@@ -247,6 +247,8 @@ local function apply_theme()
 	set(0, "RgPreviewLine", { bg = "#7aa2f7", fg = "#1a1b26", bold = false })
 	set(0, "RgPreviewLineCur", { bg = "#e07840", fg = "#1a1b26", bold = false })
 	set(0, "SnacksBackdrop", { bg = "#1a1b26", blend = 0, force = true })
+
+	set(0, "NavPreviewLine", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 end
 
 -- Only run on ColorScheme + VimEnter; BufWinEnter fires far too often for

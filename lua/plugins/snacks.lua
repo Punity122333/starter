@@ -30,7 +30,7 @@ return {
 				preset = "default",
 				preview = false,
 				layout = {
-					backdrop = true,
+					backdrop = false,
 				},
 			},
 			live_grep = {

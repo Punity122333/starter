@@ -70,7 +70,7 @@
   "roids.nvim": { "branch": "main", "commit": "5bfdf37b4eefc1316f92cd79f35c9d8d8b75a100" },
   "rustaceanvim": { "branch": "master", "commit": "f2f0c1231a5b019dbc1fd6dafac1751c878925a3" },
   "snacks.nvim": { "branch": "main", "commit": "ad9ede6a9cddf16cedbd31b8932d6dcdee9b716e" },
-  "snipe.nvim": { "branch": "master", "commit": "e8871410b2de8c6eba43c88def8eafea79bdc68c" },
+  "snipe.nvim": { "branch": "master", "commit": "31e30b48a9d02546dc755a19eed046cfe8babff1" },
   "sqlite.lua": { "branch": "master", "commit": "50092d60feb242602d7578398c6eb53b4a8ffe7b" },
   "swap.nvim": { "branch": "main", "commit": "c9e2a9fe1a24fc6167acf4e7fc9635923ff3c12a" },
   "telescope.nvim": { "branch": "master", "commit": "5255aa27c422de944791318024167ad5d40aad20" },
