@@ -53,7 +53,7 @@
   (#eq? @_tag "html")
   arguments: (template_string) @injection.content
   (#set! injection.language "html")
-  (#set! injection.include-children true)
+  (#set! injecton.include-children true)
 )
 
 ; Magic comment: /* sql */` ... `

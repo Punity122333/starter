@@ -233,13 +233,19 @@ pcall(vim.keymap.del, "n", "<leader>sb")
 vim.keymap.set("n", "<leader>sb", function()
   local width = 0.35
   Snacks.picker.lines({
+    -- This prevents the "lag spike" on open for big files
+    on_show = function(picker)
+      if #picker:filter().search < 2 then
+        picker:filter().search = ""
+      end
+    end,
     layout = {
       preset = "default",
       preview = false,
       layout = {
         backdrop = false,
         row = 0,
-        col = 1 - width,
+        col = 1 - width, -- Align to the far right
         width = width,
         height = 0.4,
         border = "rounded",
@@ -248,6 +254,8 @@ vim.keymap.set("n", "<leader>sb", function()
         { win = "list", border = "none" },
       },
     },
+    -- Optional: start in normal mode if you prefer j/k immediately
+    -- focus = "input", 
   })
 end, { desc = "Search Current Buffer" })
 
@@ -293,3 +301,28 @@ map("<leader>sn", search.noice, "Noice History")
 
 map("<leader>fw", rg.rg, "Grep (Fast)")
 map("<leader>/", rg.rg, "Grep (Fast)")
+local cmd = vim.api.nvim_create_user_command
+
+cmd("BrowseMain", function() 
+    require("browse").browse() 
+end, { desc = "Open browse.nvim main menu" })
+
+cmd("BrowseInput", function() 
+    require("browse").input_search() 
+end, { desc = "Search with input prompt" })
+
+cmd("BrowseBookmarks", function() 
+    require("browse").open_manual_bookmarks() 
+end, { desc = "Open manual bookmarks" })
+
+cmd("BrowseDevDocs", function() 
+    require("browse.devdocs").search() 
+end, { desc = "Search DevDocs" })
+
+cmd("BrowseDevDocsFT", function() 
+    require("browse.devdocs").search_with_filetype() 
+end, { desc = "Search DevDocs with current filetype" })
+
+cmd("BrowseMDN", function() 
+    require("browse.mdn").search() 
+end, { desc = "Search MDN" })

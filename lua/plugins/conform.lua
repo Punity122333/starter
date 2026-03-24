@@ -29,6 +29,6 @@ return {
       toml = { "taplo" },
       yaml = { "yamlfmt" },
     },
-    format_on_save = true,
+    format_on_save = false,
   },
 }

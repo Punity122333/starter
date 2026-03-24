@@ -2,6 +2,7 @@ vim.opt.rtp:prepend(vim.fn.expand("~/.local/share/nvim/site"))
 return {
   {
     "TheNoeTrevino/roids.nvim",
+    enabled = false,
     event = { "BufReadPost", "BufNewFile" },
     config = function()
       require("roids").setup({
@@ -21,7 +22,7 @@ return {
         "glsl", "hlsl", "wgsl"
       },
       sync_install = false,
-      auto_install = true,
+      auto_install = false,
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,

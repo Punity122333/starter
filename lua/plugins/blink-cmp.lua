@@ -75,23 +75,20 @@ return {
 							return true
 						end
 
-						-- 2. handle copilot
 						local copilot_ok, copilot = pcall(require, "copilot.suggestion")
 						if copilot_ok and copilot.is_visible() then
 							copilot.accept()
 							return true
 						end
 
-						-- 3. if completion menu is open, accept it
 						if cmp.is_visible() then
 							return cmp.accept()
 						end
 
-						-- 4. if it's just whitespace, fallback to normal tabbing
 						local col = vim.fn.col(".") - 1
 						local line = vim.api.nvim_get_current_line()
 						if col == 0 or line:sub(col, col):match("%s") then
-							return false -- this triggers the "fallback" below
+							return false
 						end
 					end,
 					"snippet_forward",
