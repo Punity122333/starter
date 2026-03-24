@@ -1,61 +1,61 @@
 return {
-  {
-    "folke/persistence.nvim",
-    event = "BufReadPre",
-    opts = {
-      dir = vim.fn.expand(vim.fn.stdpath("state") .. "/sessions/"),
-      options = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" },
-      pre_save = nil,
-      save_empty = false,
-    },
-    keys = {
-      {
-        "<leader>qs",
-        function()
-          require("persistence").load()
-        end,
-        desc = "Restore Session",
-      },
-      {
-        "<leader>qS",
-        function()
-          require("persistence").select()
-        end,
-        desc = "Select Session",
-      },
-      {
-        "<leader>ql",
-        function()
-          require("persistence").load({ last = true })
-        end,
-        desc = "Restore Last Session",
-      },
-      {
-        "<leader>qd",
-        function()
-          require("persistence").stop()
-        end,
-        desc = "Don't Save Current Session",
-      },
-    },
-    config = function(_, opts)
-      require("persistence").setup(opts)
-      local function restore_session()
-        if vim.fn.argc() == 0 then
-          local cwd = vim.fn.getcwd()
-          local home = vim.fn.expand("~")
-          if cwd ~= home and cwd ~= "/" then
-            require("persistence").load()
-          end
-        end
-      end
-      vim.api.nvim_create_autocmd("VimEnter", {
-        group = vim.api.nvim_create_augroup("restore_session", { clear = true }),
-        callback = function()
-          vim.defer_fn(restore_session, 100)
-        end,
-        nested = true,
-      })
-    end,
-  },
+	{
+		"folke/persistence.nvim",
+		event = "BufReadPre",
+		opts = {
+			dir = vim.fn.expand(vim.fn.stdpath("state") .. "/sessions/"),
+			options = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp", "folds" },
+			pre_save = nil,
+			save_empty = false,
+		},
+		keys = {
+			{
+				"<leader>qs",
+				function()
+					require("persistence").load()
+				end,
+				desc = "Restore Session",
+			},
+			{
+				"<leader>qS",
+				function()
+					require("persistence").select()
+				end,
+				desc = "Select Session",
+			},
+			{
+				"<leader>ql",
+				function()
+					require("persistence").load({ last = true })
+				end,
+				desc = "Restore Last Session",
+			},
+			{
+				"<leader>qd",
+				function()
+					require("persistence").stop()
+				end,
+				desc = "Don't Save Current Session",
+			},
+		},
+		config = function(_, opts)
+			require("persistence").setup(opts)
+			local function restore_session()
+				if vim.fn.argc() == 0 then
+					local cwd = vim.fn.getcwd()
+					local home = vim.fn.expand("~")
+					if cwd ~= home and cwd ~= "/" then
+						require("persistence").load()
+					end
+				end
+			end
+			vim.api.nvim_create_autocmd("VimEnter", {
+				group = vim.api.nvim_create_augroup("restore_session", { clear = true }),
+				callback = function()
+					vim.defer_fn(restore_session, 100)
+				end,
+				nested = true,
+			})
+		end,
+	},
 }

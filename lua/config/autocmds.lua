@@ -163,7 +163,7 @@ vim.api.nvim_create_autocmd("FileType", {
 local ignore_messages = {
 	"E21: Cannot make changes, 'modifiable' is off",
 	"E242: Can't split a window while closing another",
-  "model",
+	"model",
 }
 
 vim.api.nvim_create_autocmd("User", {
@@ -186,4 +186,3 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 		end
 	end,
 })
-

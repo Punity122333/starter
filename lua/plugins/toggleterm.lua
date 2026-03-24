@@ -15,10 +15,10 @@ return {
 				Normal = {
 					guibg = "#1a1b26",
 				},
-        border = {
-          guifg = "#27a1b9",
-          guibg = "#1a1b26",
-        },
+				border = {
+					guifg = "#27a1b9",
+					guibg = "#1a1b26",
+				},
 			},
 		})
 	end,

@@ -1,5 +1,5 @@
 return {
-  "chentoast/marks.nvim",
-  event = "BufReadPre",
-  opts = {},
+	"chentoast/marks.nvim",
+	event = "BufReadPre",
+	opts = {},
 }

@@ -35,9 +35,9 @@ return {
 				},
 			},
 			signature = { enabled = false },
- fuzzy = {
-    implementation = "lua"
-  },
+			fuzzy = {
+				implementation = "lua",
+			},
 			keymap = {
 				preset = "default",
 				["<Up>"] = { "fallback" },

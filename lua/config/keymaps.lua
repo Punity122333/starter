@@ -205,20 +205,20 @@ function _lazzygit_toggle()
 end
 
 vim.keymap.set("n", "<leader>\\\\", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-  lazygit:toggle()
+	local Terminal = require("toggleterm.terminal").Terminal
+	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+	lazygit:toggle()
 end, { desc = "ToggleTerm Lazygit" })
 
 vim.keymap.set("n", "<leader>gg", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-  lazygit:toggle()
+	local Terminal = require("toggleterm.terminal").Terminal
+	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+	lazygit:toggle()
 end, { desc = "ToggleTerm Lazygit" })
 vim.keymap.set("n", "<leader>gG", function()
-  local Terminal = require("toggleterm.terminal").Terminal
-  local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-  lazygit:toggle()
+	local Terminal = require("toggleterm.terminal").Terminal
+	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
+	lazygit:toggle()
 end, { desc = "ToggleTerm Lazygit" })
 local opts = { noremap = true, silent = true }
 
@@ -231,32 +231,29 @@ vim.keymap.set("n", "<leader>t<Right>", "<cmd>ToggleTerm direction=vertical<cr>"
 vim.keymap.set("o", "f", "f", { remap = true })
 pcall(vim.keymap.del, "n", "<leader>sb")
 vim.keymap.set("n", "<leader>sb", function()
-  local width = 0.35
-  Snacks.picker.lines({
-    -- This prevents the "lag spike" on open for big files
-    on_show = function(picker)
-      if #picker:filter().search < 2 then
-        picker:filter().search = ""
-      end
-    end,
-    layout = {
-      preset = "default",
-      preview = false,
-      layout = {
-        backdrop = false,
-        row = 0,
-        col = 1 - width, -- Align to the far right
-        width = width,
-        height = 0.4,
-        border = "rounded",
-        box = "vertical",
-        { win = "input", height = 1, border = "bottom" },
-        { win = "list", border = "none" },
-      },
-    },
-    -- Optional: start in normal mode if you prefer j/k immediately
-    -- focus = "input", 
-  })
+	local width = 0.35
+	Snacks.picker.lines({
+		on_show = function(picker)
+			if #picker:filter().search < 2 then
+				picker:filter().search = ""
+			end
+		end,
+		layout = {
+			preset = "default",
+			preview = false,
+			layout = {
+				backdrop = false,
+				row = 0,
+				col = 1 - width,
+				width = width,
+				height = 0.4,
+				border = "rounded",
+				box = "vertical",
+				{ win = "input", height = 1, border = "bottom" },
+				{ win = "list", border = "none" },
+			},
+		},
+	})
 end, { desc = "Search Current Buffer" })
 
 vim.keymap.set("n", "<leader>rb", "<cmd>edit!<cr>", { desc = "Refresh Buffer" })
@@ -264,7 +261,7 @@ local nav = require("snipe.nav")
 local search = require("snipe.search")
 local rg = require("snipe.rg")
 local map = function(keys, func, desc)
-  vim.keymap.set("n", keys, func, { desc = "" .. desc, silent = true })
+	vim.keymap.set("n", keys, func, { desc = "" .. desc, silent = true })
 end
 
 map("<leader>ff", nav.files, "Files (fd)")
@@ -273,11 +270,19 @@ map("<leader>f'", nav.marks, "Marks")
 map("<leader>fr", nav.references, "LSP References")
 map("<leader>fo", nav.oldfiles, "Recent Files")
 map("<leader>fj", nav.projects, "Projects")
-map("<leader>fd", function() nav.diagnostics(false) end, "Diagnostics (Buffer)")
-map("<leader>f;", function() nav.diagnostics(true) end, "Diagnostics (Workspace)")
+map("<leader>fd", function()
+	nav.diagnostics(false)
+end, "Diagnostics (Buffer)")
+map("<leader>f;", function()
+	nav.diagnostics(true)
+end, "Diagnostics (Workspace)")
 
-map("<leader>sd", function() nav.diagnostics(false) end, "Diagnostics (Buffer)")
-map("<leader>sD", function() nav.diagnostics(true) end, "Diagnostics (Workspace)")
+map("<leader>sd", function()
+	nav.diagnostics(false)
+end, "Diagnostics (Buffer)")
+map("<leader>sD", function()
+	nav.diagnostics(true)
+end, "Diagnostics (Workspace)")
 map("<leader>sa", search.autocmds, "Autocmds")
 map("<leader>sc", search.cmdhistory, "Command History")
 map("<leader>sC", search.commands, "Commands")
@@ -293,8 +298,12 @@ map("<leader>sM", search.manpages, "Man Pages")
 map("<leader>sp", search.plugins, "Plugin Spec")
 map("<leader>sq", search.quickfix, "Quickfix")
 map("<leader>su", search.undo, "Undo History")
-map("<leader>sw", function() search.grep_word(true) end, "Grep Word (Root)")
-map("<leader>sW", function() search.grep_word(false) end, "Grep Word (CWD)")
+map("<leader>sw", function()
+	search.grep_word(true)
+end, "Grep Word (Root)")
+map("<leader>sW", function()
+	search.grep_word(false)
+end, "Grep Word (CWD)")
 map('<leader>s"', search.registers, "Registers")
 map("<leader>s/", search.searchhistory, "Search History")
 map("<leader>sn", search.noice, "Noice History")
@@ -303,26 +312,26 @@ map("<leader>fw", rg.rg, "Grep (Fast)")
 map("<leader>/", rg.rg, "Grep (Fast)")
 local cmd = vim.api.nvim_create_user_command
 
-cmd("BrowseMain", function() 
-    require("browse").browse() 
+cmd("BrowseMain", function()
+	require("browse").browse()
 end, { desc = "Open browse.nvim main menu" })
 
-cmd("BrowseInput", function() 
-    require("browse").input_search() 
+cmd("BrowseInput", function()
+	require("browse").input_search()
 end, { desc = "Search with input prompt" })
 
-cmd("BrowseBookmarks", function() 
-    require("browse").open_manual_bookmarks() 
+cmd("BrowseBookmarks", function()
+	require("browse").open_manual_bookmarks()
 end, { desc = "Open manual bookmarks" })
 
-cmd("BrowseDevDocs", function() 
-    require("browse.devdocs").search() 
+cmd("BrowseDevDocs", function()
+	require("browse.devdocs").search()
 end, { desc = "Search DevDocs" })
 
-cmd("BrowseDevDocsFT", function() 
-    require("browse.devdocs").search_with_filetype() 
+cmd("BrowseDevDocsFT", function()
+	require("browse.devdocs").search_with_filetype()
 end, { desc = "Search DevDocs with current filetype" })
 
-cmd("BrowseMDN", function() 
-    require("browse.mdn").search() 
+cmd("BrowseMDN", function()
+	require("browse.mdn").search()
 end, { desc = "Search MDN" })

@@ -1,6 +1,6 @@
 return {
-  "folke/which-key.nvim",
-  opts = {
-    delay = 300,
-  },
+	"folke/which-key.nvim",
+	opts = {
+		delay = 300,
+	},
 }

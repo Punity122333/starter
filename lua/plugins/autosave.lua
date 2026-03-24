@@ -1,43 +1,43 @@
 local ImmediateSaveEvents = { "BufLeave", "FocusLost" }
 local DeferSaveEvents = { "InsertLeave", "TextChanged" }
 local CancelDeferredSaveEvents = { "InsertEnter" }
-local DebounceDelay = 20000 
+local DebounceDelay = 20000
 
 return {
-  {
-    "okuuva/auto-save.nvim",
-    event = { "InsertLeave", "BufReadPre" }, 
-    opts = {
-      enabled = true,
-      trigger_events = {
-        immediate_save = ImmediateSaveEvents,
-        defer_save = DeferSaveEvents,
-        cancel_deferred_save = CancelDeferredSaveEvents,
-      },
-      debounce_delay = DebounceDelay,
-      condition = function(buffer)
-        local mode = vim.api.nvim_get_mode().mode
-        if mode == 'no' or mode == 'i' or mode == 'v' or mode == 'c' then 
-          return false 
-        end
+	{
+		"okuuva/auto-save.nvim",
+		event = { "InsertLeave", "BufReadPre" },
+		opts = {
+			enabled = true,
+			trigger_events = {
+				immediate_save = ImmediateSaveEvents,
+				defer_save = DeferSaveEvents,
+				cancel_deferred_save = CancelDeferredSaveEvents,
+			},
+			debounce_delay = DebounceDelay,
+			condition = function(buffer)
+				local mode = vim.api.nvim_get_mode().mode
+				if mode == "no" or mode == "i" or mode == "v" or mode == "c" then
+					return false
+				end
 
-        if vim.snippet and vim.snippet.active({ direction = 1 }) then
-          return false
-        end
+				if vim.snippet and vim.snippet.active({ direction = 1 }) then
+					return false
+				end
 
-        local fn = vim.fn
-        local utils = require("auto-save.utils.data")
-        
-        local ft = fn.getbufvar(buffer, "&filetype")
-        local ExcludedFiletypes = { "gitcommit", "gitrebase", "hgcommit", "oil" }
+				local fn = vim.fn
+				local utils = require("auto-save.utils.data")
 
-        if fn.getbufvar(buffer, "&modifiable") == 1 and utils.not_in(ft, ExcludedFiletypes) then
-          return true
-        end
-        return false
-      end,
-      noautocmd = true, 
-      write_all_buffers = false,
-    },
-  },
+				local ft = fn.getbufvar(buffer, "&filetype")
+				local ExcludedFiletypes = { "gitcommit", "gitrebase", "hgcommit", "oil" }
+
+				if fn.getbufvar(buffer, "&modifiable") == 1 and utils.not_in(ft, ExcludedFiletypes) then
+					return true
+				end
+				return false
+			end,
+			noautocmd = true,
+			write_all_buffers = false,
+		},
+	},
 }
