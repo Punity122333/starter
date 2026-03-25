@@ -8,6 +8,7 @@ local STATUSLINE_BG = "#16161e"
 local LIGHT_BLUE = "#82aaff"
 local SOLID_BG = { bg = NIGHT_BG, blend = 0 }
 local BORDER_HIGHLIGHT = "border_highlight"
+
 return {
 	{
 		"folke/tokyonight.nvim",

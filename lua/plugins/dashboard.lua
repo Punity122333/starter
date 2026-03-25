@@ -61,7 +61,7 @@ return {
 					{ icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
 					{ icon = "⚙ ", key = "c", desc = "Config", action = ":Telescope find_files cwd=~/.config/nvim" }, -- beyond snipe
 					{ icon = " ", key = "s", desc = "Restore Session", action = ":SessionManager load_session" }, -- beyond snipe
-					{ icon = "󰒲 ", key = "x", desc = "Lazy Extras", action = ":Lazy extras" },
+					{ icon = "󰒲 ", key = "x", desc = "Lazy Extras", action = ":LazyExtras" },
 					{ icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
 					{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
 				},
