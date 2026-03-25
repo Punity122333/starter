@@ -74,5 +74,5 @@ return {
 			indent = { enable = false },
 		},
 	},
-	{ "nvim-treesitter/nvim-treesitter-textobjects", enabled = false },
+	{ "nvim-treesitter/nvim-treesitter-textobjects", enabled = true },
 }

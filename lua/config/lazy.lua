@@ -27,9 +27,6 @@ require("lazy").setup({
 		lazy = not force_all,
 		version = false,
 	},
-  ui = {
-    backdrop = 100,
-  },
 	concurrency = force_all and 100 or nil,
 	performance = {
 		cache = { enabled = true },

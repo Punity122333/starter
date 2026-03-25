@@ -74,16 +74,6 @@ vim.keymap.set("n", "<leader>fD", function()
 	})
 end, { desc = "Search Home" })
 
-vim.keymap.set("n", "<leader>sD", function()
-	Snacks.picker.grep({
-		cwd = vim.fn.expand("~"),
-		title = "Grep Home (Filtered)",
-		hidden = true,
-		ignored = false,
-		exclude = { "node_modules", ".git", ".cache", "__pycache__", ".venv", "venv", "build", "dist", "*.lock" },
-	})
-end, { desc = "Grep Home Directory" })
-
 vim.keymap.set("n", "<leader>fx", function()
 	Snacks.explorer.reveal()
 end, { desc = "Reveal Current File in Explorer" })
@@ -147,10 +137,9 @@ vim.keymap.set("n", "gjs", "<cmd>Lspsaga outline<CR>", { desc = "Toggle Outline"
 vim.keymap.set("n", "gjb", "<cmd>Lspsaga symbols_in_winbar<CR>", { desc = "Winbar Symbols" })
 vim.keymap.set("n", "gjl", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Buffer Diagnostics" })
 
-require("which-key").add({ { "gj", group = "LSP Navigation" } })
-vim.keymap.set("n", "<leader>sB", function()
-	Snacks.picker.lsp_symbols()
-end, { desc = "LSP Symbols" })
+pcall(function()
+	require("which-key").add({ { "gj", group = "LSP Navigation" } })
+end)
 vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
 vim.keymap.set("n", "<leader>[]", function()
 	local clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -197,28 +186,21 @@ vim.keymap.set("n", "<leader>uH", function()
 end, { desc = "Toggle List / NoList" })
 vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm direction=float<cr>", { desc = "ToggleTerm Float" })
 
-local Terminal = require("toggleterm.terminal").Terminal
-local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-
-function _lazzygit_toggle()
+local function toggle_lazygit()
+	local Terminal = require("toggleterm.terminal").Terminal
+	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
 	lazygit:toggle()
 end
 
 vim.keymap.set("n", "<leader>\\\\", function()
-	local Terminal = require("toggleterm.terminal").Terminal
-	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-	lazygit:toggle()
+	toggle_lazygit()
 end, { desc = "ToggleTerm Lazygit" })
 
 vim.keymap.set("n", "<leader>gg", function()
-	local Terminal = require("toggleterm.terminal").Terminal
-	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-	lazygit:toggle()
+	toggle_lazygit()
 end, { desc = "ToggleTerm Lazygit" })
 vim.keymap.set("n", "<leader>gG", function()
-	local Terminal = require("toggleterm.terminal").Terminal
-	local lazygit = Terminal:new({ cmd = "lazygit", hidden = true, direction = "float" })
-	lazygit:toggle()
+	toggle_lazygit()
 end, { desc = "ToggleTerm Lazygit" })
 local opts = { noremap = true, silent = true }
 
@@ -257,62 +239,77 @@ vim.keymap.set("n", "<leader>sb", function()
 end, { desc = "Search Current Buffer" })
 
 vim.keymap.set("n", "<leader>rb", "<cmd>edit!<cr>", { desc = "Refresh Buffer" })
-local nav = require("snipe.nav")
-local search = require("snipe.search")
-local rg = require("snipe.rg")
 local map = function(keys, func, desc)
 	vim.keymap.set("n", keys, func, { desc = "" .. desc, silent = true })
 end
 
-map("<leader>ff", nav.files, "Files (fd)")
-map("<leader>fb", nav.buffers, "Buffers")
-map("<leader>f'", nav.marks, "Marks")
-map("<leader>fr", nav.references, "LSP References")
-map("<leader>fo", nav.oldfiles, "Recent Files")
-map("<leader>fj", nav.projects, "Projects")
+local function nav_call(method)
+	return function()
+		require("snipe.nav")[method]()
+	end
+end
+
+local function search_call(method)
+	return function()
+		require("snipe.search")[method]()
+	end
+end
+
+local function rg_call(method)
+	return function()
+		require("snipe.rg")[method]()
+	end
+end
+
+map("<leader>ff", nav_call("files"), "Files (fd)")
+map("<leader>fb", nav_call("buffers"), "Buffers")
+map("<leader>f'", nav_call("marks"), "Marks")
+map("<leader>fr", nav_call("references"), "LSP References")
+map("<leader>fo", nav_call("oldfiles"), "Recent Files")
+map("<leader>fj", nav_call("projects"), "Projects")
 map("<leader>fd", function()
-	nav.diagnostics(false)
+	require("snipe.nav").diagnostics(false)
 end, "Diagnostics (Buffer)")
 map("<leader>f;", function()
-	nav.diagnostics(true)
+	require("snipe.nav").diagnostics(true)
 end, "Diagnostics (Workspace)")
 
 map("<leader>sd", function()
-	nav.diagnostics(false)
+	require("snipe.nav").diagnostics(false)
 end, "Diagnostics (Buffer)")
 map("<leader>sD", function()
-	nav.diagnostics(true)
+	require("snipe.nav").diagnostics(true)
 end, "Diagnostics (Workspace)")
-map("<leader>sa", search.autocmds, "Autocmds")
-map("<leader>sc", search.cmdhistory, "Command History")
-map("<leader>sC", search.commands, "Commands")
-map("<leader>sg", rg.rg, "Grep (Root)")
-map("<leader>s.", rg.rg, "Grep (CWD)")
-map("<leader>sh", search.help, "Help Pages")
-map("<leader>sH", search.highlights, "Highlights")
-map("<leader>si", search.icons, "Icons")
-map("<leader>sj", search.jumps, "Jumps")
-map("<leader>sk", search.keymaps, "Keymaps")
-map("<leader>sl", search.loclist, "Location List")
-map("<leader>sM", search.manpages, "Man Pages")
-map("<leader>sp", search.plugins, "Plugin Spec")
-map("<leader>sq", search.quickfix, "Quickfix")
-map("<leader>su", search.undo, "Undo History")
-map("<leader>sb", rg.rg_buffer, "Search Buffer")
-map("<leader>sB", search.lsp_symbols, "LSP Symbols")
-map("<leader>sP", search.pickers , "Builtin Pickers")
+map("<leader>sa", search_call("autocmds"), "Autocmds")
+map("<leader>sc", search_call("cmdhistory"), "Command History")
+map("<leader>sC", search_call("commands"), "Commands")
+map("<leader>sg", rg_call("rg"), "Grep (Root)")
+map("<leader>/", rg_call("rg"), "Grep (Root)")
+map("<leader>s.", rg_call("rg"), "Grep (CWD)")
+map("<leader>sh", search_call("help"), "Help Pages")
+map("<leader>sH", search_call("highlights"), "Highlights")
+map("<leader>si", search_call("icons"), "Icons")
+map("<leader>sj", search_call("jumps"), "Jumps")
+map("<leader>sk", search_call("keymaps"), "Keymaps")
+map("<leader>sl", search_call("loclist"), "Location List")
+map("<leader>sM", search_call("manpages"), "Man Pages")
+map("<leader>sp", search_call("plugins"), "Plugin Spec")
+map("<leader>sq", search_call("quickfix"), "Quickfix")
+map("<leader>su", search_call("undo"), "Undo History")
+map("<leader>sb", rg_call("rg_buffer"), "Search Buffer")
+map("<leader>sB", search_call("lsp_symbols"), "LSP Symbols")
+map("<leader>sP", search_call("pickers"), "Builtin Pickers")
 map("<leader>sw", function()
-	search.grep_word(true)
+	require("snipe.search").grep_word(true)
 end, "Grep Word (Root)")
 map("<leader>sW", function()
-	search.grep_word(false)
+	require("snipe.search").grep_word(false)
 end, "Grep Word (CWD)")
-map('<leader>s"', search.registers, "Registers")
-map("<leader>s/", search.searchhistory, "Search History")
-map("<leader>sn", search.noice, "Noice History")
+map('<leader>s"', search_call("registers"), "Registers")
+map("<leader>s/", search_call("searchhistory"), "Search History")
+map("<leader>sn", search_call("noice"), "Noice History")
 
-map("<leader>fw", rg.rg, "Grep (Fast)")
-map("<leader>/", rg.rg, "Grep (Fast)")
+map("<leader>fw", rg_call("rg"), "Grep (Fast)")
 local cmd = vim.api.nvim_create_user_command
 
 cmd("BrowseMain", function()
@@ -338,3 +335,4 @@ end, { desc = "Search DevDocs with current filetype" })
 cmd("BrowseMDN", function()
 	require("browse.mdn").search()
 end, { desc = "Search MDN" })
+

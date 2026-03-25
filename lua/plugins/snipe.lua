@@ -1,7 +1,7 @@
 return {
 	{
 		"Punity122333/snipe.nvim",
-		dir = "~/projects/snipe.nvim",
+		-- dir = "~/projects/snipe.nvim",
 		branch = "master",
 		lazy = false,
 		priority = 1000,

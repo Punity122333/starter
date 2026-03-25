@@ -1,3 +1,17 @@
+local function get_sig_win()
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local config = vim.api.nvim_win_get_config(win)
+		if config.relative ~= "" then
+			local buf = vim.api.nvim_win_get_buf(win)
+			local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+			if ft == "lsp_signature" or ft == "noice" then
+				return win
+			end
+		end
+	end
+	return nil
+end
+
 return {
 	"folke/noice.nvim",
 	opts = {
@@ -82,20 +96,6 @@ return {
 			return false
 		end
 
-		local function get_sig_win()
-			for _, win in ipairs(vim.api.nvim_list_wins()) do
-				local config = vim.api.nvim_win_get_config(win)
-				if config.relative ~= "" then
-					local buf = vim.api.nvim_win_get_buf(win)
-					local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-					if ft == "lsp_signature" or ft == "noice" then
-						return win
-					end
-				end
-			end
-			return nil
-		end
-
 		vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 			group = vim.api.nvim_create_augroup("SignatureAutoClose", { clear = true }),
 			callback = function()
@@ -114,19 +114,6 @@ return {
 		{
 			"<C-;>",
 			function()
-				local function get_sig_win()
-					for _, win in ipairs(vim.api.nvim_list_wins()) do
-						local config = vim.api.nvim_win_get_config(win)
-						if config.relative ~= "" then
-							local buf = vim.api.nvim_win_get_buf(win)
-							local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-							if ft == "lsp_signature" or ft == "noice" then
-								return win
-							end
-						end
-					end
-					return nil
-				end
 				if get_sig_win() then
 					require("noice").cmd("dismiss")
 				else
@@ -139,19 +126,6 @@ return {
 		{
 			"<C-,>",
 			function()
-				local function get_sig_win()
-					for _, win in ipairs(vim.api.nvim_list_wins()) do
-						local config = vim.api.nvim_win_get_config(win)
-						if config.relative ~= "" then
-							local buf = vim.api.nvim_win_get_buf(win)
-							local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
-							if ft == "lsp_signature" or ft == "noice" then
-								return win
-							end
-						end
-					end
-					return nil
-				end
 				if get_sig_win() then
 					require("noice").cmd("dismiss")
 				else

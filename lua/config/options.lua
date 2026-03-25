@@ -85,18 +85,6 @@ vim.opt.concealcursor = ""
 vim.g.VM_SET_STATUS_LINE = 0
 vim.g.VM_set_statusline = 0
 vim.opt.shiftwidth = 2
-
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_ruby_provider = 0
-vim.g.loaded_node_provider = 0
-vim.g.loaded_python3_provider = 0
-
-if vim.env[KITTY_SCROLLBACK_NVIM] == TRUE then
-	vim.g.loaded_matchit = 1
-	vim.g.loaded_netrwPlugin = 1
-end
-
-vim.opt.foldenable = false
 vim.o.winborder = BORDER_ROUNDED
 vim.opt.lazyredraw = true
 vim.g.loaded_matchparen = 1
