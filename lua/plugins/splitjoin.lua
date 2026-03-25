@@ -4,7 +4,7 @@ return {
     opts = {
       mappings = {
         toggle = "gS",
-        split = "gS",
+        split = "",
         join = "gJ",
       },
     },
