@@ -6,10 +6,18 @@ return {
 		explorer = {
 			enabled = true,
 			cycle = false,
+			-- Toggle these off if it still feels slow; gitui handles the info better
+			git_status = false,
 			win = {
 				layout = {
 					position = "right",
 					width = 0.15,
+				},
+				-- THIS IS THE HACK: Mapping your selection clears
+				list = {
+					keys = {
+						["<C-x>"] = "clear_selection",
+					},
 				},
 			},
 		},
@@ -39,6 +47,7 @@ return {
 			},
 			sources = {
 				grep = {
+					-- Keep it snappy: only search once you've typed a real query
 					finder = function(opts, ctx)
 						if #(ctx.filter.search or "") < 3 then
 							return {}
@@ -46,10 +55,21 @@ return {
 						return require("snacks.picker.source.grep").grep(opts, ctx)
 					end,
 				},
+				explorer = {
+					hidden = true,
+					ignored = true, -- Shows gitignored files by default
+					win = {
+						list = {
+							keys = {
+								["<C-x>"] = "clear_selection",
+							},
+						},
+					},
+				},
 			},
 		},
 		input = { enabled = true },
-		scroll = { enabled = false },
+		scroll = { enabled = false }, -- Good choice, scroll animations are for casuals
 		statuscolumn = { enabled = true },
 		words = { enabled = true },
 		image = { enabled = true },
@@ -61,6 +81,14 @@ return {
 				Snacks.terminal("gitui")
 			end,
 			desc = "GitUI",
+		},
+		-- Added a quick explorer toggle since it's a right-side sidebar now
+		{
+			"<leader>e",
+			function()
+				Snacks.explorer()
+			end,
+			desc = "Toggle Explorer",
 		},
 	},
 }
