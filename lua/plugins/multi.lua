@@ -9,13 +9,17 @@ return {
 			mc.setup({
 				updatetime = 50,
 			})
+
+			vim.keymap.set({ "n", "v" }, "\\q", function()
+				mc.toggleCursor()
+			end)
+
 			vim.keymap.set({ "n", "v" }, "\\k", function()
 				mc.lineAddCursor(-1)
 			end)
 			vim.keymap.set({ "n", "v" }, "\\j", function()
 				mc.lineAddCursor(1)
 			end)
-
 			vim.keymap.set({ "n", "v" }, "\\m", function()
 				mc.lineAddCursor(0)
 			end)

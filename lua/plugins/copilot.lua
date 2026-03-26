@@ -6,7 +6,7 @@ return {
 				enabled = true,
 				auto_trigger = true,
 				keymap = {
-					accept = "<Tab>",
+					accept = false, -- handled by blink-cmp Tab keymap
 					accept_word = false,
 					accept_line = false,
 					next = "<M-]>",
