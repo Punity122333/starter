@@ -31,6 +31,9 @@ return {
 			layout = {
 				preset = "default",
 				preview = false,
+        layout = {
+          backdrop = false,
+        },
 			},
 			exclude = {
 				".git",
@@ -40,7 +43,6 @@ return {
 			},
 			sources = {
 				grep = {
-					-- Keep it snappy: only search once you've typed a real query
 					finder = function(opts, ctx)
 						if #(ctx.filter.search or "") < 3 then
 							return {}
@@ -50,7 +52,7 @@ return {
 				},
 				explorer = {
 					hidden = true,
-					ignored = true, -- Shows gitignored files by default
+					ignored = true,
 					win = {
 						list = {
 							keys = {
@@ -62,7 +64,7 @@ return {
 			},
 		},
 		input = { enabled = true },
-		scroll = { enabled = false }, -- Good choice, scroll animations are for casuals
+		scroll = { enabled = false }, 
 		statuscolumn = { enabled = true },
 		words = { enabled = true },
 		image = { enabled = true },

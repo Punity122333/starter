@@ -1,6 +1,5 @@
 ; extends
 
-; Magic comment: /* css */` ... `
 (
   (comment) @_comment
   (#lua-match? @_comment "/%*%s*css%s*%*/")
@@ -9,7 +8,6 @@
   (#set! injection.include-children true)
 )
 
-; Tagged template: css` ... `
 (call_expression
   function: (identifier) @_tag
   (#eq? @_tag "css")
@@ -18,7 +16,6 @@
   (#set! injection.include-children true)
 )
 
-; styled.div` ... ` etc
 (call_expression
   function: (member_expression
     object: (identifier) @_tag
@@ -28,7 +25,6 @@
   (#set! injection.include-children true)
 )
 
-; styled(Component)` ... `
 (call_expression
   function: (call_expression
     function: (identifier) @_tag
@@ -38,7 +34,6 @@
   (#set! injection.include-children true)
 )
 
-; Magic comment: /* html */` ... `
 (
   (comment) @_comment
   (#lua-match? @_comment "/%*%s*html%s*%*/")
@@ -47,7 +42,6 @@
   (#set! injection.include-children true)
 )
 
-; Tagged template: html` ... `
 (call_expression
   function: (identifier) @_tag
   (#eq? @_tag "html")
@@ -56,7 +50,6 @@
   (#set! injection.include-children true)
 )
 
-; Magic comment: /* sql */` ... `
 (
   (comment) @_comment
   (#lua-match? @_comment "/%*%s*sql%s*%*/")
@@ -65,7 +58,6 @@
   (#set! injection.include-children true)
 )
 
-; Tagged template: sql` ... ` / SQL` ... `
 (call_expression
   function: (identifier) @_tag
   (#any-of? @_tag "sql" "SQL" "gql" "graphql")
@@ -74,7 +66,6 @@
   (#set! injection.include-children true)
 )
 
-; Magic comment: /* graphql */` ... `
 (
   (comment) @_comment
   (#lua-match? @_comment "/%*%s*graphql%s*%*/")
