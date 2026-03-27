@@ -33,7 +33,7 @@ return {
 				preview = false,
         layout = {
           backdrop = false,
-        },
+        }
 			},
 			exclude = {
 				".git",

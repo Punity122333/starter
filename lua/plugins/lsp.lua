@@ -211,6 +211,17 @@ return {
 						provideFormatter = true,
 					},
 				},
+				html = {
+					filetypes = { "html", "javascriptreact", "typescriptreact" },
+					init_options = {
+						configurationSection = { "html", "css", "javascript" },
+						embeddedLanguages = {
+							css = true,
+							javascript = true,
+						},
+						provideFormatter = true,
+					},
+				},
 			},
 		},
 		config = function(_, opts)
