@@ -9,6 +9,14 @@ return {
 			mode = { "n", "x" },
 			desc = " rip-substitute",
 		},
+		{
+			"<leader>rg",
+			function()
+				require("rip-substitute").sub()
+			end,
+			mode = { "n", "x" },
+			desc = " rip-substitute 2",
+		},
 	},
 	opts = {
 		popupWin = {
@@ -16,12 +24,11 @@ return {
 			position = "top",
 		},
 		ui = {
-			-- This moves it to the right side
 			position = "top",
 			align = "right",
 		},
 		keymaps = {
-			confirmAndSubstituteInBuffer = "<CR>",
+			confirmAndSubstiituteInBuffer = "<CR>",
 			insertModeConfirmAndSubstituteInBuffer = "<C-CR>",
 			abort = "q",
 			prevSubst = "<C-p>",

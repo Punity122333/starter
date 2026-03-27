@@ -3,7 +3,7 @@ return {
 	dependencies = { "nvim-telescope/telescope.nvim" },
 	keys = {
 		{
-			"<leader>bs",
+			"<leader>bw",
 			function()
 				require("browse").input_search()
 			end,
@@ -24,7 +24,7 @@ return {
 			desc = "Browse Bookmarks",
 		},
 		{
-			"<leader>bd",
+			"<leader>bt",
 			function()
 				require("browse.devdocs").search()
 			end,

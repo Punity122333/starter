@@ -140,7 +140,6 @@ vim.keymap.set("n", "gjl", "<cmd>Lspsaga show_buf_diagnostics<CR>", { desc = "Bu
 pcall(function()
 	require("which-key").add({ { "gj", group = "LSP Navigation" } })
 end)
-vim.keymap.set("n", "q", "<Nop>", { desc = "Disable macro recording" })
 vim.keymap.set("n", "<leader>[]", function()
 	local clients = vim.lsp.get_clients({ bufnr = 0 })
 	for _, client in ipairs(clients) do
@@ -286,7 +285,7 @@ map("<leader>sa", search_call("autocmds"), "Autocmds")
 map("<leader>sc", search_call("cmdhistory"), "Command History")
 map("<leader>sC", search_call("commands"), "Commands")
 map("<leader>sg", rg_call("rg"), "Grep (Root)")
-map("<leader>/", rg_call("rg"), "Grep (Root)")
+map("<leader>/", rg_call("rg"), "Grep (Root)",{ remap = true })
 map("<leader>s.", rg_call("rg"), "Grep (CWD)")
 map("<leader>sh", search_call("help"), "Help Pages")
 map("<leader>sH", search_call("highlights"), "Highlights")
@@ -337,3 +336,35 @@ end, { desc = "Search DevDocs with current filetype" })
 cmd("BrowseMDN", function()
 	require("browse.mdn").search()
 end, { desc = "Search MDN" })
+local function map(mode, lhs, rhs, desc)
+  vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
+end
+local function map(mode, lhs, rhs, desc)
+  vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
+end
+
+local modes = { "n", "o", "x" }
+
+map(modes, "gkiw", "<cmd>lua require('various-textobjs').subword('inner')<CR>", "Inner Subword")
+map(modes, "gkaw", "<cmd>lua require('various-textobjs').subword('outer')<CR>", "Outer Subword")
+map(modes, "gkim", "<cmd>lua require('various-textobjs').chainMember('inner')<CR>", "Inner Chain Member")
+map(modes, "gkam", "<cmd>lua require('various-textobjs').chainMember('outer')<CR>", "Outer Chain Member")
+map(modes, "gkic", "<cmd>lua require('various-textobjs').column('inner')<CR>", "Inner Column")
+map(modes, "gkac", "<cmd>lua require('various-textobjs').column('outer')<CR>", "Outer Column")
+
+map(modes, "gkii", "<cmd>lua require('various-textobjs').indentation('inner', 'inner')<CR>", "Inner Indent")
+map(modes, "gkai", "<cmd>lua require('various-textobjs') .indentation('outer', 'outer')<CR>", "Outer Indent")
+
+map(modes, "gkig", "<cmd>lua require('various-textobjs').entireBuffer()<CR>", "Entire Buffer")
+map(modes, "gkin", "<cmd>lua require('various-textobjs').nearLine('inner')<CR>", "Near Line")
+
+map(modes, "gkiu", "<cmd>lua require('various-textobjs').url()<CR>", "URL")
+map(modes, "gkid", "<cmd>lua require('various-textobjs').diagnostic()<CR>", "Diagnostic")
+map(modes, "gkik", "<cmd>lua require('various-textobjs').key('inner')<CR>", "Key")
+
+local wk = require("which-key")
+wk.add({
+  { "gk", group = "various-textobjs" },
+  { "gki", group = "inner" },
+  { "gka", group = "around" },
+})
