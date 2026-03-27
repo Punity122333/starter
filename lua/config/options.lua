@@ -88,3 +88,5 @@ vim.opt.shiftwidth = 2
 vim.o.winborder = BORDER_ROUNDED
 vim.opt.lazyredraw = true
 vim.g.loaded_matchparen = 1
+vim.opt.shortmess:append("S")
+vim.opt.hlsearch = false

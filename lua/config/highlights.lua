@@ -115,3 +115,6 @@ vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "#16161e", force = true })
 vim.cmd.highlight("MyTerminalBorder guifg=#1a1b26")
 
 vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+local hl = vim.api.nvim_get_hl(0, { name = "@keyword" })
+hl.bold = true
+vim.api.nvim_set_hl(0, "@keyword", hl)

@@ -337,4 +337,3 @@ end, { desc = "Search DevDocs with current filetype" })
 cmd("BrowseMDN", function()
 	require("browse.mdn").search()
 end, { desc = "Search MDN" })
-

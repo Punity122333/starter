@@ -6,18 +6,11 @@ return {
 		explorer = {
 			enabled = true,
 			cycle = false,
-			-- Toggle these off if it still feels slow; gitui handles the info better
 			git_status = false,
 			win = {
 				layout = {
 					position = "right",
 					width = 0.15,
-				},
-				-- THIS IS THE HACK: Mapping your selection clears
-				list = {
-					keys = {
-						["<C-x>"] = "clear_selection",
-					},
 				},
 			},
 		},
