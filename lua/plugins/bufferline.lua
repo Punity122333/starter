@@ -3,34 +3,34 @@ local function goto_buffer(count)
 end
 
 local BufferKeys = {
+  {
+    "<leader>ba",
+    function()
+      goto_buffer(1)
+    end,
+    desc = "Go to absolute buffer 1",
+  },
 	{
-		"<leader>ba",
-		function()
-			goto_buffer(1)
-		end,
-		desc = "Go to absolute buffer 1",
+    "<leader>bs",
+    function()
+      goto_buffer(2)
+    end,
+    desc = "Go to absolute buffer 2",
 	},
-	{
-		"<leader>bs",
-		function()
-			goto_buffer(2)
-		end,
-		desc = "Go to absolute buffer 2",
-	},
-	{
-		"<leader>bd",
-		function()
-			goto_buffer(3)
-		end,
-		desc = "Go to absolute buffer 3",
-	},
-	{
-		"<leader>bf",
-		function()
-			goto_buffer(4)
-		end,
-		desc = "Go to absolute buffer 4",
-	},
+  {
+    "<leader>bd",
+    function()
+      goto_buffer(3)
+    end,
+    desc = "Go to absolute buffer 3",
+  },
+  {
+    "<leader>bf",
+    function()
+      goto_buffer(4)
+    end,
+    desc = "Go to absolute buffer 4",
+  },
 	{
 		"<leader>bg",
 		function()
@@ -99,7 +99,6 @@ return {
 					},
 					separator_style = "thin",
 					diagnostics = "nvim_lsp",
-					-- Use 'ordinal' in the display so the numbers match your keys
 					numbers = function(numberopts)
 						local lettermap = { "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'" }
 						local letter = lettermap[numberopts.ordinal] or tostring(numberopts.ordinal)

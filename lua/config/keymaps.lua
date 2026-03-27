@@ -30,7 +30,7 @@ vim.api.nvim_create_user_command(COMMAND_SAVE_AND_QUIT_ALL_ALT1, function()
 	vim.cmd(COMMAND_SAVE_AND_QUIT)
 end, { desc = "Save all and quit cleanly" })
 
-vim.cmd([[ 
+vim.cmd([[
   cnoreabbrev <expr> wq getcmdtype() == ":" && getcmdline() == "wq" ? "WQ" : "wq"
   cnoreabbrev <expr> Wq getcmdtype() == ":" && getcmdline() == "Wq" ? "WQ" : "Wq"
   cnoreabbrev <expr> wqa getcmdtype() == ":" && getcmdline() == "wqa" ? "WQA" : "wqa"
@@ -39,6 +39,26 @@ vim.cmd([[
 
 vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
 vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
+
+-- Reselect after indent without cursor flicker.
+-- The flicker happens because Neovim redraws between > exiting visual mode
+-- (cursor jumps to block start) and gv re-entering it. Wrapping the two
+-- operations in a lazyredraw guard batches them into a single screen update.
+vim.keymap.set("v", ">", function()
+	local saved = vim.o.lazyredraw
+	vim.o.lazyredraw = true
+	vim.cmd("normal! >")
+	vim.cmd("normal! gv")
+	vim.o.lazyredraw = saved
+end, { noremap = true, silent = true, desc = "Indent and reselect" })
+
+vim.keymap.set("v", "<", function()
+	local saved = vim.o.lazyredraw
+	vim.o.lazyredraw = true
+	vim.cmd("normal! <")
+	vim.cmd("normal! gv")
+	vim.o.lazyredraw = saved
+end, { noremap = true, silent = true, desc = "Unindent and reselect" })
 
 vim.keymap.set("i", "<A-h>", "<Left>", { desc = "Move cursor left", silent = true })
 vim.keymap.set("i", "<A-j>", "<Down>", { desc = "Move cursor down", silent = true })

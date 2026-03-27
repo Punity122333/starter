@@ -6,13 +6,13 @@ return {
 		lazy = false,
 		priority = 1000,
 		keys = {
-			{
-				"<leader>ff",
-				function()
-					require("snipe.nav").files()
-				end,
-				desc = "files (fd)",
-			},
+      {
+        "<leader>ff",
+        function()
+          require("snipe.nav").files()
+        end,
+        desc = "files (fd)",
+      },
 			{
 				"<leader>fb",
 				function()

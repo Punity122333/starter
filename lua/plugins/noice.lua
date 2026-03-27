@@ -76,6 +76,7 @@ return {
 						{ find = "split" },
 						{ find = "modifiable" },
 						{ find = "decoding suggestions" },
+						{ find = "<ed" },
 					},
 				},
 				opts = { skip = true },
