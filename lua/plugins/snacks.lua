@@ -6,7 +6,6 @@ return {
         explorer = {
             enabled = true,
             cycle = false,
-            -- Toggle these off if it still feels slow; gitui handles the info better
             git_status = false,
             win = {
                 layout = {
@@ -41,7 +40,6 @@ return {
             },
             sources = {
                 grep = {
-                    -- Keep it snappy: only search once you've typed a real query
                     finder = function(opts, ctx)
                         if #(ctx.filter.search or "") < 3 then
                             return {}
@@ -51,7 +49,7 @@ return {
                 },
                 explorer = {
                     hidden = true,
-                    ignored = true, -- Shows gitignored files by default
+                    ignored = true,
                     win = {
                         list = {
                             keys = {
@@ -63,12 +61,12 @@ return {
             },
         },
         input = { enabled = true },
-        scroll = { enabled = false }, -- Good choice, scroll animations are for casuals
+        scroll = { enabled = false }, 
         statuscolumn = { enabled = true },
         words = { enabled = true },
         image = {
             enabled = true,
-            math = { enabled = false }, -- disable auto LaTeX math rendering
+            math = { enabled = false },
         },
     },
     keys = {
@@ -79,7 +77,6 @@ return {
             end,
             desc = "GitUI",
         },
-        -- Added a quick explorer toggle since it's a right-side sidebar now
         {
             "<leader>e",
             function()
