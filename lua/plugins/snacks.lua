@@ -3,6 +3,18 @@ return {
     priority = 1000,
     lazy = false,
     opts = {
+      scratch = {
+        enabled = true,
+        win = {
+            layout = {
+                position = "center",
+                width = 0.5,
+                height = 0.5,
+                backdrop = false,
+            },
+            backdrop = false,
+        },
+      },
         explorer = {
             enabled = true,
             cycle = false,
@@ -31,6 +43,9 @@ return {
             layout = {
                 preset = "default",
                 preview = false,
+                layout = {
+                  backdrop = false,
+                },
             },
             exclude = {
                 ".git",

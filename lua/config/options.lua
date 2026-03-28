@@ -83,6 +83,9 @@ vim.env.PATH = vim.fn.expand(MASON_BIN) .. vim.env.PATH
 vim.opt.relativenumber = true
 vim.opt.number = true
 
+vim.opt.wrap = false
+vim.opt.sidescrolloff = 8
+
 vim.opt.list = false
 vim.g.VM_theme = "neon"
 vim.opt.concealcursor = ""
@@ -106,6 +109,19 @@ vim.g.vimtex_syntax_conceal = {
     math_super_sub = 0,
     sections = 0,
     styles = 0,
+}
+
+vim.g.clipboard = {
+  name = 'wl-copy',
+  copy = {
+     ['+'] = 'wl-copy',
+     ['*'] = 'wl-copy',
+  },
+  paste = {
+     ['+'] = 'wl-paste',
+     ['*'] = 'wl-paste',
+  },
+  cache_enabled = 1,
 }
 
 vim.g.vimtex_syntax_conceal_disable = 1

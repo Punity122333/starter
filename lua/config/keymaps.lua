@@ -40,24 +40,68 @@ vim.cmd([[
 vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
 vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
 
-local _scroll_ts = 0
+local _scroll_ts         = 0
 local SCROLL_DEBOUNCE_MS = 120
-local _sv = { noremap = true, silent = true }
-local _uv = vim.uv or vim.loop
+local _sv                = { noremap = true, silent = true }
+local _uv                = vim.uv or vim.loop
 
-local function make_scroll(amount)
-    return function()
-        _scroll_ts = _uv.now()
-        vim.cmd("normal! " .. math.abs(amount) .. (amount > 0 and "\025" or "\005"))
+-- ── Scroll accumulator — coalesces rapid events into a single redraw ─────
+-- Each wheel event adds to a pending delta and schedules one flush via
+-- vim.schedule. Events that arrive before the flush fires (i.e. the whole
+-- burst) are summed and applied in one vim.cmd call → one redraw.
+local _pending_v         = 0 -- positive = up (C-y), negative = down (C-e)
+local _pending_h         = 0 -- positive = right (zl), negative = left (zh)
+local _flush_sched       = false
+
+local function flush_scroll()
+    _flush_sched = false
+    local v, h = _pending_v, _pending_h
+    _pending_v, _pending_h = 0, 0
+    if v == 0 and h == 0 then return end
+    if v ~= 0 then
+        vim.cmd("normal! " .. math.abs(v) .. (v > 0 and "\025" or "\005"))
+    end
+    if h ~= 0 then
+        vim.cmd("normal! " .. math.abs(h) .. (h > 0 and "zl" or "zh"))
     end
 end
 
-local _i_up   = vim.api.nvim_replace_termcodes("<C-o><C-y><C-o><C-y><C-o><C-y>", true, false, true)
-local _i_down = vim.api.nvim_replace_termcodes("<C-o><C-e><C-o><C-e><C-o><C-e>", true, false, true)
+local function queue_scroll(dv, dh)
+    _scroll_ts = _uv.now()
+    _pending_v = _pending_v + dv
+    _pending_h = _pending_h + dh
+    if not _flush_sched then
+        _flush_sched = true
+        vim.schedule(flush_scroll)
+    end
+end
+
+-- Insert-mode sequences fed directly into the key queue (not batched —
+-- C-o already keeps them lightweight and mode-safe).
+local _i_up     = vim.api.nvim_replace_termcodes("<C-o><C-y><C-o><C-y><C-o><C-y>", true, false, true)
+local _i_down   = vim.api.nvim_replace_termcodes("<C-o><C-e><C-o><C-e><C-o><C-e>", true, false, true)
+local _i_hleft  = vim.api.nvim_replace_termcodes("<C-o>6zh", true, false, true)
+local _i_hright = vim.api.nvim_replace_termcodes("<C-o>6zl", true, false, true)
 
 for _, dir in ipairs({ "Up", "Down" }) do
-    local fn   = make_scroll(dir == "Up" and 3 or -3)
+    local dv   = dir == "Up" and 3 or -3
     local iseq = dir == "Up" and _i_up or _i_down
+    local fn   = function() queue_scroll(dv, 0) end
+    local i_fn = function()
+        _scroll_ts = _uv.now()
+        vim.api.nvim_feedkeys(iseq, "m", false)
+    end
+    for _, mult in ipairs({ "", "2-", "3-", "4-" }) do
+        local lhs = "<" .. mult .. "ScrollWheel" .. dir .. ">"
+        vim.keymap.set({ "n", "v" }, lhs, fn, _sv)
+        vim.keymap.set("i", lhs, i_fn, _sv)
+    end
+end
+
+for _, dir in ipairs({ "Left", "Right" }) do
+    local dh   = dir == "Right" and 6 or -6
+    local iseq = dir == "Right" and _i_hright or _i_hleft
+    local fn   = function() queue_scroll(0, dh) end
     local i_fn = function()
         _scroll_ts = _uv.now()
         vim.api.nvim_feedkeys(iseq, "m", false)
