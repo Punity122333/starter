@@ -108,6 +108,7 @@ vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = "NONE" })
 vim.api.nvim_set_hl(0, "ToggleTerm1FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
 vim.api.nvim_set_hl(0, "ToggleTerm2FloatBorder", { bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true })
 vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(0, "PmenuKind", { bg = NONE, force = true })
 
 vim.api.nvim_set_hl(0, "StatusLine", { bg = "#16161e", force = true })
 vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "#16161e", force = true })
