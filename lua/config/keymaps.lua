@@ -40,34 +40,43 @@ vim.cmd([[
 vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
 vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
 
--- Fix: prevent cursor jumping during fast mouse scrolling.
--- Default <ScrollWheel*> moves the viewport AND repositions the cursor when it
--- reaches the edge.  With many queued-up events this makes the cursor burst
--- across the buffer.  Remapping to <C-e>/<C-y> restricts movement to one line
--- at a time and keeps the cursor stable while you are purely scrolling.
--- The <2-/3-/4-ScrollWheel*> variants cover the "rapid-fire" repeat events
--- that some terminals emit when the wheel is spun quickly.
+local _scroll_ts = 0
+local SCROLL_DEBOUNCE_MS = 120
 local _sv = { noremap = true, silent = true }
-for _, dir in ipairs({ "Up", "Down" }) do
-    -- n/v: <C-y>/<C-e> scrolls the viewport without moving the cursor
-    local nv_key = dir == "Up" and "<C-y><C-y><C-y>" or "<C-e><C-e><C-e>"
-    -- i: <C-o> executes exactly ONE normal command then returns to insert mode,
-    --    so each scroll step needs its own <C-o> prefix.
-    --    Plain <C-y>/<C-e> in insert mode would insert/delete text instead.
-    local i_key = dir == "Up"
-        and "<C-o><C-y><C-o><C-y><C-o><C-y>"
-        or "<C-o><C-e><C-o><C-e><C-o><C-e>"
-    for _, mult in ipairs({ "", "2-", "3-", "4-" }) do
-        local lhs = "<" .. mult .. "ScrollWheel" .. dir .. ">"
-        vim.keymap.set({ "n", "v" }, lhs, nv_key, _sv)
-        vim.keymap.set("i", lhs, i_key, _sv)
+local _uv = vim.uv or vim.loop
+
+local function make_scroll(amount)
+    return function()
+        _scroll_ts = _uv.now()
+        vim.cmd("normal! " .. math.abs(amount) .. (amount > 0 and "\025" or "\005"))
     end
 end
 
--- Reselect after indent without cursor flicker.
--- The flicker happens because Neovim redraws between > exiting visual mode
--- (cursor jumps to block start) and gv re-entering it. Wrapping the two
--- operations in a lazyredraw guard batches them into a single screen update.
+local _i_up   = vim.api.nvim_replace_termcodes("<C-o><C-y><C-o><C-y><C-o><C-y>", true, false, true)
+local _i_down = vim.api.nvim_replace_termcodes("<C-o><C-e><C-o><C-e><C-o><C-e>", true, false, true)
+
+for _, dir in ipairs({ "Up", "Down" }) do
+    local fn   = make_scroll(dir == "Up" and 3 or -3)
+    local iseq = dir == "Up" and _i_up or _i_down
+    local i_fn = function()
+        _scroll_ts = _uv.now()
+        vim.api.nvim_feedkeys(iseq, "m", false)
+    end
+    for _, mult in ipairs({ "", "2-", "3-", "4-" }) do
+        local lhs = "<" .. mult .. "ScrollWheel" .. dir .. ">"
+        vim.keymap.set({ "n", "v" }, lhs, fn, _sv)
+        vim.keymap.set("i", lhs, i_fn, _sv)
+    end
+end
+
+local _lm_raw = vim.api.nvim_replace_termcodes("<LeftMouse>", true, false, true)
+vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
+    if _uv.now() - _scroll_ts < SCROLL_DEBOUNCE_MS then
+        return -- spurious click during scroll burst — drop silently
+    end
+    vim.api.nvim_feedkeys(_lm_raw, "n", false)
+end, _sv)
+
 vim.keymap.set("v", ">", function()
     local saved = vim.o.lazyredraw
     vim.o.lazyredraw = true

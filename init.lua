@@ -115,7 +115,6 @@ end
 
 -- ─── theme ───────────────────────────────────────────────────────────────────
 
--- Names whose background must not be flattened to the primary bg.
 local PROTECTED_PATTERNS = {
     "Border",
     "Prompt",
