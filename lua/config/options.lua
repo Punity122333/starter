@@ -1,3 +1,7 @@
+vim.ui.open = function(path)
+    vim.fn.jobstart({ "xdg-open", path }, { detach = true })
+end
+
 local COLOR_SIGNATURE_BG = "#15151c"
 local COLOR_SIGNATURE_BORDER = "#232330"
 local COLOR_ALPHA_HEADER = "#7aa2f7"

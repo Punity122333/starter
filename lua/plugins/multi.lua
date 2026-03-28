@@ -1,81 +1,82 @@
 return {
-	{
-		"jake-stewart/multicursor.nvim",
-		branch = "main",
-		lazy = false,
-		config = function()
-			local mc = require("multicursor-nvim")
+    {
+        "jake-stewart/multicursor.nvim",
+        branch = "main",
+        lazy = false,
+        config = function()
+            local mc = require("multicursor-nvim")
 
-			mc.setup({
-				updatetime = 150,
-			})
+            mc.setup({
+                updatetime = 150,
+            })
 
-			local function clear_all()
-				if mc.hasCursors() then
-					mc.clearCursors()
-					vim.cmd("redraw!")
-					vim.cmd("nohlsearch")
-				else
-					vim.cmd("nohlsearch")
-				end
-			end
+            local function clear_all()
+                if mc.hasCursors() then
+                    mc.clearCursors()
+                    vim.cmd("redraw!")
+                    vim.cmd("nohlsearch")
+                else
+                    vim.cmd("nohlsearch")
+                end
+            end
 
-			local function toggleCursorState()
-				if mc.cursorsEnabled() then
-					mc.toggleCursor()
-					mc.disableCursors()
-				else
-					mc.toggleCursor()
-					mc.enableCursors()
-				end
-			end
+            local function toggleCursorState()
+                if mc.cursorsEnabled() then
+                    mc.toggleCursor()
+                    mc.disableCursors()
+                else
+                    mc.toggleCursor()
+                    mc.enableCursors()
+                end
+            end
 
-			local set = vim.keymap.set
+            local set = vim.keymap.set
 
-			set({ "n", "v" }, "L", function()
-				if not mc.hasCursors() then
-					vim.cmd("normal! n")
-				else
-					mc.nextCursor()
-				end
-			end)
+            set({ "n", "v" }, "L", function()
+                if not mc.hasCursors() then
+                    vim.cmd("normal! n")
+                else
+                    mc.nextCursor()
+                end
+            end, { desc = "Next cursor/search" })
 
-			set({ "n", "v" }, "H", function()
-				if not mc.hasCursors() then
-					vim.cmd("normal! N")
-				else
-					mc.prevCursor()
-				end
-			end)
+            set({ "n", "v" }, "H", function()
+                if not mc.hasCursors() then
+                    vim.cmd("normal! N")
+                else
+                    mc.prevCursor()
+                end
+            end, { desc = "Prev cursor/search" })
 
-			set({ "n", "v" }, "n", "<Nop>")
-			set({ "n", "v" }, "N", "<Nop>")
+            set({ "n", "v" }, "n", "<Nop>", { desc = "Disable n" })
+            set({ "n", "v" }, "N", "<Nop>", { desc = "Disable N" })
 
-			set({ "n", "v" }, "\\q", mc.toggleCursor)
-			set({ "n", "v" }, "\\k", function()
-				mc.lineAddCursor(-1)
-			end)
-			set({ "n", "v" }, "\\j", function()
-				mc.lineAddCursor(1)
-			end)
-			set({ "n", "v" }, "\\m", function()
-				mc.lineAddCursor(0)
-			end)
+            set({ "n", "v" }, "\\q", mc.toggleCursor,
+                { desc = "Toggle cursor" })
+            set({ "n", "v" }, "\\k", function()
+                mc.lineAddCursor(-1)
+            end, { desc = "Add cursor above" })
+            set({ "n", "v" }, "\\j", function()
+                mc.lineAddCursor(1)
+            end, { desc = "Add cursor below" })
+            set({ "n", "v" }, "\\m", function()
+                mc.lineAddCursor(0)
+            end, { desc = "Add cursor here" })
 
-			set({ "n", "v" }, "\\n", function()
-				mc.matchAddCursor(1)
-			end)
-			set({ "n", "v" }, "\\s", function()
-				mc.matchSkipCursor(1)
-			end)
-			set({ "n", "v" }, "\\a", mc.matchAllAddCursors)
+            set({ "n", "v" }, "\\n", function()
+                mc.matchAddCursor(1)
+            end, { desc = "Add cursor match" })
+            set({ "n", "v" }, "\\s", function()
+                mc.matchSkipCursor(1)
+            end, { desc = "Skip match" })
+            set({ "n", "v" }, "\\a", mc.matchAllAddCursors, { desc = "Add cursors (all)" })
 
-			set({ "n", "v" }, "\\c", clear_all)
-			set({ "n", "v" }, "\\w", toggleCursorState) 
-		end,
-	},
-	{
-		"mg979/vim-visual-multi",
-		enabled = false,
-	},
+            set({ "n", "v" }, "\\c", clear_all, { desc = "Clear cursors" })
+            set({ "n", "v" }, "\\w", toggleCursorState, { desc = "Toggle multicursor" })
+        end,
+    },
+    {
+        "mg979/vim-visual-multi",
+        enabled = false,
+    },
 }
