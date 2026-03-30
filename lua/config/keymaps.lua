@@ -162,7 +162,7 @@ vim.keymap.set("n", "<leader>fD", function()
         title = "Home Search",
         exclude = { "node_modules", ".git", ".cache", "__pycache__", ".venv", "venv", "build", "dist" },
     })
-end, { desc = "Search Home" })
+end, { desc = "Search from Home Directory" })
 
 vim.keymap.set("n", "<leader>fx", function()
     Snacks.explorer.reveal()
@@ -213,7 +213,7 @@ local function wrap_saga(cmd)
     end
 end
 
-vim.keymap.set("n", "gh", wrap_saga("Lspsaga finder"), { desc = "LSP Finder" })
+vim.keymap.set("n", "gT", wrap_saga("Lspsaga finder"), { desc = "LSP Finder" })
 vim.keymap.set("n", "K", wrap_saga("Lspsaga hover_doc"), { desc = "Hover Docs" })
 vim.keymap.set("n", "gjd", wrap_saga("Lspsaga goto_definition"), { desc = "Goto Definition" })
 vim.keymap.set("n", "gjt", wrap_saga("Lspsaga peek_type_definition"), { desc = "Peek Type Definition" })
@@ -300,32 +300,7 @@ vim.keymap.set("n", "<leader>t<Left>", "<cmd>ToggleTerm direction=vertical<cr>",
 vim.keymap.set("n", "<leader>t<Right>", "<cmd>ToggleTerm direction=vertical<cr>", opts)
 
 vim.keymap.set("o", "f", "f", { remap = true })
-pcall(vim.keymap.del, "n", "<leader>sb")
-vim.keymap.set("n", "<leader>sb", function()
-    local width = 0.35
-    Snacks.picker.lines({
-        on_show = function(picker)
-            if #picker:filter().search < 2 then
-                picker:filter().search = ""
-            end
-        end,
-        layout = {
-            preset = "default",
-            preview = false,
-            layout = {
-                backdrop = false,
-                row = 0,
-                col = 1 - width,
-                width = width,
-                height = 0.4,
-                border = "rounded",
-                box = "vertical",
-                { win = "input", height = 1,     border = "bottom" },
-                { win = "list",  border = "none" },
-            },
-        },
-    })
-end, { desc = "Search Current Buffer" })
+
 
 vim.keymap.set("n", "<leader>rb", "<cmd>edit!<cr>", { desc = "Refresh Buffer" })
 local map = function(keys, func, desc)
@@ -451,6 +426,9 @@ map(modes, "gkin", "<cmd>lua require('various-textobjs').nearLine('inner')<CR>",
 map(modes, "gkiu", "<cmd>lua require('various-textobjs').url()<CR>", "URL")
 map(modes, "gkid", "<cmd>lua require('various-textobjs').diagnostic()<CR>", "Diagnostic")
 map(modes, "gkik", "<cmd>lua require('various-textobjs').key('inner')<CR>", "Key")
+
+map("n", "gD", "<cmd>Lspsaga goto_definition<CR>")
+
 local wk = require("which-key")
 
 wk.add({
@@ -459,3 +437,7 @@ wk.add({
     { "gka", group = "around" },
 })
 
+
+vim.keymap.set("i", "<C-S-k>", function()
+  require("avante.suggestion").show()
+end, { desc = "manual avante suggestion" })

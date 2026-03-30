@@ -4,7 +4,7 @@ return {
 		opts = {
 			operators = {
 				evaluate = {
-					prefix = "gm=",
+					prefix = "gz=",
 					func = function(content)
 						local expr = table.concat(content.lines, "\n")
 						local f, err = load("return " .. expr)
@@ -17,10 +17,10 @@ return {
 						return content.lines
 					end,
 				},
-				exchange = { prefix = "gmx" },
-				multiply = { prefix = "gmm" },
-				replace = { prefix = "gmr" },
-				sort = { prefix = "gms" },
+				exchange = { prefix = "gzx" },
+				multiply = { prefix = "gzm" },
+				replace = { prefix = "gzr" },
+				sort = { prefix = "gzr" },
 			},
 		},
 		config = function(_, opts)

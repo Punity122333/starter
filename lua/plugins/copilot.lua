@@ -3,8 +3,8 @@ return {
 		"zbirenbaum/copilot.lua",
 		opts = {
 			suggestion = {
-				enabled = true,
-				auto_trigger = true,
+				enabled = false,
+				auto_trigger = false,
 				keymap = {
 					accept = false, -- handled by blink-cmp Tab keymap
 					accept_word = false,

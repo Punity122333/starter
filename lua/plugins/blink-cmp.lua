@@ -7,7 +7,7 @@ return {
 			end,
 			completion = {
 				list = {
-					selection = { preselect = false, auto_insert = false },
+					selection = { preselect = true, auto_insert = false },
 				},
 				ghost_text = { enabled = false },
 				trigger = {

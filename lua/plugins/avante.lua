@@ -9,7 +9,7 @@ end
 return {
 	{
 		"yetone/avante.nvim",
-		event = "VeryLazy",
+    event = "VeryLazy",
 		version = false,
 		build = "make",
 		opts = {
@@ -20,7 +20,7 @@ return {
 			providers = {
 				copilot = {
 					endpoint = "https://api.githubcopilot.com",
-					model = "gpt-4o",
+					model = "gpt-5-mini",
 					proxy = nil,
 					allow_insecure_call = true,
 					timeout = 5000,
@@ -28,7 +28,7 @@ return {
 			},
 			behaviour = {
 				enable_cursor_planning_mode = true,
-				auto_suggestions = true,
+				auto_suggestions = false,
 				auto_set_highlight_group = true,
 				auto_set_keymaps = true,
 				auto_apply_diff_after_generation = false,

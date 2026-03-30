@@ -1,6 +1,6 @@
 local ImmediateSaveEvents = { "BufLeave", "FocusLost" }
 local DeferSaveEvents = { "InsertLeave", "TextChanged" }
-local CancelDeferredSaveEvents = { "InsertEnter" }
+local CancelDeferredSaveEvents = {  }
 local DebounceDelay = 20000
     
 return {
