@@ -9,6 +9,7 @@
   "blink.compat": { "branch": "main", "commit": "2ed6d9a28b07fa6f3bface818470605f8896408c" },
   "browse.nvim": { "branch": "main", "commit": "31c19629212b66801a467cdf8127d8639e5ebb7e" },
   "bufferline.nvim": { "branch": "main", "commit": "655133c3b4c3e5e05ec549b9f8cc2894ac6f51b3" },
+  "case-dial.nvim": { "branch": "main", "commit": "f5206dcd057053553e4c371f578734b7ec50760a" },
   "catppuccin": { "branch": "main", "commit": "a7788416689dbefea659d9e9415c87926b0ba5d8" },
   "clangd_extensions.nvim": { "branch": "main", "commit": "c9f2190064c4b42d5ce58419684251771019961f" },
   "cmp-latex-symbols": { "branch": "main", "commit": "0f8a9539f4c1c8fcf3b5244866b07b9d07282fa2" },

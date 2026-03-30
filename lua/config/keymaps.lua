@@ -45,12 +45,8 @@ local SCROLL_DEBOUNCE_MS = 120
 local _sv                = { noremap = true, silent = true }
 local _uv                = vim.uv or vim.loop
 
--- ── Scroll accumulator — coalesces rapid events into a single redraw ─────
--- Each wheel event adds to a pending delta and schedules one flush via
--- vim.schedule. Events that arrive before the flush fires (i.e. the whole
--- burst) are summed and applied in one vim.cmd call → one redraw.
-local _pending_v         = 0 -- positive = up (C-y), negative = down (C-e)
-local _pending_h         = 0 -- positive = right (zl), negative = left (zh)
+local _pending_v         = 0
+local _pending_h         = 0
 local _flush_sched       = false
 
 local function flush_scroll()
@@ -76,8 +72,6 @@ local function queue_scroll(dv, dh)
     end
 end
 
--- Insert-mode sequences fed directly into the key queue (not batched —
--- C-o already keeps them lightweight and mode-safe).
 local _i_up     = vim.api.nvim_replace_termcodes("<C-o><C-y><C-o><C-y><C-o><C-y>", true, false, true)
 local _i_down   = vim.api.nvim_replace_termcodes("<C-o><C-e><C-o><C-e><C-o><C-e>", true, false, true)
 local _i_hleft  = vim.api.nvim_replace_termcodes("<C-o>6zh", true, false, true)
@@ -116,7 +110,6 @@ end
 local _lm_raw = vim.api.nvim_replace_termcodes("<LeftMouse>", true, false, true)
 vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
     if _uv.now() - _scroll_ts < SCROLL_DEBOUNCE_MS then
-        return -- spurious click during scroll burst — drop silently
     end
     vim.api.nvim_feedkeys(_lm_raw, "n", false)
 end, _sv)
@@ -458,10 +451,11 @@ map(modes, "gkin", "<cmd>lua require('various-textobjs').nearLine('inner')<CR>",
 map(modes, "gkiu", "<cmd>lua require('various-textobjs').url()<CR>", "URL")
 map(modes, "gkid", "<cmd>lua require('various-textobjs').diagnostic()<CR>", "Diagnostic")
 map(modes, "gkik", "<cmd>lua require('various-textobjs').key('inner')<CR>", "Key")
-
 local wk = require("which-key")
+
 wk.add({
     { "gk",  group = "various-textobjs" },
     { "gki", group = "inner" },
     { "gka", group = "around" },
 })
+

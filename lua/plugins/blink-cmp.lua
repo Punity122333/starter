@@ -7,9 +7,9 @@ return {
 			end,
 			completion = {
 				list = {
-					selection = { preselect = true, auto_insert = false },
+					selection = { preselect = false, auto_insert = false },
 				},
-				ghost_text = { enabled = true },
+				ghost_text = { enabled = false },
 				trigger = {
 					show_on_keyword = true,
 					show_on_trigger_character = true,
@@ -67,14 +67,12 @@ return {
 				},
 				["<Tab>"] = {
 					function(cmp)
-						-- 1. accept copilot ghost text first
 						local copilot_ok, copilot = pcall(require, "copilot.suggestion")
 						if copilot_ok and copilot.is_visible() then
 							copilot.accept()
 							return true
 						end
 
-						-- 2. handle snippets
 						if vim.snippet and vim.snippet.active({ direction = 1 }) then
 							vim.schedule(function()
 								vim.snippet.jump(1)
