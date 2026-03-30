@@ -24,7 +24,7 @@ require("lazy").setup({
 		{ import = "plugins" },
 	},
 	defaults = {
-		lazy = not force_all,
+		lazy = false,
 		version = false,
 	},
 	concurrency = force_all and 100 or nil,

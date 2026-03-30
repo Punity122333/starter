@@ -17,7 +17,7 @@ local NPM_GLOBAL_BIN = "~/.npm-global/bin:"
 local LOCAL_BIN = "~/.local/bin:"
 local MASON_BIN = "~/.local/share/nvim/mason/bin:"
 
-vim.opt.timeoutlen = 130
+vim.opt.timeoutlen = 300
 vim.opt.ttimeoutlen = 10
 vim.g.autoformat = false
 local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview

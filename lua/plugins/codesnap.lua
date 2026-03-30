@@ -111,7 +111,7 @@ return {
                     },
                 },
                 watermark = {
-                    content = "Pxnity",
+                    content = "Made by Pxnity",
                     font_family = "FantasqueSansM Nerd Font",
                     color = "#7aa2f7",
                 },
