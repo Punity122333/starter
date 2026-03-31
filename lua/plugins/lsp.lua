@@ -81,7 +81,6 @@ return {
 				lua_ls = {
 					on_attach = function(client, bufnr)
 						client.server_capabilities.diagnosticProvider = false
-						vim.diagnostic.enable(false, { bufnr = bufnr })
 						client.server_capabilities.semanticTokensProvider = nil
 						client.server_capabilities.documentSymbolProvider = false
 					end,
@@ -90,6 +89,7 @@ return {
 							runtime = { version = "LuaJIT" },
 							diagnostics = {
 								globals = { "vim" },
+                updateOn = "OnSave",
 								disable = { "lowercase-global", "undefined-global", "missing-fields" },
 							},
 							checkThirdParty = false,

@@ -4,8 +4,6 @@ local COLOR_SELECTION_BLUE = "#28344a"
 local COLOR_BACKGROUND_SECONDARY = "#111116"
 local COLOR_FOREGROUND_ACCENT = "#111116"
 local COLOR_FOREGROUND_SECONDARY = "#232330"
-local COLOR_CURSOR_FOREGROUND = "#000000"
-local COLOR_CURSOR_BACKGROUND = "#00ff00"
 local COLOR_SNACKS_SELECTION_BG = "#1a1b26"
 local COLOR_SNACKS_PICKER_SELECTED = "#88c0d0"
 local COLOR_BORDER = "#27a1b9"
@@ -122,4 +120,4 @@ vim.cmd.highlight("MyTerminalBorder guifg=#1a1b26")
 vim.opt.guicursor = "n-v-c-sm:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
 local hl = vim.api.nvim_get_hl(0, { name = "@keyword" })
 hl.bold = true
-vim.api.nvim_set_hl(0, "@keyword", hl)
+vim.api.nvim_set_hl(0, "@keyword", { bold = true })
