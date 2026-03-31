@@ -6,8 +6,6 @@ local COLOR_CURSOR_FG = "#000000"
 local COLOR_CURSOR_BG = "#00ff00"
 local FLAG_FORCE_ALL = os.getenv("NO_LAZY") == "1"
 
--- ─── path ────────────────────────────────────────────────────────────────────
-
 do
 	local home = vim.fn.expand("~")
 	vim.env.PATH = table.concat({
@@ -20,8 +18,6 @@ do
 	package.path = package.path .. ";" .. lr .. "/share/lua/5.1/?/init.lua;" .. lr .. "/share/lua/5.1/?.lua;"
 	package.cpath = package.cpath .. ";" .. lr .. "/lib/lua/5.1/?.so;"
 end
-
--- ─── treesitter / render-markdown snacks guard ───────────────────────────────
 
 local orig_ts_start = vim.treesitter.start
 vim.treesitter.start = function(buf, lang)
@@ -44,8 +40,6 @@ if ok then
 		orig_rm_attach(buf)
 	end
 end
-
--- ─── options / globals ───────────────────────────────────────────────────────
 
 vim.opt.relativenumber = true
 vim.opt.number = true
@@ -158,14 +152,24 @@ local function apply_theme()
 			goto continue
 		end
 
-		if
-			SELECTION_NAMES[name]
+		local is_ui_selection = SELECTION_NAMES[name]
 			or (
 				name:find("Selected", 1, true)
 				and (name:find("SnacksPicker", 1, true) or name:find("Telescope", 1, true))
 			)
-		then
+
+		if is_ui_selection then
 			set(0, name, { bg = COLOR_BG_SELECTION, fg = hl.fg, force = true })
+			goto continue
+		end
+
+		if
+			name:find("@markup", 1, true)
+			or name:find("@markdown", 1, true)
+			or name:find("@conceal", 1, true)
+			or name:find("@spell", 1, true)
+		then
+			set(0, name, { bg = "NONE", fg = hl.fg, bold = false, force = true })
 			goto continue
 		end
 
@@ -199,16 +203,14 @@ local function apply_theme()
 	end
 	set(0, "DiagnosticUnnecessary", { fg = COLOR_UNUSED_DIAGNOSTIC, strikethrough = true, force = true })
 
-	for _, g in ipairs({
-		"LspReferenceText",
-	}) do
+	for _, g in ipairs({ "LspReferenceText" }) do
 		set(0, g, { bg = COLOR_BG_SELECTION, force = true })
 	end
 	set(0, "LspReferenceRead", { bg = "NONE", force = true })
 	set(0, "LspReferenceWrite", { bg = "NONE", force = true })
 
 	set(0, "MarkdownBold", { fg = COLOR_FG_MARKDOWN_BOLD, bold = true, force = true })
-	set(0, "@MarkupStrong", { fg = COLOR_FG_MARKDOWN_BOLD, bold = true, force = true })
+	set(0, "@markup.strong", { fg = COLOR_FG_MARKDOWN_BOLD, bold = true, force = true })
 
 	set(0, "BlinkCmpKindFile", { bg = "NONE", force = true })
 	set(0, "LspKindFile", { bg = "NONE", force = true })
@@ -228,7 +230,6 @@ end
 
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 	group = vim.api.nvim_create_augroup("ThemeGodMode", { clear = true }),
-
 	callback = apply_theme,
 })
 

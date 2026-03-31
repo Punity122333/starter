@@ -2,9 +2,9 @@ local ImmediateSaveEvents = { "BufLeave", "FocusLost" }
 local DeferSaveEvents = { "InsertLeave", "TextChanged" }
 local CancelDeferredSaveEvents = {  }
 local DebounceDelay = 20000
-    
+
 return {
-	{  
+	{
 		"okuuva/auto-save.nvim",
 		event = { "InsertLeave", "BufReadPre" },
 		opts = {

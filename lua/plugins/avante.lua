@@ -20,7 +20,7 @@ return {
 			providers = {
 				copilot = {
 					endpoint = "https://api.githubcopilot.com",
-					model = "gpt-5-mini",
+					model = "gpt-4o",
 					proxy = nil,
 					allow_insecure_call = true,
 					timeout = 5000,
@@ -81,7 +81,7 @@ return {
 				callback = function()
 					if not is_online() then
 						local ok, suggestion = pcall(require, "avante.suggestion")
-						if ok and suggestion.stop then
+						if ok and suggestion.stop ~= nil then
 							pcall(suggestion.stop)
 						end
 					end
