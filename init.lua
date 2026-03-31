@@ -54,7 +54,6 @@ vim.opt.concealcursor = ""
 vim.g.VM_THEME = ""
 vim.g.VM_SET_STATUSLINE = 0
 
--- ─── clipboard (wayland) ─────────────────────────────────────────────────────
 
 if vim.fn.has("wayland") == 1 then
     vim.g.clipboard = {
@@ -65,7 +64,6 @@ if vim.fn.has("wayland") == 1 then
     }
 end
 
--- ─── lazy / highlights ───────────────────────────────────────────────────────
 
 require("config.lazy")
 require("config.highlights")
@@ -78,7 +76,6 @@ vim.defer_fn(function()
     end
 end, 300)
 
--- ─── keymaps ─────────────────────────────────────────────────────────────────
 
 vim.keymap.set("n", "hi", ":Inspect<CR>")
 
@@ -91,7 +88,6 @@ vim.keymap.set("n", "<leader>mi", function()
     print(vim.inspect(vim.inspect_pos(buf, mp.line - 1, mp.column - 1)))
 end, { desc = "Inspect under mouse" })
 
--- ─── commands ────────────────────────────────────────────────────────────────
 
 vim.api.nvim_create_user_command("RefreshAll", "bufdo edit!", { desc = "Reload all buffers from disk" })
 
@@ -103,7 +99,6 @@ vim.api.nvim_create_user_command("Format", function(args)
     })
 end, { range = true })
 
--- ─── notify filter ───────────────────────────────────────────────────────────
 
 local orig_notify = vim.notify
 vim.notify = function(msg, level, opts)
@@ -113,7 +108,6 @@ vim.notify = function(msg, level, opts)
     orig_notify(msg, level, opts)
 end
 
--- ─── theme ───────────────────────────────────────────────────────────────────
 
 local PROTECTED_PATTERNS = {
     "Border",
@@ -165,7 +159,6 @@ local SELECTION_NAMES = { SnacksPickerCursorLine = true, TelescopeSelection = tr
 local function apply_theme()
     local set = vim.api.nvim_set_hl
 
-    -- Flatten all non-protected highlight backgrounds.
     for name, hl in pairs(vim.api.nvim_get_hl(0, {})) do
         if not hl.bg then
             goto continue
@@ -200,11 +193,9 @@ local function apply_theme()
         ::continue::
     end
 
-    -- Picker selection
     set(0, "SnacksPickerSelected", { bg = "NONE", fg = "#27a1b9", force = true })
     set(0, "SnacksPickerUnselected", { bg = "NONE", force = true })
 
-    -- Cursor
     set(0, "Cursor", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG })
     set(0, "CursorInsert", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG })
 
