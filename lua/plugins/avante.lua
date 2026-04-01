@@ -28,7 +28,7 @@ return {
 			},
 			behaviour = {
 				enable_cursor_planning_mode = true,
-				auto_suggestions = false,
+				auto_suggestions = true,
 				auto_set_highlight_group = true,
 				auto_set_keymaps = true,
 				auto_apply_diff_after_generation = false,
@@ -81,7 +81,7 @@ return {
 				callback = function()
 					if not is_online() then
 						local ok, suggestion = pcall(require, "avante.suggestion")
-						if ok and suggestion.stop ~= nil then
+						if ok and suggestion.stop then
 							pcall(suggestion.stop)
 						end
 					end
@@ -104,8 +104,6 @@ return {
 								return
 							end
 							local ok2, err = pcall(original, ...)
-							if not ok2 then
-							end
 						end
 					end
 				end,

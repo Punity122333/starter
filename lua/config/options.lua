@@ -125,3 +125,5 @@ vim.g.clipboard = {
 }
 
 vim.g.vimtex_syntax_conceal_disable = 1
+
+vim.opt.spell = false

@@ -41,10 +41,18 @@ return {
 						},
 					},
 				},
+
+				marksman = {
+					filetypes = { "markdown", "markdown.mdx" },
+					root_dir = function(fname)
+						local util = require("lspconfig.util")
+						return util.root_pattern(".git", ".marksman.toml", "README.md")(fname) or vim.fn.getcwd()
+					end,
+				},
 				asm_lsp = {
 					cmd = { "asm-lsp" },
 					filetypes = { "asm", "s", "S", "nasm" },
-					root_dir = function(fname)
+					root_dir = function()
 						return vim.fn.getcwd()
 					end,
 					settings = {
@@ -89,7 +97,7 @@ return {
 							runtime = { version = "LuaJIT" },
 							diagnostics = {
 								globals = { "vim" },
-                updateOn = "OnSave",
+								updateOn = "OnSave",
 								disable = { "lowercase-global", "undefined-global", "missing-fields" },
 							},
 							checkThirdParty = false,
