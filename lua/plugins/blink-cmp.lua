@@ -5,6 +5,9 @@ return {
 			enabled = function()
 				return vim.b.blink_enabled ~= false and vim.bo.buftype ~= "prompt"
 			end,
+			snippets = {
+				preset = "luasnip",
+			},
 			completion = {
 				list = {
 					selection = { preselect = true, auto_insert = false },
@@ -73,11 +76,10 @@ return {
 							return true
 						end
 
-						if vim.snippet and vim.snippet.active({ direction = 1 }) then
-							vim.schedule(function()
-								vim.snippet.jump(1)
-							end)
-							return true
+						-- 2. Use LuaSnip for jumping instead of vim.snippet
+						local luasnip = require("luasnip")
+						if luasnip.expand_or_jumpable() then
+							return luasnip.expand_or_jump()
 						end
 
 						if cmp.is_visible() then
@@ -93,10 +95,21 @@ return {
 					"snippet_forward",
 					"fallback",
 				},
-				["<S-Tab>"] = { "snippet_backward", "fallback" },
+				-- 3. Update S-Tab for LuaSnip backward jumping
+				["<S-Tab>"] = {
+					function()
+						local luasnip = require("luasnip")
+						if luasnip.jumpable(-1) then
+							return luasnip.jump(-1)
+						end
+					end,
+					"snippet_backward",
+					"fallback",
+				},
 			},
 			sources = {
-				default = { "lsp", "path", "buffer" },
+				-- 4. Add "snippets" to the default list
+				default = { "lsp", "path", "snippets", "buffer" },
 				providers = {
 					lsp = {
 						name = "lsp",
@@ -107,6 +120,14 @@ return {
 					},
 					buffer = { max_items = 25 },
 					path = { max_items = 25 },
+					snippets = {
+						name = "snippets",
+						enabled = true,
+						max_items = 8,
+						min_keyword_length = 2,
+						module = "blink.cmp.sources.snippets",
+						score_offset = 85, -- Boost snippet priority
+					},
 				},
 			},
 		})

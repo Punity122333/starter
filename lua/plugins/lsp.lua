@@ -234,7 +234,6 @@ return {
 			default_capabilities.general = default_capabilities.general or {}
 			default_capabilities.general.positionEncodings = { "utf-8" }
 
-			-- O(1) skip check to prevent lspconfig from screaming about non-existent servers
 			local skip_servers = {
 				copilot = true,
 				stylua = true,
@@ -244,7 +243,7 @@ return {
 				ruff_lsp = true,
 				rust_analyzer = true,
 				r_language_server = true,
-				tsgo = true, -- explicitly killing the tsgo warning
+				tsgo = true,
         oxfmt = true,
 			}
 
@@ -254,7 +253,6 @@ return {
 					config.capabilities =
 						vim.tbl_deep_extend("force", {}, default_capabilities, config.capabilities or {})
 
-					-- offsetEncoding is now a string in 0.12
 					config.offsetEncoding = "utf-8"
 
 					if
