@@ -19,7 +19,11 @@ return {
 		},
 	},
 	opts = {
+		incrementalPreview = {
+			debounceMs = 100,
+		},
 		popupWin = {
+      title = "search and replace",
 			border = "rounded",
 			position = "top",
 		},
@@ -28,7 +32,7 @@ return {
 			align = "right",
 		},
 		keymaps = {
-			confirmAndSubstiituteInBuffer = "<CR>",
+			confirmAndSubstituteInBuffer = "<CR>",
 			insertModeConfirmAndSubstituteInBuffer = "<C-CR>",
 			abort = "q",
 			prevSubst = "<C-p>",

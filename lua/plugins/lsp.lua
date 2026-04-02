@@ -23,6 +23,8 @@ return {
 				},
 			},
 			servers = {
+
+				oxfmt = { enabled = false },
 				basedpyright = {
 					mason = false,
 					cmd = { "/home/pxnity/.local/bin/basedpyright-langserver", "--stdio" },
@@ -41,7 +43,6 @@ return {
 						},
 					},
 				},
-
 				marksman = {
 					filetypes = { "markdown", "markdown.mdx" },
 					root_dir = function(fname)
@@ -85,7 +86,6 @@ return {
 						client.server_capabilities.documentFormattingProvider = false
 					end,
 				},
-
 				lua_ls = {
 					on_attach = function(client, bufnr)
 						client.server_capabilities.diagnosticProvider = false
@@ -148,12 +148,6 @@ return {
 						end
 						return root
 					end,
-					handlers = {
-						["textDocument/definition"] = vim.lsp.handlers["textDocument/definition"],
-						["textDocument/completion"] = vim.lsp.with(vim.lsp.handlers["textDocument/completion"], {
-							border = "rounded",
-						}),
-					},
 					on_attach = function(client, bufnr)
 						client.server_capabilities.semanticTokensProvider = nil
 						if client.server_capabilities.completionProvider then
@@ -187,7 +181,6 @@ return {
 							or vim.fn.getcwd()
 					end,
 				},
-
 				glsl_analyzer = {
 					cmd = { "glsl_analyzer" },
 					filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
@@ -241,24 +234,28 @@ return {
 			default_capabilities.general = default_capabilities.general or {}
 			default_capabilities.general.positionEncodings = { "utf-8" }
 
+			-- O(1) skip check to prevent lspconfig from screaming about non-existent servers
+			local skip_servers = {
+				copilot = true,
+				stylua = true,
+				["*"] = true,
+				tsserver = true,
+				ruff = true,
+				ruff_lsp = true,
+				rust_analyzer = true,
+				r_language_server = true,
+				tsgo = true, -- explicitly killing the tsgo warning
+        oxfmt = true,
+			}
+
 			for server_name, server_config in pairs(opts.servers) do
-				local skip_servers =
-					{ "copilot", "stylua", "*", "tsserver", "ruff", "ruff_lsp", "rust_analyzer", "r_language_server" }
-
-				local should_skip = false
-				for _, skip_name in ipairs(skip_servers) do
-					if server_name == skip_name then
-						should_skip = true
-						break
-					end
-				end
-
-				if not should_skip and lspconfig[server_name] then
+				if not skip_servers[server_name] and lspconfig[server_name] then
 					local config = vim.deepcopy(server_config)
 					config.capabilities =
 						vim.tbl_deep_extend("force", {}, default_capabilities, config.capabilities or {})
 
-					config.offsetEncoding = { "utf-8" }
+					-- offsetEncoding is now a string in 0.12
+					config.offsetEncoding = "utf-8"
 
 					if
 						config.capabilities.textDocument

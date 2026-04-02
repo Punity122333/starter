@@ -320,3 +320,14 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.conceallevel = 3
   end,
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "Avante" },
+  callback = function()
+    require("blink.cmp").setup({
+      enabled = function()
+        return false
+      end
+    })
+  end,
+})

@@ -134,3 +134,4 @@ hl2.bold = true
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_set_hl(0, "Comment", hl2)
 
+vim.api.nvim_set_hl(0, "@module.haskell", { link = "@type.haskell" })
