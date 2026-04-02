@@ -404,9 +404,6 @@ end, { desc = "Search MDN" })
 local function map(mode, lhs, rhs, desc)
     vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
 end
-local function map(mode, lhs, rhs, desc)
-    vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
-end
 
 local modes = { "n", "o", "x" }
 
@@ -441,3 +438,5 @@ wk.add({
 vim.keymap.set("i", "<C-S-k>", function()
   require("avante.suggestion").show()
 end, { desc = "manual avante suggestion" })
+
+vim.keymap.del('n', 'hi')
