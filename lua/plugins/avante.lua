@@ -1,11 +1,21 @@
-local function is_online()
-	local result = vim.system(
-		{ "curl", "-s", "--max-time", "1", "-o", "/dev/null", "-w", "%{http_code}", "https://1.1.1.1" },
-		{ text = true }
-	):wait()
-	return result.stdout ~= nil and result.stdout ~= "000"
-end
 
+local _online_cache = nil
+local _online_checked_at = 0
+local ONLINE_CACHE_TTL = 30000 -- re-check every 30s
+
+local function is_online()
+    local now = vim.uv.now()
+    if _online_cache ~= nil and (now - _online_checked_at) < ONLINE_CACHE_TTL then
+        return _online_cache
+    end
+    local result = vim.system(
+        { "curl", "-s", "--max-time", "1", "-o", "/dev/null", "-w", "%{http_code}", "https://1.1.1.1" },
+        { text = true }
+    ):wait()
+    _online_cache = result.stdout ~= nil and result.stdout ~= "000"
+    _online_checked_at = now
+    return _online_cache
+end
 return {
 	{
 		"yetone/avante.nvim",
@@ -28,7 +38,7 @@ return {
 			},
 			behaviour = {
 				enable_cursor_planning_mode = true,
-				auto_suggestions = true,
+				auto_suggestions = false,
 				auto_set_highlight_group = true,
 				auto_set_keymaps = true,
 				auto_apply_diff_after_generation = false,

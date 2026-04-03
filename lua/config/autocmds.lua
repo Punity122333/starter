@@ -35,9 +35,9 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 				codeaction_timers[args.buf] = vim.fn.timer_start(300, function()
 					local params = vim.lsp.util.make_range_params(nil, "utf-16")
-					params.context = { diagnostics = vim.lsp.diagnostic.get_line_diagnostics() }
 
-					vim.lsp.buf_request(args.buf, "textDocument/codeAction", params, function() end)
+					params.context = { diagnostics = vim.diagnostic.get(args.buf, { lnum = vim.fn.line(".") - 1 }) }
+					vim.lsp.buf_request(args.buf, "textDocument/codeAction", params, function(err, result, ctx, config) end)
 				end)
 			end,
 		})
@@ -315,19 +315,19 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "markdown",
-  callback = function()
-    vim.opt_local.conceallevel = 3
-  end,
+	pattern = "markdown",
+	callback = function()
+		vim.opt_local.conceallevel = 3
+	end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "Avante" },
-  callback = function()
-    require("blink.cmp").setup({
-      enabled = function()
-        return false
-      end
-    })
-  end,
+	pattern = { "Avante" },
+	callback = function()
+		require("blink.cmp").setup({
+			enabled = function()
+				return false
+			end,
+		})
+	end,
 })
