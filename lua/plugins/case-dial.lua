@@ -7,11 +7,11 @@ return {
 		config = function(_, opts)
 			require("case-dial").setup(opts)
 
-			vim.keymap.set("n", "<C-v>", function()
+			vim.keymap.set("n", "<C-q>", function()
 				require("case-dial").dial_normal()
 			end, { desc = "Dial Case" })
 
-			vim.keymap.set("v", "<C-v>", function()
+			vim.keymap.set("v", "<C-q>", function()
 				require("case-dial").dial_visual()
 			end, { desc = "Dial Case" })
 		end,

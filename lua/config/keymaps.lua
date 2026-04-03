@@ -413,30 +413,30 @@ end, { desc = "Search DevDocs with current filetype" })
 cmd("BrowseMDN", function()
 	require("browse.mdn").search()
 end, { desc = "Search MDN" })
-local function map(mode, lhs, rhs, desc)
+local function map2(mode, lhs, rhs, desc)
 	vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
 end
 
 local modes = { "n", "o", "x" }
 
-map(modes, "gkiw", "<cmd>lua require('various-textobjs').subword('inner')<CR>", "Inner Subword")
-map(modes, "gkaw", "<cmd>lua require('various-textobjs').subword('outer')<CR>", "Outer Subword")
-map(modes, "gkim", "<cmd>lua require('various-textobjs').chainMember('inner')<CR>", "Inner Chain Member")
-map(modes, "gkam", "<cmd>lua require('various-textobjs').chainMember('outer')<CR>", "Outer Chain Member")
-map(modes, "gkic", "<cmd>lua require('various-textobjs').column('inner')<CR>", "Inner Column")
-map(modes, "gkac", "<cmd>lua require('various-textobjs').column('outer')<CR>", "Outer Column")
+map2(modes, "gkiw", "<cmd>lua require('various-textobjs').subword('inner')<CR>", "Inner Subword")
+map2(modes, "gkaw", "<cmd>lua require('various-textobjs').subword('outer')<CR>", "Outer Subword")
+map2(modes, "gkim", "<cmd>lua require('various-textobjs').chainMember('inner')<CR>", "Inner Chain Member")
+map2(modes, "gkam", "<cmd>lua require('various-textobjs').chainMember('outer')<CR>", "Outer Chain Member")
+map2(modes, "gkic", "<cmd>lua require('various-textobjs').column('inner')<CR>", "Inner Column")
+map2(modes, "gkac", "<cmd>lua require('various-textobjs').column('outer')<CR>", "Outer Column")
 
-map(modes, "gkii", "<cmd>lua require('various-textobjs').indentation('inner', 'inner')<CR>", "Inner Indent")
-map(modes, "gkai", "<cmd>lua require('various-textobjs') .indentation('outer', 'outer')<CR>", "Outer Indent")
+map2(modes, "gkii", "<cmd>lua require('various-textobjs').indentation('inner', 'inner')<CR>", "Inner Indent")
+map2(modes, "gkai", "<cmd>lua require('various-textobjs') .indentation('outer', 'outer')<CR>", "Outer Indent")
 
-map(modes, "gkig", "<cmd>lua require('various-textobjs').entireBuffer()<CR>", "Entire Buffer")
-map(modes, "gkin", "<cmd>lua require('various-textobjs').nearLine('inner')<CR>", "Near Line")
+map2(modes, "gkig", "<cmd>lua require('various-textobjs').entireBuffer()<CR>", "Entire Buffer")
+map2(modes, "gkin", "<cmd>lua require('various-textobjs').nearLine('inner')<CR>", "Near Line")
 
-map(modes, "gkiu", "<cmd>lua require('various-textobjs').url()<CR>", "URL")
-map(modes, "gkid", "<cmd>lua require('various-textobjs').diagnostic()<CR>", "Diagnostic")
-map(modes, "gkik", "<cmd>lua require('various-textobjs').key('inner')<CR>", "Key")
+map2(modes, "gkiu", "<cmd>lua require('various-textobjs').url()<CR>", "URL")
+map2(modes, "gkid", "<cmd>lua require('various-textobjs').diagnostic()<CR>", "Diagnostic")
+map2(modes, "gkik", "<cmd>lua require('various-textobjs').key('inner')<CR>", "Key")
 
-map("n", "gD", "<cmd>Lspsaga goto_definition<CR>")
+map2("n", "gD", "<cmd>Lspsaga goto_definition<CR>")
 
 local wk = require("which-key")
 
@@ -451,3 +451,11 @@ vim.keymap.set("i", "<C-S-k>", function()
 end, { desc = "manual avante suggestion" })
 
 vim.keymap.del("n", "hi")
+
+vim.keymap.set("n", "<C-q>", function()
+	require("case-dial").dial_normal()
+end, { desc = "Dial Case" })
+
+vim.keymap.set("v", "<C-q>", function()
+	require("case-dial").dial_visual()
+end, { desc = "Dial Case" })
