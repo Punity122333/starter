@@ -447,7 +447,7 @@ wk.add({
 })
 
 vim.keymap.set("i", "<C-S-k>", function()
-	require("avante.suggestion").show()
+	require("avante.suggestion").show({})
 end, { desc = "manual avante suggestion" })
 
 vim.keymap.del("n", "hi")
@@ -459,3 +459,99 @@ end, { desc = "Dial Case" })
 vim.keymap.set("v", "<C-q>", function()
 	require("case-dial").dial_visual()
 end, { desc = "Dial Case" })
+
+local function tc(s)
+	return vim.api.nvim_replace_termcodes(s, true, false, true)
+end
+
+local function feed(s)
+	vim.api.nvim_feedkeys(tc(s), "in", false)
+end
+
+local function read_digits(first)
+	local out = first or ""
+	while true do
+		local c = vim.fn.getcharstr()
+		if not c:match("%d") then
+			feed(c)
+			break
+		end
+		out = out .. c
+	end
+	return out
+end
+
+local function read_until_cr()
+	local out = ""
+	while true do
+		local c = vim.fn.getcharstr()
+		if c == "\r" then
+			break
+		end
+		out = out .. c
+	end
+	return out
+end
+
+local function read_target()
+	local c1 = vim.fn.getcharstr()
+
+	if c1:match("%d") then
+		return c1 .. read_digits()
+	end
+
+	if c1 == "+" or c1 == "-" then
+		local c2 = vim.fn.getcharstr()
+		if c2:match("%d") then
+			return c1 .. c2 .. read_digits()
+		end
+		feed(c2)
+		return c1
+	end
+
+	if c1 == "'" then
+		local m = vim.fn.getcharstr()
+		return "'" .. m
+	end
+
+	if c1 == "/" or c1 == "?" then
+		local p = read_until_cr()
+		return c1 .. p
+	end
+
+	if c1 == "g" then
+		local c2 = vim.fn.getcharstr()
+		if c2 == "g" then
+			return "0"
+		end
+		feed(c2)
+		return nil
+	end
+
+	if c1 == "G" then
+		return "$"
+	end
+
+	if c1 == "." or c1 == "$" then
+		return c1
+	end
+
+	return nil
+end
+
+vim.keymap.set("n", "\\\\", function()
+	local t = read_target()
+	if not t then
+		return
+	end
+	feed("<Cmd>silent! move " .. t .. "<CR>")
+end, { noremap = true, silent = true, nowait = true })
+
+-- visual mode
+vim.keymap.set("x", "\\\\", function()
+	local t = read_target()
+	if not t then
+		return
+	end
+	feed("<Cmd>silent! move " .. t .. "<CR>")
+end, { noremap = true, silent = true, nowait = true })

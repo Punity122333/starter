@@ -16,7 +16,6 @@ return {
 			},
 		},
 
-words = { enabled = true, debounce = 200 },
 		scope = { enabled = false },
 		explorer = {
 			enabled = true,
@@ -90,8 +89,8 @@ words = { enabled = true, debounce = 200 },
 		},
 		input = { enabled = true },
 		scroll = { enabled = false },
-		statuscolumn = { enabled = true },
-		words = { enabled = true },
+		statuscolumn = { enabled = false },
+		words = { enabled = false },
 		image = {
 			enabled = true,
 			math = { enabled = false },

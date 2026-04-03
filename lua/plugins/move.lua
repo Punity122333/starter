@@ -13,7 +13,7 @@ return {
 			line_up = "<A-S-k>",
 		},
 		options = {
-			reindent_linewise = true,
+			reindent_linewise = false,
 		},
 	},
 	config = function(_, opts)

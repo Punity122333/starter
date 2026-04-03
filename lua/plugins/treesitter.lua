@@ -72,6 +72,11 @@ return {
 				end,
 			},
 			indent = { enable = false },
+
+			incremental_selection = {
+				enable = false,
+				keymaps = {},
+			},
 		},
 	},
 	{ "nvim-treesitter/nvim-treesitter-textobjects", enabled = true },

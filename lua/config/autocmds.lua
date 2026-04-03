@@ -328,7 +328,7 @@ vim.api.nvim_create_autocmd("FileType", {
 				return false
 			end,
 		})
-	end,
+  end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
@@ -339,3 +339,5 @@ vim.api.nvim_create_autocmd("FileType", {
     end)
   end,
 })
+
+

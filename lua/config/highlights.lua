@@ -37,7 +37,11 @@ for _, g in ipairs(blink) do
 	vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_SECONDARY, blend = 0, force = true })
 end
 vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
-vim.api.nvim_set_hl(0, "NoicePopupBorderSearch", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"NoicePopupBorderSearch",
+	{ bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true }
+)
 vim.api.nvim_set_hl(0, "NoicePopupBorderInput", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupTitleSearch", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupTitleInput", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
@@ -84,6 +88,7 @@ vim.api.nvim_set_hl(
 	"AvantePromptInputBorder",
 	{ bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true, blend = 0 }
 )
+
 -- hor20-Cursor
 vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "MasonHeader", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
@@ -134,5 +139,4 @@ hl2.italic = nil
 hl2.bold = true
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_set_hl(0, "Comment", hl2)
-
 vim.api.nvim_set_hl(0, "@module.haskell", { link = "@type.haskell" })
