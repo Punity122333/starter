@@ -15,6 +15,9 @@ return {
 				backdrop = false,
 			},
 		},
+
+words = { enabled = true, debounce = 200 },
+		scope = { enabled = false },
 		explorer = {
 			enabled = true,
 			cycle = false,
@@ -78,7 +81,7 @@ return {
 					layout = {
 
 						layout = {
-							width = 0.18, 
+							width = 0.18,
 							min_width = 0.18,
 						},
 					},

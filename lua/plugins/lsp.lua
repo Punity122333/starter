@@ -265,7 +265,6 @@ return {
 			}
 
 			for server_name, server_config in pairs(opts.servers) do
-				-- Removed the wildcard check that was preventing loops
 				if not skip_servers[server_name] and lspconfig[server_name] then
 					local config = vim.deepcopy(server_config)
 					config.capabilities =
@@ -292,10 +291,5 @@ return {
 			return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
 		end,
 	},
-	{
-		"nvim-lualine/lualine.nvim",
-		cond = function()
-			return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
-		end,
-	},
+
 }
