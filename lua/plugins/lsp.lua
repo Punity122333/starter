@@ -23,8 +23,34 @@ return {
 				},
 			},
 			servers = {
-
-				oxfmt = { enabled = false },
+				vtsls = {
+					filetypes = {
+						"javascript",
+						"javascriptreact",
+						"javascript.jsx",
+						"typescript",
+						"typescriptreact",
+						"typescript.tsx",
+					},
+					settings = {
+						complete_function_calls = true,
+						vtsls = {
+							enableMoveToFileCodeAction = true,
+							autoUseWorkspaceTsdk = true,
+							experimental = {
+								completion = {
+									enableServerSideFuzzyQuery = true,
+								},
+							},
+						},
+						typescript = {
+							updateImportsOnPaste = true,
+							suggest = {
+								completeFunctionCalls = true,
+							},
+						},
+					},
+				},
 				basedpyright = {
 					mason = false,
 					cmd = { "/home/pxnity/.local/bin/basedpyright-langserver", "--stdio" },
@@ -171,16 +197,6 @@ return {
 						msbuild = { loadProjectsOnDemand = true },
 					},
 				},
-				ts_ls = {
-					cmd = { "typescript-language-server", "--stdio" },
-					filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" },
-					single_file_support = true,
-					root_dir = function(fname)
-						local util = require("lspconfig.util")
-						return util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname)
-							or vim.fn.getcwd()
-					end,
-				},
 				glsl_analyzer = {
 					cmd = { "glsl_analyzer" },
 					filetypes = { "glsl", "vert", "tesc", "tese", "frag", "geom", "comp" },
@@ -237,17 +253,19 @@ return {
 			local skip_servers = {
 				copilot = true,
 				stylua = true,
-				["*"] = true,
 				tsserver = true,
+				ts_ls = true,
 				ruff = true,
 				ruff_lsp = true,
 				rust_analyzer = true,
 				r_language_server = true,
 				tsgo = true,
-        oxfmt = true,
+				oxfmt = true,
+        ["*"] = true,
 			}
 
 			for server_name, server_config in pairs(opts.servers) do
+				-- Removed the wildcard check that was preventing loops
 				if not skip_servers[server_name] and lspconfig[server_name] then
 					local config = vim.deepcopy(server_config)
 					config.capabilities =

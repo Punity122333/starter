@@ -52,7 +52,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
--- Refresh Avante when a code buffer is deleted
 vim.api.nvim_create_autocmd("BufDelete", {
 	callback = function(args)
 		local ft = vim.bo[args.buf].filetype
@@ -330,4 +329,13 @@ vim.api.nvim_create_autocmd("FileType", {
 			end,
 		})
 	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+  callback = function()
+    pcall(function()
+      vim.cmd("lsp enable vtsls")
+    end)
+  end,
 })
