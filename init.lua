@@ -233,4 +233,5 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 	callback = apply_theme,
 })
 
+
 apply_theme()

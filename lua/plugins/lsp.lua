@@ -112,6 +112,7 @@ return {
 						client.server_capabilities.documentFormattingProvider = false
 					end,
 				},
+
 				lua_ls = {
 					on_attach = function(client, bufnr)
 						client.server_capabilities.diagnosticProvider = false
@@ -129,10 +130,8 @@ return {
 							checkThirdParty = false,
 							workspace = {
 								checkThirdParty = false,
-								library = {
-									vim.fn.stdpath("config") .. "/lua",
-								},
-								ignoreDir = { "**/node_modules", "**/lazy" },
+								library = { vim.fn.stdpath("config") .. "/lua" },
+								ignoreDir = { "**/node_modules", "**/lazy", "**/.git", "**/packer_compiled.lua" },
 								libraryStatus = "None",
 							},
 							telemetry = { enable = false },
@@ -239,8 +238,7 @@ return {
 			},
 		},
 		config = function(_, opts)
-			vim.diagnostic.config(opts.diagnostics)
-
+			vim.diagnostic.config(opts.diagnostics) 
 			local ok, lspconfig = pcall(require, "lspconfig")
 			if not ok then
 				return
@@ -261,7 +259,7 @@ return {
 				r_language_server = true,
 				tsgo = true,
 				oxfmt = true,
-        ["*"] = true,
+				["*"] = true,
 			}
 
 			for server_name, server_config in pairs(opts.servers) do
@@ -273,6 +271,7 @@ return {
 					config.offsetEncoding = "utf-8"
 
 					if
+            
 						config.capabilities.textDocument
 						and config.capabilities.textDocument.completion
 						and config.capabilities.textDocument.completion.completionItem
@@ -291,5 +290,4 @@ return {
 			return vim.env.KITTY_SCROLLBACK_NVIM ~= "true"
 		end,
 	},
-
 }

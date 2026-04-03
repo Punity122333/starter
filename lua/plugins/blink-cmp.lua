@@ -76,7 +76,6 @@ return {
 							return true
 						end
 
-						-- 2. Use LuaSnip for jumping instead of vim.snippet
 						local luasnip = require("luasnip")
 						if luasnip.expand_or_jumpable() then
 							return luasnip.expand_or_jump()
@@ -95,7 +94,6 @@ return {
 					"snippet_forward",
 					"fallback",
 				},
-				-- 3. Update S-Tab for LuaSnip backward jumping
 				["<S-Tab>"] = {
 					function()
 						local luasnip = require("luasnip")
@@ -108,7 +106,6 @@ return {
 				},
 			},
 			sources = {
-				-- 4. Add "snippets" to the default list
 				default = { "lsp", "path", "snippets", "buffer" },
 				providers = {
 					lsp = {
@@ -126,7 +123,7 @@ return {
 						max_items = 8,
 						min_keyword_length = 2,
 						module = "blink.cmp.sources.snippets",
-						score_offset = 85, -- Boost snippet priority
+						score_offset = 85, 
 					},
 				},
 			},

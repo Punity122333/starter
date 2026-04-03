@@ -1,0 +1,61 @@
+-- Movement Keymaps
+vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+
+local function read_until_cr()
+  local out = ""
+  while true do
+    local c = vim.fn.getcharstr()
+    if c == "\r" then
+      break
+    end
+    out = out .. c
+  end
+  return out
+end
+
+local function read_target()
+  local c1 = vim.fn.getcharstr()
+
+  if c1:match("%d") then
+    return c1 .. read_digits()
+  end
+
+  if c1 == "+" or c1 == "-" then
+    local c2 = vim.fn.getcharstr()
+    if c2:match("%d") then
+      return c1 .. c2 .. read_digits()
+    end
+    feed(c2)
+    return c1
+  end
+
+  if c1 == "'" then
+    local m = vim.fn.getcharstr()
+    return "'" .. m
+  end
+
+  if c1 == "/" or c1 == "?" then
+    local p = read_until_cr()
+    return c1 .. p
+  end
+
+  if c1 == "g" then
+    local c2 = vim.fn.getcharstr()
+    if c2 == "g" then
+      return "0"
+    end
+    feed(c2)
+    return nil
+  end
+
+  if c1 == "G" then
+    return "$"
+  end
+
+  if c1 == "." or c1 == "$" then
+    return c1
+  end
+
+  return nil
+end
+
