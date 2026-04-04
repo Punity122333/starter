@@ -1,6 +1,6 @@
 local ImmediateSaveEvents = { "BufLeave", "FocusLost" }
-local DeferSaveEvents = { "InsertLeave", "TextChanged" }
-local CancelDeferredSaveEvents = {  }
+local DeferSaveEvents = {}
+local CancelDeferredSaveEvents = {}
 local DebounceDelay = 20000
 
 return {
@@ -20,24 +20,24 @@ return {
 				if mode == "no" or mode == "i" or mode == "v" or mode == "c" then
 					return false
 				end
-    
+
 				if vim.snippet and vim.snippet.active({ direction = 1 }) then
 					return false
 				end
-    
+
 				local fn = vim.fn
 				local utils = require("auto-save.utils.data")
-    
+
 				local ft = fn.getbufvar(buffer, "&filetype")
 				local ExcludedFiletypes = { "gitcommit", "gitrebase", "hgcommit", "oil" }
-    
+
 				if fn.getbufvar(buffer, "&modifiable") == 1 and utils.not_in(ft, ExcludedFiletypes) then
 					return true
 				end
 				return false
-			end, 
+			end,
 			noautocmd = true,
 			write_all_buffers = false,
 		},
-	}, 
-}   
+	},
+}

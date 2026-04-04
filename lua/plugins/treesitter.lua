@@ -65,7 +65,7 @@ return {
 							return true
 						end
 					end
-          
+
 					if (lang == "c" or lang == "cpp") and vim.api.nvim_buf_line_count(buf) > 1000 then
 						return true
 					end
