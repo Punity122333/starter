@@ -21,12 +21,10 @@ end, { desc = "Remove Current Buffer" })
 vim.keymap.set("n", "<leader>bn", "<cmd>BufferLineCycleNext<cr>", { desc = "Next Buffer" })
 vim.keymap.set("n", "<leader>bp", "<cmd>BufferLineCyclePrev<cr>", { desc = "Previous Buffer" })
 vim.keymap.set("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
-
 vim.keymap.set("n", "<A-S-Up>", "<cmd>resize +2<cr>", { desc = "Increase window height" })
 vim.keymap.set("n", "<A-S-Down>", "<cmd>resize -2<cr>", { desc = "Decrease window height" })
 vim.keymap.set("n", "<A-S-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease window width" })
 vim.keymap.set("n", "<A-S-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
-
 vim.keymap.set("n", "<leader>fD", function()
 	Snacks.picker.files({
 		cwd = vim.fn.expand("~"),
@@ -41,7 +39,6 @@ vim.keymap.set("n", "<leader>fx", function()
 	Snacks.explorer.reveal()
 end, { desc = "Reveal Current File in Explorer" })
 vim.keymap.del("n", "<leader>gg")
-
 vim.keymap.set("n", "<leader>pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
 vim.keymap.set("n", "<leader>ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })
 vim.keymap.set("n", "<leader>pdf", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
