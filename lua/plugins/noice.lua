@@ -247,6 +247,7 @@ return {
 						{ find = "split" },
 						{ find = "modifiable" },
 						{ find = "decoding suggestions" },
+						{ find = "yanked" },
 						{ find = "<ed" },
 					},
 				},
