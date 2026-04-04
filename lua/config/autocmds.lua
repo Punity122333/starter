@@ -37,7 +37,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
 					local params = vim.lsp.util.make_range_params(nil, "utf-16")
 
 					params.context = { diagnostics = vim.diagnostic.get(args.buf, { lnum = vim.fn.line(".") - 1 }) }
-					vim.lsp.buf_request(args.buf, "textDocument/codeAction", params, function(err, result, ctx, config) end)
+					vim.lsp.buf_request(
+						args.buf,
+						"textDocument/codeAction",
+						params,
+						function(err, result, ctx, config) end
+					)
 				end)
 			end,
 		})
@@ -328,16 +333,36 @@ vim.api.nvim_create_autocmd("FileType", {
 				return false
 			end,
 		})
-  end,
+	end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-  callback = function()
-    pcall(function()
-      vim.cmd("lsp enable vtsls")
-    end)
-  end,
+	pattern = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+	callback = function()
+		pcall(function()
+			vim.cmd("lsp enable vtsls")
+		end)
+	end,
 })
 
+local function redraw_signs()
+	vim.schedule(function()
+		vim.schedule(function()
+			vim.cmd("redraw!")
+		end)
+	end)
+end
 
+local mark_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+for i = 1, #mark_chars do
+	local c = mark_chars:sub(i, i)
+	vim.keymap.set("n", "m" .. c, function()
+		vim.cmd("normal! m" .. c)
+		redraw_signs()
+	end, { silent = true, desc = "Set mark " .. c })
+end
+
+vim.api.nvim_create_autocmd("User", {
+	pattern = { "DapBreakpoint", "DapBreakpointCondition", "DapLogPoint", "DapBreakpointRejected" },
+	callback = redraw_signs,
+})

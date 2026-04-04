@@ -1,5 +1,6 @@
 return {
 	"saghen/blink.cmp",
+  lazy = false,
 	opts = function(_, opts)
 		local function paren_context()
 			local col = vim.fn.col(".")

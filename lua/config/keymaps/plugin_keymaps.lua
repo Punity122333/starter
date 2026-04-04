@@ -1,12 +1,24 @@
 -- Plugin Keymaps
 vim.keymap.set("n", "<leader>\\\\", function()
-  toggle_lazygit()
+	toggle_lazygit()
 end, { desc = "ToggleTerm Lazygit" })
 
-vim.keymap.set("n", "<leader>tt", "<cmd>ToggleTerm direction=float<cr>", { desc = "ToggleTerm Float" })
+vim.keymap.set("n", "<leader>tt", function()
+	local terminal = require("toggleterm.terminal").Terminal
+	local float_term = terminal:new({
+		direction = "float",
+		-- 0.12 specific: ensuring the float doesn't
+		-- trigger unnecessary screen redraws
+		on_open = function(term)
+			vim.cmd("startinsert!")
+			-- Clean up the 0.12 msg_show noise for this buffer
+			vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", { noremap = true, silent = true })
+		end,
+	})
+	float_term:toggle()
+end, { desc = "ToggleTerm Float" })
 
 vim.keymap.set("n", "<leader>mb", ":set list!<CR>", { noremap = true, silent = true, desc = "Toggle listchars" })
-
 
 vim.keymap.set("n", "<leader>fv", function()
 	Snacks.terminal(nil, { win = { position = "right", width = 0.25 } })
@@ -322,4 +334,9 @@ vim.keymap.set("v", "<C-q>", function()
 	require("case-dial").dial_visual()
 end, { desc = "Dial Case" })
 
+
+vim.keymap.set('n', '<leader>db', function()
+  require('dap').toggle_breakpoint()
+  vim.cmd("redraw!") -- the ! forces a full clear and redraw
+end)
 
