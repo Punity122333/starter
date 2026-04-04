@@ -1,3 +1,4 @@
+
 return {
 	"saghen/blink.cmp",
 	opts = function(_, opts)
@@ -214,11 +215,11 @@ return {
 						max_items = 8,
 						min_keyword_length = 2,
 						module = "blink.cmp.sources.snippets",
-						score_offset = 85, -- Boost snippet priority
 					},
 				},
 			},
 		})
 	end,
 }
+
 
