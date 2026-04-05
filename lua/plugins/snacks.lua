@@ -90,13 +90,8 @@ return {
 		input = { enabled = true },
 		scroll = { enabled = false },
 		words = { enabled = true },
-
-		statuscolumn = {
-			enabled = true,
-			left = { "mark", "sign" },
-			right = { "fold", "number" },
-		},
-		image = {
+    statuscolumn = { enabled = false },
+    image = {
 			enabled = true,
 			math = { enabled = false },
 		},

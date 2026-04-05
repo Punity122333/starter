@@ -118,7 +118,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
-vim.opt.updatetime = 1000
 
 local rust_clippy_group = vim.api.nvim_create_augroup("RustAutoClippy", { clear = true })
 
@@ -349,6 +348,7 @@ local function redraw_signs()
 	vim.schedule(function()
 		vim.schedule(function()
 			vim.cmd("redraw!")
+      vim.cmd("")
 		end)
 	end)
 end
@@ -363,6 +363,35 @@ for i = 1, #mark_chars do
 end
 
 vim.api.nvim_create_autocmd("User", {
-	pattern = { "DapBreakpoint", "DapBreakpointCondition", "DapLogPoint", "DapBreakpointRejected" },
+	pattern = { "DapBreakpoint", "DapBreakpointCondition", "DapLogPoint", "DapBreakpointRejected", "CursorHold", "CursorHoldI", "CursorMoved", "CursorMovedI" },
 	callback = redraw_signs,
+})
+
+-- Sign priorities: higher number = rightmost column (closest to text)
+-- DAP breakpoints (lowest priority, leftmost)
+vim.fn.sign_define("DapBreakpoint",         { text = "●", texthl = "DapBreakpoint",        priority = 10 })
+vim.fn.sign_define("DapBreakpointCondition",{ text = "◆", texthl = "DapBreakpointCondition",priority = 10 })
+vim.fn.sign_define("DapBreakpointRejected", { text = "○", texthl = "DapBreakpointRejected", priority = 10 })
+vim.fn.sign_define("DapStopped",            { text = "▶", texthl = "DapStopped",             priority = 10 })
+vim.fn.sign_define("DapLogPoint",           { text = "◉", texthl = "DapLogPoint",            priority = 10 })
+
+-- Diagnostics (middle priority)
+vim.diagnostic.config({
+    signs = {
+        priority = 20,
+    },
+})
+
+-- marks.nvim (highest priority, rightmost / closest to text)
+vim.api.nvim_create_autocmd("User", {
+    pattern = "MarksSetupComplete",
+    once = true,
+    callback = function()
+        local marks = require("marks")
+        if marks.mark_state and marks.mark_state.signs then
+            for _, sign in pairs(marks.mark_state.signs) do
+                sign.priority = 30
+            end
+        end
+    end,
 })

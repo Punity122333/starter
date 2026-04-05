@@ -130,7 +130,9 @@ local PROTECTED_PATTERNS = {
 	"VM",
 	"Rainbow",
 	"LazyReason",
-	"TroubleCount",
+	"TroubleCounts",
+  "GitSign",
+  "Dap",
 }
 
 local function is_protected(name)

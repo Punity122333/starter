@@ -37,7 +37,11 @@ for _, g in ipairs(blink) do
 	vim.api.nvim_set_hl(0, g, { bg = COLOR_BACKGROUND_SECONDARY, blend = 0, force = true })
 end
 vim.api.nvim_set_hl(0, "NoicePopupBorder", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
-vim.api.nvim_set_hl(0, "NoicePopupBorderSearch", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"NoicePopupBorderSearch",
+	{ bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true }
+)
 vim.api.nvim_set_hl(0, "NoicePopupBorderInput", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupTitleSearch", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "NoicePopupTitleInput", { bg = COLOR_GENERAL_NONE, fg = COLOR_BORDER, blend = 0, force = true })
@@ -48,6 +52,71 @@ vim.api.nvim_set_hl(0, "NoicePopupmenuBorder", { bg = COLOR_GENERAL_NONE, fg = C
 vim.api.nvim_set_hl(0, "NoicePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
+vim.api.nvim_set_hl(0, "GitSignsAdd", { link = "@string", force = true })
+
+-- ERROR
+vim.api.nvim_set_hl(0, "BufferLineError", { fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineErrorSelected",
+	{ fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+vim.api.nvim_set_hl(0, "BufferLineErrorDiagnostic", { fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineErrorDiagnosticSelected",
+	{ fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+
+-- WARNING
+vim.api.nvim_set_hl(0, "BufferLineWarning", { fg = "#e0af68", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineWarningSelected",
+	{ fg = "#e0af68", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+vim.api.nvim_set_hl(0, "BufferLineWarningDiagnostic", { fg = "#e0af68", bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineWarningDiagnosticSelected",
+	{ fg = "#e0af68", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+
+-- INFO
+vim.api.nvim_set_hl(0, "BufferLineInfo", { fg = "#7dcfff", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineInfoSelected",
+	{ fg = "#7dcfff", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+vim.api.nvim_set_hl(0, "BufferLineInfoDiagnostic", { fg = "#7dcfff", bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineInfoDiagnosticSelected",
+	{ fg = "#7dcfff", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+
+-- HINT
+vim.api.nvim_set_hl(0, "BufferLineHint", { fg = "#1abc9c", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineHintSelected",
+	{ fg = "#1abc9c", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+vim.api.nvim_set_hl(0, "BufferLineHintDiagnostic", { fg = "#1abc9c", bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineHintDiagnosticSelected",
+	{ fg = "#1abc9c", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
+
+-- MODIFIED / CHANGES
+vim.api.nvim_set_hl(0, "BufferLineModified", { fg = "#ff9e64", bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(
+	0,
+	"BufferLineModifiedSelected",
+	{ fg = "#ff9e64", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
+)
 
 vim.api.nvim_set_hl(
 	0,
@@ -85,6 +154,25 @@ vim.api.nvim_set_hl(
 	{ bg = COLOR_BACKGROUND_PRIMARY, fg = COLOR_BORDER, force = true, blend = 0 }
 )
 
+local BG = "#1a1b26"
+
+-- controls
+vim.api.nvim_set_hl(0, "DapUIPlayPause", { fg = "#7dcfff", bg = BG })
+vim.api.nvim_set_hl(0, "DapUIStepOver", { fg = "#7dcfff", bg = BG })
+vim.api.nvim_set_hl(0, "DapUIStepInto", { fg = "#7dcfff", bg = BG })
+vim.api.nvim_set_hl(0, "DapUIStepOut", { fg = "#7dcfff", bg = BG })
+vim.api.nvim_set_hl(0, "DapUIRestart", { fg = "#ff9e64", bg = BG })
+vim.api.nvim_set_hl(0, "DapUIStop", { fg = "#f7768e", bg = BG })
+vim.api.nvim_set_hl(0, "DapUIUnavailable", { fg = "#565f89", bg = BG })
+
+vim.api.nvim_set_hl(0, "DapUIControls", { bg = BG })
+vim.api.nvim_set_hl(0, "DapUIControlsButton", { bg = BG })
+vim.api.nvim_set_hl(0, "DapUIControlsDisabled", { bg = BG })
+-- background
+vim.api.nvim_set_hl(0, "NormalFloat", { bg = BG })
+vim.api.nvim_set_hl(0, "DapUIFloatNormal", { bg = BG })
+
+-- border
 -- hor20-Cursor
 vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "MasonHeader", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
@@ -136,4 +224,3 @@ hl2.bold = true
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_set_hl(0, "Comment", hl2)
 vim.api.nvim_set_hl(0, "@module.haskell", { link = "@type.haskell" })
-

@@ -334,9 +334,13 @@ vim.keymap.set("v", "<C-q>", function()
 	require("case-dial").dial_visual()
 end, { desc = "Dial Case" })
 
-
-vim.keymap.set('n', '<leader>db', function()
-  require('dap').toggle_breakpoint()
-  vim.cmd("redraw!") -- the ! forces a full clear and redraw
+vim.keymap.set("n", "<leader>db", function()
+	require("dap").toggle_breakpoint()
+	vim.cmd("redraw!") -- the ! forces a full clear and redraw
 end)
 
+vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", priority = 50 })
+vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DapBreakpointCondition", priority = 50 })
+vim.fn.sign_define("DapBreakpointRejected", { text = "○", texthl = "DapBreakpointRejected", priority = 50 })
+vim.fn.sign_define("DapStopped", { text = "▶", texthl = "DapStopped", priority = 50 })
+vim.fn.sign_define("DapLogPoint", { text = "◉", texthl = "DapLogPoint", priority = 50 })
