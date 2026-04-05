@@ -20,6 +20,7 @@ do
 end
 
 local orig_ts_start = vim.treesitter.start
+---@diagnostic disable-next-line: duplicate-set-field
 vim.treesitter.start = function(buf, lang)
 	buf = buf or vim.api.nvim_get_current_buf()
 	if vim.bo[buf].filetype:match("^snacks_") then
@@ -90,6 +91,7 @@ vim.api.nvim_create_user_command("Format", function(args)
 end, { range = true })
 
 local orig_notify = vim.notify
+---@diagnostic disable-next-line: duplicate-set-field
 vim.notify = function(msg, level, opts)
 	if type(msg) == "string" and msg:find("Avante") then
 		return
@@ -131,8 +133,8 @@ local PROTECTED_PATTERNS = {
 	"Rainbow",
 	"LazyReason",
 	"TroubleCounts",
-  "GitSign",
-  "Dap",
+	"GitSign",
+	"Dap",
 }
 
 local function is_protected(name)
@@ -234,6 +236,5 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 	group = vim.api.nvim_create_augroup("ThemeGodMode", { clear = true }),
 	callback = apply_theme,
 })
-
 
 apply_theme()

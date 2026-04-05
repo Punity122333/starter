@@ -128,12 +128,5 @@ vim.g.vimtex_syntax_conceal_disable = 1
 
 vim.opt.spell = false
 
-
-vim.api.nvim_create_autocmd("VimEnter", {
-    once = true,
-    callback = function()
-        vim.opt.signcolumn = "auto:4"
-    end,
-})
 vim.opt.updatetime = 400
 
