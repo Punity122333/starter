@@ -24,11 +24,11 @@ return {
 			win = {
 				layout = {
 					position = "right",
-					width = 0.15,
+					width = 0.10,
 				},
 			},
 			layout = {
-				width = 0.15,
+				width = 0.10,
 			},
 		},
 		styles = {

@@ -1,7 +1,7 @@
 return {
 	{
 		"rcarriga/nvim-dap-ui",
-		dependencies = { "mfussenegger/nvim-dap", "nvim-neodev/nvim-nio" },
+		dependencies = { "mfussenegger/nvim-dap", "nvim-neotest/nvim-nio" },
 		config = function()
 			local dap = require("dap")
 			local dapui = require("dapui")
@@ -38,11 +38,11 @@ return {
 
 			vim.defer_fn(function()
 				dapui.update_render({
-					indent = 0,
+					indent = 0,    
 				})
 			end, 0)
 
-			dap.listeners.after.event_initialized["dapui_config"] = dapui.open
+
 			dap.listeners.before.event_terminated["dapui_config"] = dapui.close
 			dap.listeners.before.event_exited["dapui_config"] = dapui.close
 

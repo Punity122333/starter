@@ -6,6 +6,10 @@ local COLOR_CURSOR_FG = "#000000"
 local COLOR_CURSOR_BG = "#00ff00"
 local FLAG_FORCE_ALL = os.getenv("NO_LAZY") == "1"
 
+if vim.loader then
+  vim.loader.enable()
+end
+
 do
 	local home = vim.fn.expand("~")
 	vim.env.PATH = table.concat({

@@ -238,15 +238,92 @@ end
 -- ── toggle ─────────────────────────────────────────────────────────────────
 local _sc_enabled = false
 
-
--- set on startup WITHOUT redraw (avoids flicker before colorscheme loads)
 local function init_sc()
-    vim.opt.signcolumn   = "no"
-    vim.opt.statuscolumn = _sc_enabled
-        and "%{%v:lua.StatusColumn()%}"
-        or  "%{%v:lua.StatusColumnSimple()%}"
-end
+	local ft = vim.bo.filetype
+	local bt = vim.bo.buftype
 
+	local exclude = {
+		-- explorers & tools<S-F10>
+		"NvimTree",
+		"neo-tree",
+		"oil",
+		"stevearc.oil",
+		"lazy",
+		"mason",
+		"trouble",
+		-- dashboards
+		"dashboard",
+		"alpha",
+		"snacks_dashboard",
+		"starter",
+		-- help & docs
+		"help",
+		"man",
+		"checkhealth",
+		"tutor",
+		-- dap (debugger)
+		"dapui_scopes",
+		"dapui_breakpoints",
+		"dapui_stacks",
+		"dapui_watches",
+		"dapui_console",
+		"dap-repl",
+		"dap-terminal",
+		-- ai (avante)
+		"avante",
+		"avante-input",
+		"avante-selected",
+		"avante-chat",
+		"Avante",
+		-- floating & snacks
+		"notify",
+		"noice",
+		"snacks_notif",
+		"snacks_notif_history",
+		"snacks_win_backdrop",
+		"TelescopePrompt",
+		"TelescopeResults",
+		-- misc
+		"qf",
+		"gitcommit",
+		"git",
+		"diff",
+		"toggleterm",
+		"undotree",
+	}
+  if ft:find("Avante") then
+    vim.opt_local.statuscolumn = ""
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+    table.insert(exclude, ft)
+    return
+  end
+	if ft:find("^snacks_") then
+		table.insert(exclude, ft)
+		return
+	end
+	if ft:find("dap") then
+		vim.opt_local.statuscolumn = "   "
+		vim.opt_local.number = false
+		vim.opt_local.relativenumber = false
+		return
+	end
+	-- blocking statuscolumn for utility buffers
+	if vim.tbl_contains(exclude, ft) or ft:find("avante") or bt == "nofile" or bt == "prompt" then
+		vim.opt_local.statuscolumn = " "
+		vim.opt_local.number = false
+		vim.opt_local.relativenumber = false
+		return
+	end
+
+	-- apply the custom column for code
+	vim.opt.signcolumn = "no"
+	vim.opt.statuscolumn = _sc_enabled and "%{%v:lua.StatusColumn()%}" or "%{%v:lua.StatusColumnSimple()%}"
+
+	-- ensure numbers are back on for actual files
+	vim.opt_local.number = true
+	vim.opt_local.relativenumber = true
+end
 init_sc()
 
 vim.keymap.set("n", "<leader>Us", function()
@@ -258,3 +335,9 @@ vim.keymap.set("n", "<leader>Us", function()
 		{ title = "UI Toggle" }
 	)
 end, { desc = "Toggle signcolumn" })
+
+vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+	callback = function()
+		init_sc()
+	end,
+})
