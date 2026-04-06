@@ -89,7 +89,7 @@ return {
 		},
 		input = { enabled = true },
 		scroll = { enabled = false },
-		words = { enabled = true },
+		words = { enabled = false },
     statuscolumn = { enabled = false },
     image = {
 			enabled = true,

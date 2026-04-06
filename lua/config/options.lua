@@ -130,3 +130,131 @@ vim.opt.spell = false
 
 vim.opt.updatetime = 400
 
+vim.opt.signcolumn = "no"
+
+-- ── helpers ────────────────────────────────────────────────────────────────
+local EMPTY = "%#SignColumn#  "
+
+local _ns_cache = {}
+local function get_ns(name)
+	if not _ns_cache[name] then
+		local id = vim.api.nvim_get_namespaces()[name]
+		if id then
+			_ns_cache[name] = id
+		end
+	end
+	return _ns_cache[name]
+end
+
+local function extmark_sign(ns_name, buf, lnum)
+	local ns = get_ns(ns_name)
+	if not ns then
+		return EMPTY
+	end
+	local ok, ems = pcall(vim.api.nvim_buf_get_extmarks, buf, ns, { lnum - 1, 0 }, { lnum - 1, -1 }, { details = true })
+	if ok and ems[1] then
+		local d = ems[1][4]
+		if d and d.sign_text and d.sign_text ~= "" then
+			return "%#" .. (d.sign_hl_group or "SignColumn") .. "#" .. d.sign_text
+		end
+	end
+	return EMPTY
+end
+
+local function diag_sign(buf, lnum)
+	local diags = vim.diagnostic.get(buf, { lnum = lnum - 1 })
+	if #diags == 0 then
+		return EMPTY
+	end
+	local sev = diags[1].severity
+	for _, d in ipairs(diags) do
+		if d.severity < sev then
+			sev = d.severity
+		end
+	end
+	local sev_name = ({
+		[vim.diagnostic.severity.ERROR] = "Error",
+		[vim.diagnostic.severity.WARN] = "Warn",
+		[vim.diagnostic.severity.INFO] = "Info",
+		[vim.diagnostic.severity.HINT] = "Hint",
+	})[sev]
+	if not sev_name then
+		return EMPTY
+	end
+	local def = vim.fn.sign_getdefined("DiagnosticSign" .. sev_name)[1]
+	local txt = (def and def.text) or (sev_name:sub(1, 1) .. " ")
+	return "%#DiagnosticSign" .. sev_name .. "#" .. txt
+end
+
+local function make_number(buf, lnum)
+	local num = (vim.wo.relativenumber and vim.v.relnum ~= 0) and vim.v.relnum or lnum
+	local num_hl = vim.v.relnum == 0 and "%#CursorLineNr#" or "%#LineNr#"
+	local width = math.max(#tostring(vim.api.nvim_buf_line_count(buf)), 2)
+	return num_hl .. " " .. string.format("%" .. width .. "d", num) .. " "
+end
+
+-- ── statuscolumn implementations ───────────────────────────────────────────
+-- full: dedicated column per sign type, gitsigns after number
+_G.StatusColumn = function()
+	local buf = vim.api.nvim_get_current_buf()
+	local lnum = vim.v.lnum
+	return extmark_sign("dap_breakpoints", buf, lnum)
+		.. diag_sign(buf, lnum)
+		.. extmark_sign("MarkSigns", buf, lnum)
+		.. make_number(buf, lnum)
+		.. extmark_sign("gitsigns_signs_", buf, lnum)
+end
+
+-- simple: highest-priority non-git sign wins (native-like), gitsigns after number
+_G.StatusColumnSimple = function()
+	local buf = vim.api.nvim_get_current_buf()
+	local lnum = vim.v.lnum
+	local sign_col = EMPTY
+	local best_p = -1
+	for ns_name, ns_id in pairs(vim.api.nvim_get_namespaces()) do
+		if ns_name ~= "gitsigns_signs_" then
+			local ok, ems = pcall(
+				vim.api.nvim_buf_get_extmarks,
+				buf,
+				ns_id,
+				{ lnum - 1, 0 },
+				{ lnum - 1, -1 },
+				{ details = true }
+			)
+			if ok then
+				for _, em in ipairs(ems) do
+					local d = em[4]
+					if d and d.sign_text and d.sign_text ~= "" and (d.priority or 0) > best_p then
+						best_p = d.priority or 0
+						sign_col = "%#" .. (d.sign_hl_group or "SignColumn") .. "#" .. d.sign_text
+					end
+				end
+			end
+		end
+	end
+	return sign_col .. make_number(buf, lnum) .. extmark_sign("gitsigns_signs_", buf, lnum)
+end
+
+-- ── toggle ─────────────────────────────────────────────────────────────────
+local _sc_enabled = false
+
+
+-- set on startup WITHOUT redraw (avoids flicker before colorscheme loads)
+local function init_sc()
+    vim.opt.signcolumn   = "no"
+    vim.opt.statuscolumn = _sc_enabled
+        and "%{%v:lua.StatusColumn()%}"
+        or  "%{%v:lua.StatusColumnSimple()%}"
+end
+
+init_sc()
+
+vim.keymap.set("n", "<leader>Us", function()
+	_sc_enabled = not _sc_enabled
+	init_sc()
+	vim.notify(
+		_sc_enabled and "Custom signcolumn enabled" or "Simple signcolumn enabled",
+		vim.log.levels.INFO,
+		{ title = "UI Toggle" }
+	)
+end, { desc = "Toggle signcolumn" })

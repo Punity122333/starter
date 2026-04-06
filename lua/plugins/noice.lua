@@ -248,6 +248,7 @@ return {
 						{ find = "modifiable" },
 						{ find = "decoding suggestions" },
 						{ find = "yanked" },
+						{ find = "fewer" },
 						{ find = "<ed" },
 					},
 				},

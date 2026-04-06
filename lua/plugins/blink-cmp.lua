@@ -1,6 +1,6 @@
 return {
 	"saghen/blink.cmp",
-  lazy = false,
+	lazy = false,
 	opts = function(_, opts)
 		local function paren_context()
 			local col = vim.fn.col(".")
@@ -26,18 +26,27 @@ return {
 				vim.schedule(function()
 					local cur_line = vim.api.nvim_get_current_line()
 					local fixed = cur_line:gsub("%)%(%)$", ")"):gsub("%)%(%)([^%w%(])", ")" .. "%1")
+					local cursor = vim.api.nvim_win_get_cursor(0)
 					if fixed ~= cur_line then
-						local cursor = vim.api.nvim_win_get_cursor(0)
 						vim.api.nvim_set_current_line(fixed)
 						local max_col = math.max(0, #fixed - 1)
 						if cursor[2] > max_col then
-							vim.api.nvim_win_set_cursor(0, { cursor[1], max_col })
+							cursor = { cursor[1], max_col }
+							vim.api.nvim_win_set_cursor(0, cursor)
 						end
+					end
+					local line = vim.api.nvim_get_current_line()
+					local col = cursor[2] 
+					local rest = line:sub(col + 1)
+					local open = rest:find("%(%)")
+					if open then
+						vim.api.nvim_win_set_cursor(0, { cursor[1], col + open })
 					end
 				end)
 			end
 			return ok
 		end
+
 		return vim.tbl_deep_extend("force", opts or {}, {
 			enabled = function()
 				return vim.b.blink_enabled ~= false and vim.bo.buftype ~= "prompt"
