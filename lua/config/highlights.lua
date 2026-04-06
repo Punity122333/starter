@@ -54,7 +54,6 @@ vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = COLOR_BACKGROUND_PR
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "GitSignsAdd", { link = "@string", force = true })
 
--- ERROR
 vim.api.nvim_set_hl(0, "BufferLineError", { fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(
 	0,
@@ -171,7 +170,7 @@ vim.api.nvim_set_hl(0, "DapUIControlsDisabled", { bg = BG })
 -- background
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = BG })
 vim.api.nvim_set_hl(0, "DapUIFloatNormal", { bg = BG })
-
+-- TODO: add more floating windows
 -- border
 -- hor20-Cursor
 vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = COLOR_BACKGROUND_PRIMARY, force = true })

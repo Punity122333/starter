@@ -7,7 +7,7 @@ local COLOR_CURSOR_BG = "#00ff00"
 local FLAG_FORCE_ALL = os.getenv("NO_LAZY") == "1"
 
 if vim.loader then
-  vim.loader.enable()
+	vim.loader.enable()
 end
 
 do
@@ -45,6 +45,8 @@ if ok then
 		orig_rm_attach(buf)
 	end
 end
+
+-- TODO: this is a band-aid for the fact that some plugins (looking at you, render-markdown) don't defer their setup properly. We should probably fix those plugins instead of doing this.
 
 vim.opt.relativenumber = true
 vim.opt.number = true
