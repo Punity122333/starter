@@ -10,9 +10,6 @@ if vim.loader then
 	vim.loader.enable()
 end
 
-
-
-
 do
 	local home = vim.fn.expand("~")
 	vim.env.PATH = table.concat({

@@ -291,19 +291,26 @@ local function init_sc()
 		"toggleterm",
 		"undotree",
 	}
-  if bt == "nofile" or bt == "prompt" then
-    vim.opt_local.statuscolumn = ""
-    vim.opt_local.number = false
-    vim.opt_local.relativenumber = false
-    return
-  end
-  if ft:find("Avante") then
-    vim.opt_local.statuscolumn = ""
-    vim.opt_local.number = false
-    vim.opt_local.relativenumber = false
-    table.insert(exclude, ft)
-    return
-  end
+	if bt == "nofile" or bt == "prompt" then
+		if ft:find("dap") then
+			vim.opt_local.statuscolumn = "   "
+			vim.opt_local.number = false
+			vim.opt_local.relativenumber = false
+			return
+		else
+			vim.opt_local.statuscolumn = ""
+			vim.opt_local.number = false
+			vim.opt_local.relativenumber = false
+			return
+		end
+	end
+	if ft:find("Avante") then
+		vim.opt_local.statuscolumn = ""
+		vim.opt_local.number = false
+		vim.opt_local.relativenumber = false
+		table.insert(exclude, ft)
+		return
+	end
 	if ft:find("^snacks_") then
 		table.insert(exclude, ft)
 		return
