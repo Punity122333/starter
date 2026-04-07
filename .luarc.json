@@ -1,10 +1,19 @@
 {
-    "workspace.maxPreload": 1000,
     "diagnostics.globals": [
         "vim",
         "Snacks",
         "NONE",
         "group",
-        "_scroll_ts"
+        "_scroll_ts",
+        "ipairs",
+        "pcall",
+        "require"
+    ],
+    "diagnostics.disable": [
+        "missing-fields",
+        "inject-field",
+        "param-type-mismatch",
+        "assign-type-mismatch",
+        "undefined-field"
     ]
 }

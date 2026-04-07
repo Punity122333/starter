@@ -46,12 +46,10 @@ if ok then
 	end
 end
 
--- TODO: this is a band-aid for the fact that some plugins (looking at you, render-markdown) don't defer their setup properly. We should probably fix those plugins instead of doing this.
 
 vim.opt.relativenumber = true
 vim.opt.number = true
 vim.opt.concealcursor = ""
-
 vim.g.VM_THEME = ""
 vim.g.VM_SET_STATUSLINE = 0
 

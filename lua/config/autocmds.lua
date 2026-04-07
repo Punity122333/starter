@@ -319,13 +319,6 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-	pattern = "markdown",
-	callback = function()
-		vim.opt_local.conceallevel = 3
-	end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
 	pattern = { "Avante" },
 	callback = function()
 		require("blink.cmp").setup({
@@ -399,3 +392,28 @@ vim.api.nvim_create_autocmd("User", {
 		end
 	end,
 })
+
+vim.schedule(function()
+	for _, autocmd in ipairs(vim.api.nvim_get_autocmds({ event = "TextChangedI" })) do
+		local src = autocmd.callback or ""
+		if tostring(src):match("trouble") then
+			vim.api.nvim_del_autocmd(autocmd.id)
+		end
+	end
+end)
+
+vim.schedule(function()
+	for _, autocmd in ipairs(vim.api.nvim_get_autocmds({ event = "TextChangedI" })) do
+		if autocmd.desc and autocmd.desc:match("trouble") then
+			vim.api.nvim_del_autocmd(autocmd.id)
+		end
+	end
+end)
+
+vim.schedule(function()
+	for _, ac in ipairs(vim.api.nvim_get_autocmds({ event = "TextChangedI" })) do
+		if ac.callback and tostring(ac.callback):match("trouble") then
+			vim.api.nvim_del_autocmd(ac.id)
+		end
+	end
+end)

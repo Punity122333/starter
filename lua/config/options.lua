@@ -291,6 +291,12 @@ local function init_sc()
 		"toggleterm",
 		"undotree",
 	}
+  if bt == "nofile" or bt == "prompt" then
+    vim.opt_local.statuscolumn = ""
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+    return
+  end
   if ft:find("Avante") then
     vim.opt_local.statuscolumn = ""
     vim.opt_local.number = false
@@ -341,3 +347,4 @@ vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
 		init_sc()
 	end,
 })
+vim.opt.ttyfast = true

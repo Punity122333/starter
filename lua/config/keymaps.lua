@@ -48,13 +48,13 @@ vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
 
 local _scroll_ts = 0
 local SCROLL_DEBOUNCE_MS = 120
+local _move_ts = 0
+local MOVE_DEBOUNCE_MS = 300
 local _sv = { noremap = true, silent = true }
 local _uv = vim.uv or vim.loop
-
 local _pending_v = 0
 local _pending_h = 0
 local _flush_sched = false
-
 local function flush_scroll()
 	_flush_sched = false
 	local v, h = _pending_v, _pending_h
@@ -69,7 +69,6 @@ local function flush_scroll()
 		vim.cmd("normal! " .. math.abs(h) .. (h > 0 and "zl" or "zh"))
 	end
 end
-
 local function queue_scroll(dv, dh)
 	_scroll_ts = _uv.now()
 	_pending_v = _pending_v + dv
@@ -79,12 +78,10 @@ local function queue_scroll(dv, dh)
 		vim.schedule(flush_scroll)
 	end
 end
-
 local _i_up = vim.api.nvim_replace_termcodes("<C-o><C-y><C-o><C-y><C-o><C-y>", true, false, true)
 local _i_down = vim.api.nvim_replace_termcodes("<C-o><C-e><C-o><C-e><C-o><C-e>", true, false, true)
 local _i_hleft = vim.api.nvim_replace_termcodes("<C-o>6zh", true, false, true)
 local _i_hright = vim.api.nvim_replace_termcodes("<C-o>6zl", true, false, true)
-
 for _, dir in ipairs({ "Up", "Down" }) do
 	local dv = dir == "Up" and 3 or -3
 	local iseq = dir == "Up" and _i_up or _i_down
@@ -101,7 +98,6 @@ for _, dir in ipairs({ "Up", "Down" }) do
 		vim.keymap.set("i", lhs, i_fn, _sv)
 	end
 end
-
 for _, dir in ipairs({ "Left", "Right" }) do
 	local dh = dir == "Right" and 6 or -6
 	local iseq = dir == "Right" and _i_hright or _i_hleft
@@ -119,106 +115,52 @@ for _, dir in ipairs({ "Left", "Right" }) do
 	end
 end
 local _lm_raw = vim.api.nvim_replace_termcodes("<LeftMouse>", true, false, true)
-vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
-	---@diagnostic disable-next-line: empty-block
+local _lm_fn = function()
 	if _uv.now() - _scroll_ts < SCROLL_DEBOUNCE_MS then
+		return
+	end
+	if _uv.now() - _move_ts < MOVE_DEBOUNCE_MS then
+		return
 	end
 	vim.api.nvim_feedkeys(_lm_raw, "n", false)
+end
+for _, btn in ipairs({ "<LeftMouse>", "<2-LeftMouse>", "<3-LeftMouse>", "<4-LeftMouse>" }) do
+	vim.keymap.set({ "n", "v", "i" }, btn, _lm_fn, _sv)
+end
+local _j_raw = vim.api.nvim_replace_termcodes("j", true, false, true)
+local _k_raw = vim.api.nvim_replace_termcodes("k", true, false, true)
+vim.keymap.set({ "n", "v" }, "j", function()
+	_move_ts = _uv.now()
+	vim.api.nvim_feedkeys(_j_raw, "n", false)
 end, _sv)
+vim.keymap.set({ "n", "v" }, "k", function()
+	_move_ts = _uv.now()
+	vim.api.nvim_feedkeys(_k_raw, "n", false)
+end, _sv)
+vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
+	callback = function()
+		_scroll_ts = _uv.now()
+	end,
+})
+local function jump_todo(direction)
+	local search_cmd = direction == "next" and "/" or "?"
+	local regex = [[\v<(TODO|FIXME|HACK)>\c]]
 
---
--- local function tc(s)
--- 	return vim.api.nvim_replace_termcodes(s, true, false, true)
--- end
---
--- local function feed(s)
--- 	vim.api.nvim_feedkeys(tc(s), "in", false)
--- end
---
--- local function read_digits(first)
--- 	local out = first or ""
--- 	while true do
--- 		local c = vim.fn.getcharstr()
--- 		if not c:match("%d") then
--- 			feed(c)
--- 			break
--- 		end
--- 		out = out .. c
--- 	end
--- 	return out
--- end
---
--- local function read_until_cr()
--- 	local out = ""
--- 	while true do
--- 		local c = vim.fn.getcharstr()
--- 		if c == "\r" then
--- 			break
--- 		end
--- 		out = out .. c
--- 	end
--- 	return out
--- end
---
--- local function read_target()
--- 	local c1 = vim.fn.getcharstr()
---
--- 	if c1:match("%d") then
--- 		return c1 .. read_digits()
--- 	end
---
--- 	if c1 == "+" or c1 == "-" then
--- 		local c2 = vim.fn.getcharstr()
--- 		if c2:match("%d") then
--- 			return c1 .. c2 .. read_digits()
--- 		end
--- 		feed(c2)
--- 		return c1
--- 	end
---
--- 	if c1 == "'" then
--- 		local m = vim.fn.getcharstr()
--- 		return "'" .. m
--- 	end
---
--- 	if c1 == "/" or c1 == "?" then
--- 		local p = read_until_cr()
--- 		return c1 .. p
--- 	end
---
--- 	if c1 == "g" then
--- 		local c2 = vim.fn.getcharstr()
--- 		if c2 == "g" then
--- 			return "0"
--- 		end
--- 		feed(c2)
--- 		return nil
--- 	end
---
--- 	if c1 == "G" then
--- 		return "$"
--- 	end
---
--- 	if c1 == "." or c1 == "$" then
--- 		return c1
--- 	end
---
--- 	return nil
--- end
---
--- vim.keymap.set("n", "\\\\", function()
--- 	local t = read_target()
--- 	if not t then
--- 		return
--- 	end
--- 	feed("<Cmd>silent! move " .. t .. "<CR>")
--- end, { noremap = true, silent = true, nowait = true })
---
--- -- visual mode
--- vim.keymap.set("x", "\\\\", function()
--- 	local t = read_target()
--- 	if not t then
--- 		return
--- 	end
--- 	feed("<Cmd>silent! move " .. t .. "<CR>")
--- end, { noremap = true, silent = true, nowait = true })
+	local ok, _ = pcall(vim.cmd, "silent! " .. search_cmd .. regex)
+
+	if ok then
+		local node = vim.treesitter.get_node()
+		if node and node:type():find("comment") then
+			return
+		else
+			jump_todo(direction)
+		end
+	end
+end
+
+vim.keymap.set("n", "]o", function()
+	jump_todo("next")
+end, { silent = true, desc = "Next todo comment" })
+vim.keymap.set("n", "[o", function()
+	jump_todo("prev")
+end, { silent = true, desc = "Prev todo comment" })

@@ -10,7 +10,7 @@ return {
 		},
 		opts = {
 			diagnostics = {
-				update_in_insert = true,
+        update_in_insert = true,
 				underline = true,
 				severity_sort = true,
 				virtual_text = {
@@ -130,9 +130,11 @@ return {
 							checkThirdParty = false,
 							workspace = {
 								checkThirdParty = false,
-								library = { vim.fn.stdpath("config") .. "/lua" },
+								library = { vim.env.VIMRUNTIME },
 								ignoreDir = { "**/node_modules", "**/lazy", "**/.git", "**/packer_compiled.lua" },
 								libraryStatus = "None",
+								maxPreload = 2000,
+								preloadFileSize = 5000,
 							},
 							telemetry = { enable = false },
 						},
@@ -238,7 +240,22 @@ return {
 			},
 		},
 		config = function(_, opts)
-			vim.diagnostic.config(opts.diagnostics) 
+			vim.diagnostic.config(opts.diagnostics)
+
+			-- Debounce diagnostic rendering by updatetime ms, bypassing insert mode gating
+			local timers = {}
+			local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
+			vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, cfg)
+				local bufnr = vim.uri_to_bufnr(result.uri)
+				if timers[bufnr] then
+					timers[bufnr]:stop()
+				end
+				timers[bufnr] = vim.defer_fn(function()
+					timers[bufnr] = nil
+					orig(err, result, ctx, cfg)
+				end, vim.o.updatetime)
+			end
+
 			local ok, lspconfig = pcall(require, "lspconfig")
 			if not ok then
 				return
@@ -271,7 +288,6 @@ return {
 					config.offsetEncoding = "utf-8"
 
 					if
-            
 						config.capabilities.textDocument
 						and config.capabilities.textDocument.completion
 						and config.capabilities.textDocument.completion.completionItem

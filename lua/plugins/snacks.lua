@@ -80,8 +80,8 @@ return {
 					layout = {
 
 						layout = {
-							width = 0.18,
-							min_width = 0.18,
+							width = 0.16,
+							min_width = 0.15,
 						},
 					},
 				},
