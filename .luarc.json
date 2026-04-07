@@ -7,13 +7,15 @@
         "_scroll_ts",
         "ipairs",
         "pcall",
-        "require"
+        "require",
+        "table"
     ],
     "diagnostics.disable": [
         "missing-fields",
         "inject-field",
         "param-type-mismatch",
         "assign-type-mismatch",
-        "undefined-field"
+        "undefined-field",
+        "undefined-global"
     ]
 }
