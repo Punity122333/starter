@@ -230,11 +230,11 @@ vim.keymap.set("n", "S", function()
 		end,
 		label = { before = true, after = false },
 	})
-end)
+end, { desc = "Global Treesitter Jump" })
 
 vim.keymap.set({ "n", "x", "o" }, "<leader>]", function()
 	require("flash").treesitter()
-end)
+end, { desc = "Flash Treesitter Visual Selection" })
 
 local function map2(mode, lhs, rhs, desc)
 	vim.keymap.set(mode, lhs, rhs, { desc = desc, silent = true })
@@ -265,14 +265,14 @@ end)
 
 vim.keymap.set("i", "<C-S-k>", function()
 	require("avante.suggestion").show({})
-end)
+end, { desc = "Manual Avante suggestion" })
 
 vim.keymap.set("n", "<C-q>", function()
 	require("case-dial").dial_normal()
-end)
+end, { desc = "Dial Case" })
 vim.keymap.set("v", "<C-q>", function()
 	require("case-dial").dial_visual()
-end)
+end, { desc = "Dial Case" })
 
 vim.keymap.set("n", "<leader>db", function()
 	require("dap").toggle_breakpoint()
@@ -280,24 +280,25 @@ vim.keymap.set("n", "<leader>db", function()
 end)
 
 local cmd = vim.api.nvim_create_user_command
+local opts = {}
+
 cmd("BrowseMain", function()
 	require("browse").browse()
-end)
+end, opts)
 cmd("BrowseInput", function()
 	require("browse").input_search()
-end)
+end, opts)
 cmd("BrowseBookmarks", function()
 	require("browse").open_manual_bookmarks()
-end)
+end, opts)
 cmd("BrowseDevDocs", function()
 	require("browse.devdocs").search()
-end)
+end, opts)
 cmd("BrowseDevDocsFT", function()
 	require("browse.devdocs").search_with_filetype()
-end)
+end, opts)
 cmd("BrowseMDN", function()
 	require("browse.mdn").search()
-end)
+end, opts)
 
-vim.keymap.del("n", "hi")
-
+vim.keymap.del("n", "hi", {})
