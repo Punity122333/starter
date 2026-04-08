@@ -298,6 +298,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"desktop",
 		"tmux",
 		"nix",
+    "desktop",
 	},
 	callback = function()
 		local ft = vim.bo.filetype

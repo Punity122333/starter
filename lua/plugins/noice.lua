@@ -1,7 +1,6 @@
-
-
 local hover_win = nil
 local hover_pending = false
+local _any_float_open = false
 
 local function get_sig_win()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -31,6 +30,7 @@ local function dismiss_all()
 	end
 	hover_win = nil
 	hover_pending = false
+	_any_float_open = false
 	pcall(function()
 		require("noice").cmd("dismiss")
 	end)
@@ -94,6 +94,7 @@ local function show_lsp_info()
 		})
 		if new_win and vim.api.nvim_win_is_valid(new_win) then
 			hover_win = new_win
+			_any_float_open = true
 			vim.api.nvim_set_option_value("conceallevel", 3, { win = new_win })
 			vim.api.nvim_set_option_value("spell", false, { win = new_win })
 			vim.api.nvim_create_autocmd("WinClosed", {
@@ -101,6 +102,7 @@ local function show_lsp_info()
 				once = true,
 				callback = function()
 					hover_win = nil
+					_any_float_open = false
 				end,
 			})
 		end
@@ -156,8 +158,7 @@ local function show_lsp_info()
 				if sig then
 					local sig_lines = { "```", sig.label, "```" }
 					if sig.documentation then
-						local doc = type(sig.documentation) == "table"
-								and sig.documentation.value
+						local doc = type(sig.documentation) == "table" and sig.documentation.value
 							or tostring(sig.documentation)
 						if doc ~= "" then
 							table.insert(sig_lines, "")
@@ -180,7 +181,6 @@ local function show_lsp_info()
 		vim.schedule(open_popup)
 	end
 end
-
 
 return {
 	"folke/noice.nvim",
@@ -247,8 +247,6 @@ return {
 						{ find = "split" },
 						{ find = "modifiable" },
 						{ find = "decoding suggestions" },
-						{ find = "yanked" },
-						{ find = "fewer" },
 						{ find = "<ed" },
 					},
 				},
@@ -285,17 +283,38 @@ return {
 			end,
 		})
 
+		local _sig_close_timer = nil
 		vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 			group = vim.api.nvim_create_augroup("SignatureAutoClose", { clear = true }),
 			callback = function()
-				for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
-					if client.progress and not vim.tbl_isempty(client.progress) then
-						return
-					end
+				-- O(1) check — no window scan, no allocations
+				if not _any_float_open then
+					return
 				end
-				if get_sig_win() and not is_in_function_call() then
-					require("noice").cmd("dismiss")
+				if _sig_close_timer then
+					_sig_close_timer:stop()
+					_sig_close_timer:close()
+					_sig_close_timer = nil
 				end
+				_sig_close_timer = vim.uv.new_timer()
+				_sig_close_timer:start(
+					60,
+					0,
+					vim.schedule_wrap(function()
+						if _sig_close_timer then
+							_sig_close_timer:close()
+							_sig_close_timer = nil
+						end
+						for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+							if client.progress and not vim.tbl_isempty(client.progress) then
+								return
+							end
+						end
+						if get_sig_win() and not is_in_function_call() then
+							require("noice").cmd("dismiss")
+						end
+					end)
+				)
 			end,
 		})
 	end,
@@ -314,5 +333,3 @@ return {
 		},
 	},
 }
-
-

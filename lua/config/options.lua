@@ -86,6 +86,7 @@ vim.opt.number = true
 
 vim.opt.wrap = false
 vim.opt.sidescrolloff = 8
+vim.opt.scrolloff = 8
 
 vim.opt.list = false
 vim.g.VM_theme = "neon"
