@@ -280,25 +280,25 @@ vim.keymap.set("n", "<leader>db", function()
 end)
 
 local cmd = vim.api.nvim_create_user_command
-local opts = {}
+local opts2 = {}
 
 cmd("BrowseMain", function()
 	require("browse").browse()
-end, opts)
+end, opts2)
 cmd("BrowseInput", function()
 	require("browse").input_search()
-end, opts)
+end, opts2)
 cmd("BrowseBookmarks", function()
 	require("browse").open_manual_bookmarks()
-end, opts)
+end, opts2)
 cmd("BrowseDevDocs", function()
 	require("browse.devdocs").search()
-end, opts)
+end, opts2)
 cmd("BrowseDevDocsFT", function()
 	require("browse.devdocs").search_with_filetype()
-end, opts)
+end, opts2)
 cmd("BrowseMDN", function()
 	require("browse.mdn").search()
-end, opts)
+end, opts2)
 
 vim.keymap.del("n", "hi", {})

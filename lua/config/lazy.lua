@@ -26,9 +26,8 @@ require("lazy").setup({
 	defaults = {
 		lazy = not force_all,
 		version = false,
-    
 	},
-	concurrency = force_all and 100 or nil,
+	concurrency = force_all and (vim.uv.available_parallelism() or 8) or nil,
 	performance = {
 		cache = { enabled = true },
 		reset_packpath = true,
