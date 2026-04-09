@@ -87,7 +87,8 @@ return {
 				},
 			},
 		},
-		input = { enabled = true },
+		input = { enabled = true, prompt = " " },
+
 		scroll = { enabled = false },
 		words = { enabled = false },
     statuscolumn = { enabled = false },

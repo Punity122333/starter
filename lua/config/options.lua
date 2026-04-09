@@ -364,3 +364,4 @@ vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
 	end,
 })
 vim.opt.ttyfast = true
+vim.opt.swapfile = false

@@ -298,7 +298,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		"desktop",
 		"tmux",
 		"nix",
-    "desktop",
+		"desktop",
 	},
 	callback = function()
 		local ft = vim.bo.filetype
@@ -419,4 +419,8 @@ vim.schedule(function()
 	end
 end)
 
-
+vim.api.nvim_create_autocmd("FocusGained", {
+	callback = function()
+		collectgarbage("collect")
+	end,
+})
