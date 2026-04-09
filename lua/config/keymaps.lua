@@ -43,6 +43,12 @@ vim.cmd([[
   cnoreabbrev <expr> Wqa getcmdtype() == ":" && getcmdline() == "Wqa" ? "WQA" : "Wqa"
 ]])
 
+local telescope = require("telescope")
+
+telescope.load_extension("emoji")
+
+vim.keymap.set("n", "<leader>se", telescope.extensions.emoji.emoji, { desc = "Search Emojis" })
+
 vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
 vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
 
@@ -119,7 +125,7 @@ end
 local _lm_raw = vim.api.nvim_replace_termcodes("<LeftMouse>", true, false, true)
 vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
 	if _uv.now() - _scroll_ts < SCROLL_DEBOUNCE_MS then
-    return
+		return
 	end
 	vim.api.nvim_feedkeys(_lm_raw, "n", false)
 end, _sv)
@@ -139,25 +145,38 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
 		_scroll_ts = _uv.now()
 	end,
 })
-local function jump_todo(direction)
-	local search_cmd = direction == "next" and "/" or "?"
-	local regex = [[\v<(TODO|FIXME|HACK)>\c]]
+-- TODO: to be fixed
 
-	local ok, _ = pcall(vim.cmd, "silent! " .. search_cmd .. regex)
-
-	if ok then
-		local node = vim.treesitter.get_node()
-		if node and node:type():find("comment") then
-			return
-		else
-			jump_todo(direction)
-		end
-	end
-end
-
-vim.keymap.set("n", "]o", function()
-	jump_todo("next")
-end, { silent = true, desc = "Next todo comment" })
-vim.keymap.set("n", "[o", function()
-	jump_todo("prev")
-end, { silent = true, desc = "Prev todo comment" })
+-- local function jump_todo(direction)
+-- 	local regex = [[\v<(TODO|FIXME|HACK)>\c]]
+-- 	local flags = direction == "next" and "w" or "bw"
+-- 	local start_pos = vim.fn.getpos(".")
+--
+-- 	while true do
+-- 		-- search() returns the line number or 0 if not found
+-- 		local stop_line = vim.fn.search(regex, flags)
+--
+-- 		if stop_line == 0 then
+-- 			break
+-- 		end
+--
+-- 		local node = vim.treesitter.get_node()
+-- 		if node and node:type():find("comment") then
+-- 			break -- found it, we're done
+-- 		end
+--
+-- 		-- if we've looped back to the start and still haven't found a
+-- 		-- valid comment match, kill the loop to prevent the freeze
+-- 		local current_pos = vim.fn.getpos(".")
+-- 		if current_pos[2] == start_pos[2] and current_pos[3] == start_pos[3] then
+-- 			break
+-- 		end
+-- 	end
+-- end
+--
+-- vim.keymap.set("n", "]o", function()
+-- 	jump_todo("next")
+-- end, { silent = true, desc = "Next todo comment" })
+-- vim.keymap.set("n", "[o", function()
+-- 	jump_todo("prev")
+-- end, { silent = true, desc = "Prev todo comment" })

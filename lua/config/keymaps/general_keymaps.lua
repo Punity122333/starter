@@ -24,7 +24,7 @@ vim.keymap.set("v", "<", function()
 	vim.o.lazyredraw = saved
 end, { noremap = true, silent = true, desc = "Unindent and reselect" })
 
-vim.keymap.set("n", "gl", vim.diagnostic.open_float)
+vim.keymap.set("n", "g]", vim.diagnostic.open_float)
 vim.keymap.set("i", "<A-h>", "<Left>", { desc = "Move cursor left", silent = true })
 vim.keymap.set("i", "<A-j>", "<Down>", { desc = "Move cursor down", silent = true })
 vim.keymap.set("i", "<A-k>", "<Up>", { desc = "Move cursor up", silent = true })
