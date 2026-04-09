@@ -291,7 +291,7 @@ local function init_sc()
 	}
 	if bt == "nofile" or bt == "prompt" then
 		if ft:find("dap") then
-			if ft:find("dap-float") then
+			if ft:find("float") then
 				vim.opt_local.statuscolumn = ""
 				vim.opt_local.number = false
 				vim.opt_local.relativenumber = false

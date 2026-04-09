@@ -1,6 +1,7 @@
 return {
 	{
 		"h3pei/case-dial.nvim",
+    lazy = false,
 		opts = {
 			keymap = false,
 		},

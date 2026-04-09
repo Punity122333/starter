@@ -8,77 +8,77 @@ local BufferKeys = {
     function()
       goto_buffer(1)
     end,
-    desc = "Go to absolute buffer 1",
+    desc = "Go to buffer 1",
   },
 	{
     "<leader>bs",
     function()
       goto_buffer(2)
     end,
-    desc = "Go to absolute buffer 2",
+    desc = "Go to buffer 2",
 	},
   {
     "<leader>bd",
     function()
       goto_buffer(3)
     end,
-    desc = "Go to absolute buffer 3",
+    desc = "Go to buffer 3",
   },
   {
     "<leader>bf",
     function()
       goto_buffer(4)
     end,
-    desc = "Go to absolute buffer 4",
+    desc = "Go to buffer 4",
   },
 	{
 		"<leader>bg",
 		function()
 			goto_buffer(5)
 		end,
-		desc = "Go to absolute buffer 5",
+		desc = "Go to buffer 5",
 	},
 	{
 		"<leader>bh",
 		function()
 			goto_buffer(6)
 		end,
-		desc = "Go to absolute buffer 6",
+		desc = "Go to buffer 6",
 	},
 	{
 		"<leader>bj",
 		function()
 			goto_buffer(7)
 		end,
-		desc = "Go to absolute buffer 7",
+		desc = "Go to buffer 7",
 	},
 	{
 		"<leader>bk",
 		function()
 			goto_buffer(8)
 		end,
-		desc = "Go to absolute buffer 8",
+		desc = "Go to buffer 8",
 	},
 	{
 		"<leader>bl",
 		function()
 			goto_buffer(9)
 		end,
-		desc = "Go to absolute buffer 9",
+		desc = "Go to buffer 9",
 	},
 	{
 		"<leader>b;",
 		function()
 			goto_buffer(10)
 		end,
-		desc = "Go to absolute buffer 10",
+		desc = "Go to buffer 10",
 	},
 	{
 		"<leader>b'",
 		function()
 			goto_buffer(11)
 		end,
-		desc = "Go to absolute buffer 11",
+		desc = "Go to buffer 11",
 	},
 }
 
