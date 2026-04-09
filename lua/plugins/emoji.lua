@@ -1,13 +1,13 @@
 return {
 	"allaman/emoji.nvim",
-	ft = { "markdown", "text" }, -- load only in those filetypes
+	ft = { "markdown", "text" },
 	dependencies = {
 		"nvim-lua/plenary.nvim",
-		"hrsh7th/nvim-cmp", -- optional (emoji completion)
-		"nvim-telescope/telescope.nvim", -- optional (emoji picker)
+		"hrsh7th/nvim-cmp",
+		"nvim-telescope/telescope.nvim",
 	},
 	opts = {
-		enable_cmp_integration = true, -- allows emoji in cmp menu
+		enable_cmp_integration = true,
 	},
 	config = function(_, opts)
 		require("emoji").setup(opts)

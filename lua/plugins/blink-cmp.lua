@@ -36,7 +36,7 @@ return {
 						end
 					end
 					local line = vim.api.nvim_get_current_line()
-					local col = cursor[2] 
+					local col = cursor[2]
 					local rest = line:sub(col + 1)
 					local open = rest:find("%(%)")
 					if open then
@@ -201,6 +201,18 @@ return {
 						max_items = 8,
 						min_keyword_length = 2,
 						module = "blink.cmp.sources.snippets",
+					},
+
+					emoji = {
+						name = "emoji",
+						module = "blink.compat.source",
+						transform_items = function(ctx, items)
+							local kind = require("blink.cmp.types").CompletionItemKind.Text
+							for i = 1, #items do
+								items[i].kind = kind
+							end
+							return items
+						end,
 					},
 				},
 			},
