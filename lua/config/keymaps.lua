@@ -132,6 +132,7 @@ end, _sv)
 
 local _j_raw = vim.api.nvim_replace_termcodes("j", true, false, true)
 local _k_raw = vim.api.nvim_replace_termcodes("k", true, false, true)
+
 vim.keymap.set({ "n", "v" }, "j", function()
 	_move_ts = _uv.now()
 	vim.api.nvim_feedkeys(_j_raw, "n", false)
@@ -145,8 +146,12 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
 		_scroll_ts = _uv.now()
 	end,
 })
--- TODO: to be fixed
 
+vim.keymap.set("n", "H", "H", { desc = "Move to top of screen" })
+vim.keymap.set("n", "L", "L", { desc = "Move to bottom of screen" })
+vim.api.nvim_set_keymap("n", "j", 'v:count == 0 ? "gj" : "j"', { expr = true, noremap = true })
+vim.api.nvim_set_keymap("n", "k", 'v:count == 0 ? "gk" : "k"', { expr = true, noremap = true })
+-- TODO: to be fixed
 -- local function jump_todo(direction)
 -- 	local regex = [[\v<(TODO|FIXME|HACK)>\c]]
 -- 	local flags = direction == "next" and "w" or "bw"
