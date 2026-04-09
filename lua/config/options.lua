@@ -67,7 +67,6 @@ vim.api.nvim_create_autocmd("User", {
 	end,
 })
 
-
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
@@ -77,7 +76,7 @@ if vim.env[KITTY_SCROLLBACK_NVIM] == TRUE then
 	vim.g.loaded_netrwPlugin = 1
 end
 
-vim.opt.foldenable = false
+vim.opt.foldenable = true
 vim.env.PATH = vim.fn.expand(NPM_GLOBAL_BIN) .. vim.env.PATH
 vim.env.PATH = vim.fn.expand(LOCAL_BIN) .. vim.env.PATH
 vim.env.PATH = vim.fn.expand(MASON_BIN) .. vim.env.PATH
@@ -195,8 +194,6 @@ local function make_number(buf, lnum)
 	return num_hl .. " " .. string.format("%" .. width .. "d", num) .. " "
 end
 
--- ── statuscolumn implementations ───────────────────────────────────────────
--- full: dedicated column per sign type, gitsigns after number
 _G.StatusColumn = function()
 	local buf = vim.api.nvim_get_current_buf()
 	local lnum = vim.v.lnum
@@ -207,7 +204,6 @@ _G.StatusColumn = function()
 		.. extmark_sign("gitsigns_signs_", buf, lnum)
 end
 
--- simple: highest-priority non-git sign wins (native-like), gitsigns after number
 _G.StatusColumnSimple = function()
 	local buf = vim.api.nvim_get_current_buf()
 	local lnum = vim.v.lnum
@@ -295,10 +291,17 @@ local function init_sc()
 	}
 	if bt == "nofile" or bt == "prompt" then
 		if ft:find("dap") then
-			vim.opt_local.statuscolumn = "   "
-			vim.opt_local.number = false
-			vim.opt_local.relativenumber = false
-			return
+			if ft:find("dap-float") then
+				vim.opt_local.statuscolumn = ""
+				vim.opt_local.number = false
+				vim.opt_local.relativenumber = false
+				return
+			else
+				vim.opt_local.statuscolumn = "   "
+				vim.opt_local.number = false
+				vim.opt_local.relativenumber = false
+				return
+			end
 		else
 			vim.opt_local.statuscolumn = ""
 			vim.opt_local.number = false
@@ -306,6 +309,7 @@ local function init_sc()
 			return
 		end
 	end
+
 	if ft:find("Avante") then
 		vim.opt_local.statuscolumn = ""
 		vim.opt_local.number = false
@@ -323,7 +327,6 @@ local function init_sc()
 		vim.opt_local.relativenumber = false
 		return
 	end
-	-- blocking statuscolumn for utility buffers
 	if vim.tbl_contains(exclude, ft) or ft:find("avante") or bt == "nofile" or bt == "prompt" then
 		vim.opt_local.statuscolumn = " "
 		vim.opt_local.number = false
@@ -331,11 +334,9 @@ local function init_sc()
 		return
 	end
 
-	-- apply the custom column for code
 	vim.opt.signcolumn = "no"
 	vim.opt.statuscolumn = _sc_enabled and "%{%v:lua.StatusColumn()%}" or "%{%v:lua.StatusColumnSimple()%}"
 
-	-- ensure numbers are back on for actual files
 	vim.opt_local.number = true
 	vim.opt_local.relativenumber = true
 end
@@ -343,13 +344,19 @@ init_sc()
 
 vim.keymap.set("n", "<leader>Us", function()
 	_sc_enabled = not _sc_enabled
-	init_sc()
+	for _, win in ipairs(vim.api.nvim_list_wins()) do
+		local cfg = vim.api.nvim_win_get_config(win)
+		-- Skip floating windows (fold panels and others)
+		if cfg.relative == "" then
+			vim.api.nvim_win_call(win, init_sc)
+		end
+	end
 	vim.notify(
 		_sc_enabled and "Custom signcolumn enabled" or "Simple signcolumn enabled",
 		vim.log.levels.INFO,
 		{ title = "UI Toggle" }
 	)
-end, { desc = "Toggle signcolumn" })
+end, { desc = "Toggle signcolumn (all windows)" })
 
 vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
 	callback = function()

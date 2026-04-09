@@ -4,7 +4,7 @@ return {
 		opts = {
 			suggestion = {
 				enabled = true,
-				auto_trigger = true,
+				auto_trigger = false,
         debounce = 150,
 				keymap = {
 					accept = false, -- handled by blink-cmp Tab keymap

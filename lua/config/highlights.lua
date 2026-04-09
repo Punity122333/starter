@@ -207,6 +207,7 @@ vim.api.nvim_set_hl(0, "RenderMarkdownCodeInline", { bg = COLOR_BACKGROUND_PRIMA
 vim.api.nvim_set_hl(0, "StatusLine", { bg = COLOR_STATUS_LINE, force = true })
 vim.api.nvim_set_hl(0, "StatusLineNC", { bg = COLOR_STATUS_LINE, force = true })
 vim.api.nvim_set_hl(0, "BufferLineBuffer", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
+vim.api.nvim_set_hl(0, "Substitute", { link = "SubstituteRange" })
 
 vim.cmd.highlight("MyTerminalBorder guifg=" .. COLOR_BACKGROUND_PRIMARY)
 

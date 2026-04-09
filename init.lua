@@ -74,16 +74,6 @@ vim.defer_fn(function()
 end, 300)
 
 vim.keymap.set("n", "hi", ":Inspect<CR>")
-
-vim.keymap.set("n", "<leader>mi", function()
-	local mp = vim.fn.getmousepos()
-	if mp.winid == 0 then
-		return
-	end
-	local buf = vim.api.nvim_win_get_buf(mp.winid)
-	print(vim.inspect(vim.inspect_pos(buf, mp.line - 1, mp.column - 1)))
-end, { desc = "Inspect under mouse" })
-
 vim.api.nvim_create_user_command("RefreshAll", "bufdo edit!", { desc = "Reload all buffers from disk" })
 
 vim.api.nvim_create_user_command("Format", function(args)
