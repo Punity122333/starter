@@ -1,6 +1,1 @@
-Make debounced diagnostics in insert mode for lspconfig
-Improve startup time for Neovim configuration
-Add keybindings for common LSP actions
-Ensure compatibility with the latest LSP servers
-Document steps to add new plugins
 

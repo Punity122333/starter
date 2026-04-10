@@ -46,7 +46,7 @@ return {
 
 		local function setup_patch_hls()
 			local cursorline_bg = int_to_hex(vim.api.nvim_get_hl(0, { name = "CursorLine", link = false }).bg)
-
+			local comment_fg = int_to_hex(vim.api.nvim_get_hl(0, { name = "Comment", link = false }).fg)
 			for sev, hl_name in pairs(hl_map) do
 				local name = sev_names[sev]
 				local body_hl = vim.api.nvim_get_hl(0, { name = hl_name, link = false })
@@ -54,7 +54,7 @@ return {
 				local body_fg = int_to_hex(body_hl.fg)
 
 				vim.api.nvim_set_hl(0, "CursorDiagArrow" .. name, {
-					fg = NONE,
+					fg = comment_fg,
 					bg = cursorline_bg,
 				})
 				vim.api.nvim_set_hl(0, "CursorDiagCapL" .. name, {

@@ -49,8 +49,6 @@ telescope.load_extension("emoji")
 
 vim.keymap.set("n", "<leader>se", telescope.extensions.emoji.emoji, { desc = "Search Emojis" })
 
-vim.keymap.set("i", "<CR>", "<CR>", { noremap = true })
-vim.keymap.set("i", "<BS>", "<BS>", { noremap = true })
 
 local _scroll_ts = 0
 local SCROLL_DEBOUNCE_MS = 120
@@ -151,37 +149,61 @@ vim.keymap.set("n", "H", "H", { desc = "Move to top of screen" })
 vim.keymap.set("n", "L", "L", { desc = "Move to bottom of screen" })
 vim.api.nvim_set_keymap("n", "j", 'v:count == 0 ? "gj" : "j"', { expr = true, noremap = true })
 vim.api.nvim_set_keymap("n", "k", 'v:count == 0 ? "gk" : "k"', { expr = true, noremap = true })
--- TODO: to be fixed
--- local function jump_todo(direction)
--- 	local regex = [[\v<(TODO|FIXME|HACK)>\c]]
--- 	local flags = direction == "next" and "w" or "bw"
--- 	local start_pos = vim.fn.getpos(".")
---
--- 	while true do
--- 		-- search() returns the line number or 0 if not found
--- 		local stop_line = vim.fn.search(regex, flags)
---
--- 		if stop_line == 0 then
--- 			break
--- 		end
---
--- 		local node = vim.treesitter.get_node()
--- 		if node and node:type():find("comment") then
--- 			break -- found it, we're done
--- 		end
---
--- 		-- if we've looped back to the start and still haven't found a
--- 		-- valid comment match, kill the loop to prevent the freeze
--- 		local current_pos = vim.fn.getpos(".")
--- 		if current_pos[2] == start_pos[2] and current_pos[3] == start_pos[3] then
--- 			break
--- 		end
--- 	end
--- end
---
--- vim.keymap.set("n", "]o", function()
--- 	jump_todo("next")
--- end, { silent = true, desc = "Next todo comment" })
--- vim.keymap.set("n", "[o", function()
--- 	jump_todo("prev")
--- end, { silent = true, desc = "Prev todo comment" })
+
+vim.keymap.set("n", "g\\", function()
+	local lines = {}
+	for _ = 1, vim.v.count1 do
+		lines[#lines + 1] = ""
+	end
+	local row = vim.api.nvim_win_get_cursor(0)[1]
+	vim.api.nvim_buf_set_lines(0, row, row, false, lines)
+end, { silent = true, desc = "Put blank line(s) below" })
+
+vim.keymap.set("n", "g/", function()
+	local count = vim.v.count1
+	local lines = {}
+	for _ = 1, count do
+		lines[#lines + 1] = ""
+	end
+	local row = vim.api.nvim_win_get_cursor(0)[1]
+	vim.api.nvim_buf_set_lines(0, row, row, false, lines)
+	vim.api.nvim_win_set_cursor(0, { row + count, 0 })
+end, { silent = true, desc = "Put blank line(s) below and jump to last" })
+
+local function jump_todo(direction)
+	local regex = [[\v<(TODO|FIXME|HACK)\c]]
+	local flags = direction == "next" and "w" or "bw"
+	local start_pos = vim.fn.getpos(".")
+	local seen = {}
+
+	while true do
+		local stop_line = vim.fn.search(regex, flags)
+
+		if stop_line == 0 then
+			break
+		end
+
+		local cur = vim.fn.getpos(".")
+		local key = cur[2] .. "," .. cur[3]
+
+		-- if we've already visited this position, nothing valid exists — bail
+		if seen[key] then
+			vim.fn.setpos(".", start_pos)
+			break
+		end
+		seen[key] = true
+
+		local node = vim.treesitter.get_node()
+		if node and node:type():find("comment") then
+			break
+		end
+	end
+end
+
+vim.keymap.set("n", "]o", function()
+	jump_todo("next")
+end, { silent = true, desc = "Next todo comment" })
+
+vim.keymap.set("n", "[o", function()
+	jump_todo("prev")
+end, { silent = true, desc = "Prev todo comment" })
