@@ -24,7 +24,6 @@ return {
 				if vim.snippet and vim.snippet.active({ direction = 1 }) then
 					return false
 				end
-
 				local fn = vim.fn
 				local utils = require("auto-save.utils.data")
 
@@ -41,40 +40,3 @@ return {
 		},
 	},
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

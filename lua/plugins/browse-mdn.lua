@@ -3,28 +3,28 @@ return {
 	dependencies = { "nvim-telescope/telescope.nvim" },
 	keys = {
 		{
-			"<leader>bw",
+			"<leader>Bw",
 			function()
 				require("browse").input_search()
 			end,
 			desc = "Browse Search",
 		},
 		{
-			"<leader>bb",
+			"<leader>Bb",
 			function()
 				require("browse").browse()
 			end,
 			desc = "Browse Main Menu",
 		},
 		{
-			"<leader>bm",
+			"<leader>Bm",
 			function()
 				require("browse").open_manual_bookmarks()
 			end,
 			desc = "Browse Bookmarks",
 		},
 		{
-			"<leader>bt",
+			"<leader>Bt",
 			function()
 				require("browse.devdocs").search()
 			end,
