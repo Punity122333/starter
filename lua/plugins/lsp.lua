@@ -117,7 +117,7 @@ return {
 					on_attach = function(client, bufnr)
 						client.server_capabilities.diagnosticProvider = false
 						client.server_capabilities.semanticTokensProvider = nil
-						client.server_capabilities.documentSymbolProvider = false
+						client.server_capabilities.documentSymbolProvider = true
 					end,
 					settings = {
 						Lua = {
@@ -181,7 +181,7 @@ return {
 							client.server_capabilities.completionProvider.triggerCharacters = { ".", ":" }
 							client.server_capabilities.completionProvider.resolveProvider = true
 						end
-						client.server_capabilities.documentSymbolProvider = false
+						client.server_capabilities.documentSymbolProvider = true
 					end,
 					settings = {
 						FormattingOptions = {

@@ -121,7 +121,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 })
 
 local rust_clippy_group = vim.api.nvim_create_augroup("RustAutoClippy", { clear = true })
-
 vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 	group = rust_clippy_group,
 	pattern = "*.rs",
@@ -422,5 +421,13 @@ end)
 vim.api.nvim_create_autocmd("FocusGained", {
 	callback = function()
 		collectgarbage("collect")
+	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "dbui",
+	callback = function()
+		vim.cmd("wincmd L")
+		vim.cmd("vertical resize 40")
 	end,
 })

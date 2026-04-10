@@ -5,7 +5,7 @@ return {
 		lazy = false,
 		opts = {
 			check_ts = true,
-      enable_check_bracket_line = false,
+			enable_check_bracket_line = true,
 			ts_config = {
 				lua = { "string" },
 				python = { "string" },
@@ -13,6 +13,7 @@ return {
 			map_cr = true,
 			map_bs = true,
 		},
+
 		config = function(_, opts)
 			local autopairs = require("nvim-autopairs")
 			autopairs.setup(opts)
@@ -22,3 +23,4 @@ return {
 		end,
 	},
 }
+

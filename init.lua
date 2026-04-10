@@ -93,6 +93,7 @@ vim.notify = function(msg, level, opts)
 	orig_notify(msg, level, opts)
 end
 
+
 local PROTECTED_PATTERNS = {
 	"Border",
 	"Prompt",
