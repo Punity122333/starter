@@ -10,7 +10,7 @@ return {
 		},
 		opts = {
 			diagnostics = {
-        update_in_insert = false,
+				update_in_insert = false,
 				underline = true,
 				severity_sort = true,
 				virtual_text = {
@@ -124,7 +124,6 @@ return {
 							runtime = { version = "LuaJIT" },
 							diagnostics = {
 								globals = { "vim" },
-								updateOn = "OnSave",
 								disable = { "lowercase-global", "undefined-global", "missing-fields" },
 							},
 							checkThirdParty = false,
@@ -242,18 +241,35 @@ return {
 		config = function(_, opts)
 			vim.diagnostic.config(opts.diagnostics)
 
-			-- Debounce diagnostic rendering by updatetime ms, bypassing insert mode gating
-			local timers = {}
 			local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
+
+			-- Track lua_ls client IDs at attach time so the handler can identify it
+			-- without calling get_client_by_id (which can return nil inside a handler).
+			local lua_ls_ids = {}
+			local lua_ls_cfg = opts.servers.lua_ls
+			local lua_ls_upstream_attach = lua_ls_cfg.on_attach
+			lua_ls_cfg.on_attach = function(client, bufnr)
+				lua_ls_ids[client.id] = true
+				if lua_ls_upstream_attach then
+					lua_ls_upstream_attach(client, bufnr)
+				end
+			end
+
+			-- Debounce per buffer+client so multiple LSPs don't cancel each other's timers.
+			-- lua_ls is chatty; give it a longer delay than updatetime.
+			local timers = {}
 			vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, cfg)
 				local bufnr = vim.uri_to_bufnr(result.uri)
-				if timers[bufnr] then
-					timers[bufnr]:stop()
+				local key = bufnr .. "_" .. (ctx.client_id or 0)
+				local delay = lua_ls_ids[ctx.client_id] and 800 or vim.o.updatetime
+
+				if timers[key] then
+					timers[key]:stop()
 				end
-				timers[bufnr] = vim.defer_fn(function()
-					timers[bufnr] = nil
+				timers[key] = vim.defer_fn(function()
+					timers[key] = nil
 					orig(err, result, ctx, cfg)
-				end, vim.o.updatetime)
+				end, delay)
 			end
 
 			local ok, lspconfig = pcall(require, "lspconfig")

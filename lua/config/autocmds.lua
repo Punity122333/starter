@@ -1,6 +1,6 @@
 local COLOR_LINE_NUMBER = "#565f89"
 local COLOR_NONE = "none"
-
+require("config.clauseclose")
 vim.api.nvim_set_hl(0, "SignColumn", { bg = COLOR_NONE })
 vim.api.nvim_set_hl(0, "LineNr", { fg = COLOR_LINE_NUMBER, bg = COLOR_NONE })
 vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = COLOR_NONE, bg = COLOR_NONE })
