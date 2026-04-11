@@ -119,6 +119,11 @@ return {
 						client.server_capabilities.semanticTokensProvider = nil
 						client.server_capabilities.documentSymbolProvider = true
 					end,
+
+					flags = {
+						-- wait 500ms after the last keystroke before sending changes to the server
+						debounce_text_changes = 500,
+					},
 					settings = {
 						Lua = {
 							runtime = { version = "LuaJIT" },

@@ -80,5 +80,5 @@ return {
 			},
 		},
 	},
-	{ "nvim-treesitter/nvim-treesitter-textobjects", enabled = true },
+	{ "nvim-treesitter/nvim-treesitter-textobjects", enabled = true, lazy = false },
 }

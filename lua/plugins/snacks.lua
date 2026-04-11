@@ -89,22 +89,21 @@ return {
 		},
 		input = { enabled = true, prompt = " " },
 
+		indent = {
+			animate = {
+				enabled = false,
+			},
+		},
 		scroll = { enabled = false },
 		words = { enabled = false },
-    statuscolumn = { enabled = false },
-    image = {
+		statuscolumn = { enabled = false },
+		image = {
 			enabled = true,
 			math = { enabled = false },
 		},
 	},
 	keys = {
-		{
-			"<leader>gg",
-			function()
-				Snacks.terminal("gitui")
-			end,
-			desc = "GitUI",
-		},
+
 		{
 			"<leader>e",
 			function()

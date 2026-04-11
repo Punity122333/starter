@@ -163,23 +163,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-local ignore_messages = {
-	"E21: Cannot make changes, 'modifiable' is off",
-	"E242: Can't split a window while closing another",
-	"model",
-}
-
-vim.api.nvim_create_autocmd("User", {
-	pattern = "MsgShow",
-	callback = function()
-		local msg = vim.v.event.msg
-		for _, filter in ipairs(ignore_messages) do
-			if msg:find(filter, 1, true) then
-				return true
-			end
-		end
-	end,
-})
 
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	callback = function(args)
@@ -356,18 +339,6 @@ for i = 1, #mark_chars do
 	end, { silent = true, desc = "Set mark " .. c })
 end
 
-vim.api.nvim_create_autocmd("User", {
-	pattern = {
-		"DapBreakpoint",
-		"DapBreakpointCondition",
-		"DapLogPoint",
-		"DapBreakpointRejected",
-		"CursorHold",
-		"CursorHoldI",
-		"CursorMovedI",
-	},
-	callback = redraw_signs,
-})
 
 vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", priority = 10 })
 vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DapBreakpointCondition", priority = 10 })
@@ -392,32 +363,6 @@ vim.api.nvim_create_autocmd("User", {
 		end
 	end,
 })
-
-vim.schedule(function()
-	for _, autocmd in ipairs(vim.api.nvim_get_autocmds({ event = "TextChangedI" })) do
-		local src = autocmd.callback or ""
-		if tostring(src):match("trouble") then
-			vim.api.nvim_del_autocmd(autocmd.id)
-		end
-	end
-end)
-
-vim.schedule(function()
-	for _, autocmd in ipairs(vim.api.nvim_get_autocmds({ event = "TextChangedI" })) do
-		if autocmd.desc and autocmd.desc:match("trouble") then
-			vim.api.nvim_del_autocmd(autocmd.id)
-		end
-	end
-end)
-
-vim.schedule(function()
-	for _, ac in ipairs(vim.api.nvim_get_autocmds({ event = "TextChangedI" })) do
-		if ac.callback and tostring(ac.callback):match("trouble") then
-			vim.api.nvim_del_autocmd(ac.id)
-		end
-	end
-end)
-
 vim.api.nvim_create_autocmd("FocusGained", {
 	callback = function()
 		collectgarbage("collect")
@@ -431,3 +376,5 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.cmd("vertical resize 40")
 	end,
 })
+
+vim.api.nvim_clear_autocmds({ event = "WinScrolled" })

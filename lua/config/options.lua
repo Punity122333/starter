@@ -241,7 +241,6 @@ local function init_sc()
 	local bt = vim.bo.buftype
 
 	local exclude = {
-		-- explorers & tools<S-F10>
 		"NvimTree",
 		"neo-tree",
 		"oil",
@@ -249,17 +248,14 @@ local function init_sc()
 		"lazy",
 		"mason",
 		"trouble",
-		-- dashboards
 		"dashboard",
 		"alpha",
 		"snacks_dashboard",
 		"starter",
-		-- help & docs
 		"help",
 		"man",
 		"checkhealth",
 		"tutor",
-		-- dap (debugger)
 		"dapui_scopes",
 		"dapui_breakpoints",
 		"dapui_stacks",
@@ -267,13 +263,11 @@ local function init_sc()
 		"dapui_console",
 		"dap-repl",
 		"dap-terminal",
-		-- ai (avante)
 		"avante",
 		"avante-input",
 		"avante-selected",
 		"avante-chat",
 		"Avante",
-		-- floating & snacks
 		"notify",
 		"noice",
 		"snacks_notif",

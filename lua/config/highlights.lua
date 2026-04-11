@@ -224,3 +224,49 @@ hl2.bold = true
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_set_hl(0, "Comment", hl2)
 vim.api.nvim_set_hl(0, "@module.haskell", { link = "@type.haskell" })
+
+local sev_names = {
+	[vim.diagnostic.severity.ERROR] = "Error",
+	[vim.diagnostic.severity.WARN] = "Warn",
+	[vim.diagnostic.severity.INFO] = "Info",
+	[vim.diagnostic.severity.HINT] = "Hint",
+}
+
+local hl_map = {
+	[vim.diagnostic.severity.ERROR] = "TinyInlineDiagnosticVirtualTextError",
+	[vim.diagnostic.severity.WARN] = "TinyInlineDiagnosticVirtualTextWarn",
+	[vim.diagnostic.severity.INFO] = "TinyInlineDiagnosticVirtualTextInfo",
+	[vim.diagnostic.severity.HINT] = "TinyInlineDiagnosticVirtualTextHint",
+}
+local function int_to_hex(int)
+	if not int then
+		return nil
+	end
+	return string.format("#%06x", int)
+end
+
+local function setup_patch_hls()
+	local cursorline_bg = "#28344a"
+	local comment_fg = int_to_hex(vim.api.nvim_get_hl(0, { name = "Comment", link = false }).fg)
+	for sev, hl_name in pairs(hl_map) do
+		local name = sev_names[sev]
+		local body_hl = vim.api.nvim_get_hl(0, { name = hl_name, link = false })
+		local body_bg = int_to_hex(body_hl.bg)
+		local body_fg = int_to_hex(body_hl.fg)
+
+		vim.api.nvim_set_hl(0, "CursorDiagArrow" .. name, {
+			fg = comment_fg,
+			bg = cursorline_bg,
+		})
+		vim.api.nvim_set_hl(0, "CursorDiagCapL" .. name, {
+			fg = body_bg,
+			bg = cursorline_bg,
+		})
+		vim.api.nvim_set_hl(0, "CursorDiagCapR" .. name, {
+			fg = body_bg,
+			bg = cursorline_bg,
+		})
+	end
+end
+
+setup_patch_hls()

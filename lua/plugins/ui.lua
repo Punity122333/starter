@@ -17,31 +17,7 @@ return {
 			end,
 		},
 	},
-	{
-		"folke/snacks.nvim",
-		opts = {
-			scratch = {
-				win = {
-					style = "scratch",
-					border = "rounded",
-					title = "",
-					title_pos = "center",
-				},
-			},
-			lazygit = {
-				enabled = true,
-				theme = {
-					optionsTextColor = { fg = "NonText" },
-					selectedLineBgColor = { bg = "CursorLine" },
-					activeBorderColor = { fg = "Special", bold = true },
-				},
-				win = {
-					style = "lazygit",
-					border = "rounded",
-				},
-			},
-		},
-	},
+
 	{
 		"folke/which-key.nvim",
 		lazy = false,
