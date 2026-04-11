@@ -129,7 +129,7 @@ return {
 				["<C-Down>"] = { "select_next", "fallback" },
 				["<S-CR>"] = { smart_accept, "fallback" },
 				["<C-y>"] = { smart_accept, "fallback" },
-        
+
 
 				["<C-j>"] = { "select_next", "fallback" },
 				["<C-k>"] = { "select_prev", "fallback" },

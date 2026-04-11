@@ -46,7 +46,6 @@ if ok then
 	end
 end
 
-
 vim.opt.relativenumber = true
 vim.opt.number = true
 vim.opt.concealcursor = ""
@@ -92,7 +91,6 @@ vim.notify = function(msg, level, opts)
 	end
 	orig_notify(msg, level, opts)
 end
-
 
 local PROTECTED_PATTERNS = {
 	"Border",
@@ -233,3 +231,5 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 })
 
 apply_theme()
+
+

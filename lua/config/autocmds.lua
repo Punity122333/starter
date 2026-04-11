@@ -351,6 +351,16 @@ vim.diagnostic.config({
 	},
 })
 
+
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function(args)
+    -- Check if treesitter is even active for this buffer
+    local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
+    if ok and parser then
+      parser:parse()
+    end
+  end
+})
 vim.api.nvim_create_autocmd("User", {
 	pattern = "MarksSetupComplete",
 	once = true,

@@ -18,7 +18,6 @@ return {
 			local autopairs = require("nvim-autopairs")
 			autopairs.setup(opts)
 
-			-- 👇 THIS is the built-in module
 			require("nvim-autopairs").add_rules(require("nvim-autopairs.rules.endwise-lua"))
 		end,
 	},

@@ -1,0 +1,1 @@
+/home/pxnity/.config/nvim/queries/master_brackets.scm

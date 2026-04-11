@@ -63,6 +63,7 @@ vim.keymap.set("n", "<leader>O", function()
 	vim.cmd("Outline")
 end, { desc = "Open Outline" })
 
+vim.keymap.set("i", "<BS>", "<C-g>u<BS>", { noremap = true })
 vim.api.nvim_create_autocmd("FileType", {
 	pattern = "lua",
 	callback = function()
