@@ -159,7 +159,7 @@ local BG = "#1a1b26"
 -- 
 
 
-vim.api.nvim_set_hl(0, "@bracket.square", { link = "Function" })
+vim.api.nvim_set_hl(0, "@bracket.square", { fg = "#7aa2f7" })
 -- Optional: Set the others if you want them distinct from standard text
 vim.api.nvim_set_hl(0, "@bracket.paren", { fg = "#f38ba8" }) -- Pinkish/Red
 vim.api.nvim_set_hl(0, "@bracket.curly", { fg = "#fab387" }) -- Peach/Orange
