@@ -1,1 +1,5 @@
-/home/pxnity/.config/nvim/queries/master_brackets.scm
+;; extends
+"[" @bracket.square
+"]" @bracket.square
+"{" @bracket.curly
+"}" @bracket.curly
