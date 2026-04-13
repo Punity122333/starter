@@ -22,7 +22,6 @@ do
 	package.path = package.path .. ";" .. lr .. "/share/lua/5.1/?/init.lua;" .. lr .. "/share/lua/5.1/?.lua;"
 	package.cpath = package.cpath .. ";" .. lr .. "/lib/lua/5.1/?.so;"
 end
-
 local orig_ts_start = vim.treesitter.start
 ---@diagnostic disable-next-line: duplicate-set-field
 vim.treesitter.start = function(buf, lang)
@@ -232,4 +231,8 @@ vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 
 apply_theme()
 
-
+vim.filetype.add({
+	extension = {
+		regex = "regex",
+	},
+})

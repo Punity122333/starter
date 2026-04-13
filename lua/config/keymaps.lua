@@ -147,8 +147,6 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
 
 vim.keymap.set("n", "H", "H", { desc = "Move to top of screen" })
 vim.keymap.set("n", "L", "L", { desc = "Move to bottom of screen" })
-vim.api.nvim_set_keymap("n", "j", 'v:count == 0 ? "gj" : "j"', { expr = true, noremap = true })
-vim.api.nvim_set_keymap("n", "k", 'v:count == 0 ? "gk" : "k"', { expr = true, noremap = true })
 
 vim.keymap.set("n", "g\\", function()
 	local lines = {}

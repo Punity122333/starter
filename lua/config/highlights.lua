@@ -81,7 +81,6 @@ vim.api.nvim_set_hl(
 	{ fg = "#e0af68", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
 )
 
--- INFO
 vim.api.nvim_set_hl(0, "BufferLineInfo", { fg = "#7dcfff", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(
 	0,
@@ -155,15 +154,9 @@ vim.api.nvim_set_hl(
 
 local BG = "#1a1b26"
 
--- Navy blue square brackets
--- 
-
-
 vim.api.nvim_set_hl(0, "@bracket.square", { fg = "#7aa2f7" })
--- Optional: Set the others if you want them distinct from standard text
-vim.api.nvim_set_hl(0, "@bracket.paren", { fg = "#f38ba8" }) -- Pinkish/Red
-vim.api.nvim_set_hl(0, "@bracket.curly", { fg = "#fab387" }) -- Peach/Orange
--- controls
+vim.api.nvim_set_hl(0, "@bracket.paren", { fg = "#f38ba8" })
+vim.api.nvim_set_hl(0, "@bracket.curly", { fg = "#fab387" })
 vim.api.nvim_set_hl(0, "DapUIPlayPause", { fg = "#7dcfff", bg = BG })
 vim.api.nvim_set_hl(0, "DapUIStepOver", { fg = "#7dcfff", bg = BG })
 vim.api.nvim_set_hl(0, "DapUIStepInto", { fg = "#7dcfff", bg = BG })
@@ -171,16 +164,11 @@ vim.api.nvim_set_hl(0, "DapUIStepOut", { fg = "#7dcfff", bg = BG })
 vim.api.nvim_set_hl(0, "DapUIRestart", { fg = "#ff9e64", bg = BG })
 vim.api.nvim_set_hl(0, "DapUIStop", { fg = "#f7768e", bg = BG })
 vim.api.nvim_set_hl(0, "DapUIUnavailable", { fg = "#565f89", bg = BG })
-
 vim.api.nvim_set_hl(0, "DapUIControls", { bg = BG })
 vim.api.nvim_set_hl(0, "DapUIControlsButton", { bg = BG })
 vim.api.nvim_set_hl(0, "DapUIControlsDisabled", { bg = BG })
--- background
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = BG })
 vim.api.nvim_set_hl(0, "DapUIFloatNormal", { bg = BG })
--- TODO: add more floating windows
--- border
--- hor20-Cursor
 vim.api.nvim_set_hl(0, "BlinkCmpMenu", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "MasonHeader", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "MasonHeaderSecondary", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
@@ -194,8 +182,6 @@ vim.api.nvim_set_hl(
 	{ fg = COLOR_BORDER, bg = COLOR_BACKGROUND_PRIMARY, force = true }
 )
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
-
--- Apply this globally
 vim.api.nvim_set_hl(0, "@square_bracket", { fg = "#3d59a1", bold = true, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "@module.python", { link = "@type.python" })
@@ -235,4 +221,3 @@ hl2.bold = true
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_set_hl(0, "Comment", hl2)
 vim.api.nvim_set_hl(0, "@module.haskell", { link = "@type.haskell" })
-

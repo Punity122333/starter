@@ -130,7 +130,6 @@ return {
 				["<S-CR>"] = { smart_accept, "fallback" },
 				["<C-y>"] = { smart_accept, "fallback" },
 
-
 				["<C-j>"] = { "select_next", "fallback" },
 				["<C-k>"] = { "select_prev", "fallback" },
 				["<C-CR>"] = { smart_accept, "fallback" },
@@ -158,7 +157,8 @@ return {
 
 						local luasnip = require("luasnip")
 						if luasnip.expand_or_jumpable() then
-							return luasnip.expand_or_jump()
+							luasnip.expand_or_jump()
+							return true
 						end
 
 						if cmp.is_visible() then
@@ -178,7 +178,8 @@ return {
 					function()
 						local luasnip = require("luasnip")
 						if luasnip.jumpable(-1) then
-							return luasnip.jump(-1)
+							luasnip.jump(-1)
+							return true
 						end
 					end,
 					"snippet_backward",

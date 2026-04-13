@@ -48,8 +48,8 @@ return {
 				end
 			end, { desc = "Prev cursor/search" })
 
-			set({ "n", "v" }, "n", "<Nop>", { desc = "Disable n" })
-			set({ "n", "v" }, "N", "<Nop>", { desc = "Disable N" })
+			set({ "n", "x" }, "n", "<Nop>", { desc = "Disable n" })
+			set({ "n", "x" }, "N", "<Nop>", { desc = "Disable N" })
 
 			set({ "n", "v" }, "\\q", mc.toggleCursor, { desc = "Toggle cursor" })
 			set({ "n", "v" }, "\\k", function()
