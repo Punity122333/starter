@@ -221,6 +221,9 @@ local function apply_theme()
 	set(0, "RgPreviewLineCur", { bg = "#e07840", fg = "#1a1b26", bold = false })
 	set(0, "SnacksBackdrop", { bg = "#1a1b26", blend = 0, force = true })
 
+	vim.api.nvim_set_hl(0, "MiniSnippetsCurrent", { blend = 100 })
+	vim.api.nvim_set_hl(0, "MiniSnippetsVisited", { blend = 100 })
+	vim.api.nvim_set_hl(0, "MiniSnippetsUnvisited", { blend = 100 })
 	set(0, "NavPreviewLine", { bg = COLOR_BG_PRIMARY, force = true })
 end
 
@@ -236,3 +239,9 @@ vim.filetype.add({
 		regex = "regex",
 	},
 })
+
+vim.opt.formatoptions:remove({ "o", "r" })
+vim.opt.paste = false
+vim.opt.autoindent = false
+vim.opt.smartindent = false
+vim.opt.cindent = false

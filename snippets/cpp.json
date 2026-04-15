@@ -1,0 +1,148 @@
+{
+  "cppbase": {
+    "prefix": "cppbase",
+    "body": [
+      "#include <bits/stdc++.h>",
+      "using namespace std;",
+      "",
+      "#define ll long long",
+      "#define vi vector<int>",
+      "#define vll vector<long long>",
+      "#define pb push_back",
+      "#define all(x) (x).begin(), (x).end()",
+      "#define pii pair<int,int>",
+      "#define F first",
+      "#define S second",
+      "",
+      "int main() {",
+      "    ios::sync_with_stdio(false);",
+      "    cin.tie(nullptr);",
+      "    cout.tie(nullptr);",
+      "",
+      "    int t = 1;",
+      "    // cin >> t;",
+      "    while (t--) {",
+      "        $1",
+      "    }",
+      "",
+      "    return 0;",
+      "}"
+    ]
+  },
+
+  "cp_debug": {
+    "prefix": "debug",
+    "body": [
+      "#define debug(x) cerr << #x << \" = \" << x << endl;",
+      "#define debuga(v) cerr << #v << \" = \"; for(auto &i : v) cerr << i << \" \"; cerr << endl;"
+    ]
+  },
+
+  "fio": {
+    "prefix": "fio",
+    "body": [
+      "ios::sync_with_stdio(false);",
+      "cin.tie(nullptr);",
+      "cout.tie(nullptr);"
+    ]
+  },
+
+  "modint": {
+    "prefix": "modint",
+    "body": [
+      "const int MOD = 1e9+7;",
+      "long long modexp(long long a, long long b) {",
+      "    long long res = 1;",
+      "    while (b) {",
+      "        if (b & 1) res = (res * a) % MOD;",
+      "        a = (a * a) % MOD;",
+      "        b >>= 1;",
+      "    }",
+      "    return res;",
+      "}"
+    ]
+  },
+
+  "sieve": {
+    "prefix": "sieve",
+    "body": [
+      "const int N = 1e6+5;",
+      "vector<bool> prime(N, true);",
+      "",
+      "void sieve() {",
+      "    prime[0] = prime[1] = false;",
+      "    for (int i = 2; i * i < N; i++) {",
+      "        if (prime[i]) {",
+      "            for (int j = i * i; j < N; j += i)",
+      "                prime[j] = false;",
+      "        }",
+      "    }",
+      "}"
+    ]
+  },
+
+  "dsu": {
+    "prefix": "dsu",
+    "body": [
+      "struct DSU {",
+      "    vector<int> parent, size;",
+      "",
+      "    DSU(int n) {",
+      "        parent.resize(n);",
+      "        size.resize(n, 1);",
+      "        iota(parent.begin(), parent.end(), 0);",
+      "    }",
+      "",
+      "    int find(int x) {",
+      "        if (x == parent[x]) return x;",
+      "        return parent[x] = find(parent[x]);",
+      "    }",
+      "",
+      "    void unite(int a, int b) {",
+      "        a = find(a);",
+      "        b = find(b);",
+      "        if (a != b) {",
+      "            if (size[a] < size[b]) swap(a, b);",
+      "            parent[b] = a;",
+      "            size[a] += size[b];",
+      "        }",
+      "    }",
+      "};"
+    ]
+  },
+
+  "binary_search": {
+    "prefix": "bs",
+    "body": [
+      "int l = 0, r = n - 1;",
+      "while (l <= r) {",
+      "    int mid = (l + r) / 2;",
+      "    if (a[mid] == x) return mid;",
+      "    else if (a[mid] < x) l = mid + 1;",
+      "    else r = mid - 1;",
+      "}"
+    ]
+  },
+
+  "hardcore_class": {
+    "prefix": "classcpp",
+    "body": [
+      "class Solution {",
+      "public:",
+      "    void solve() {",
+      "        $1",
+      "    }",
+      "};"
+    ]
+  },
+
+  "stress_test": {
+    "prefix": "stress",
+    "body": [
+      "while (true) {",
+      "    int n = rand() % 100;",
+      "    cout << n << endl;",
+      "}"
+    ]
+  }
+}

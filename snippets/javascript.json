@@ -1,0 +1,125 @@
+{
+  "console": {
+    "prefix": "log",
+    "body": ["console.log($1)"]
+  },
+
+  "main": {
+    "prefix": "main",
+    "body": ["function main() {", "  $1", "}", "", "main();"]
+  },
+
+  "arrow_func": {
+    "prefix": "afn",
+    "body": ["const ${1:func} = (${2:args}) => {", "  $3", "}"]
+  },
+
+  "timeout": {
+    "prefix": "to",
+    "body": ["setTimeout(() => {", "  $1", "}, ${2:1000});"]
+  },
+
+  "interval": {
+    "prefix": "int",
+    "body": ["setInterval(() => {", "  $1", "}, ${2:1000});"]
+  },
+
+  "promise": {
+    "prefix": "pms",
+    "body": ["return new Promise((resolve, reject) => {", "  $1", "});"]
+  },
+
+  "async_func": {
+    "prefix": "async",
+    "body": [
+      "async function ${1:name}() {",
+      "  try {",
+      "    $2",
+      "  } catch (err) {",
+      "    console.error(err);",
+      "  }",
+      "}"
+    ]
+  },
+
+  "fetch": {
+    "prefix": "fetch",
+    "body": [
+      "fetch('${1:url}')",
+      "  .then(res => res.json())",
+      "  .then(data => {",
+      "    console.log(data);",
+      "  })",
+      "  .catch(err => console.error(err));"
+    ]
+  },
+
+  "fetch_async": {
+    "prefix": "afetch",
+    "body": [
+      "async function getData() {",
+      "  try {",
+      "    const res = await fetch('${1:url}');",
+      "    const data = await res.json();",
+      "    console.log(data);",
+      "  } catch (err) {",
+      "    console.error(err);",
+      "  }",
+      "}"
+    ]
+  },
+
+  "dom_select": {
+    "prefix": "qs",
+    "body": ["const ${1:el} = document.querySelector('${2:selector}');"]
+  },
+
+  "dom_select_all": {
+    "prefix": "qsa",
+    "body": ["const ${1:els} = document.querySelectorAll('${2:selector}');"]
+  },
+
+  "event_listener": {
+    "prefix": "on",
+    "body": [
+      "${1:element}.addEventListener('${2:click}', (e) => {",
+      "  $3",
+      "});"
+    ]
+  },
+
+  "class": {
+    "prefix": "class",
+    "body": [
+      "class ${1:MyClass} {",
+      "  constructor(${2:args}) {",
+      "    $3",
+      "  }",
+      "",
+      "  ${4:method}() {",
+      "    $5",
+      "  }",
+      "}"
+    ]
+  },
+
+  "export": {
+    "prefix": "exp",
+    "body": ["export default ${1:name};"]
+  },
+
+  "import": {
+    "prefix": "imp",
+    "body": ["import ${1:module} from '${2:module}';"]
+  },
+
+  "trycatch": {
+    "prefix": "try",
+    "body": ["try {", "  $1", "} catch (err) {", "  console.error(err);", "}"]
+  },
+
+  "json_parse": {
+    "prefix": "json",
+    "body": ["JSON.parse(${1:data})"]
+  }
+}

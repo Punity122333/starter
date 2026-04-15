@@ -1,0 +1,111 @@
+{
+  "main": {
+    "prefix": "main",
+    "body": ["fn main() {", "    $1", "}"]
+  },
+
+  "println": {
+    "prefix": "print",
+    "body": ["println!(\"$1\");"]
+  },
+
+  "debug": {
+    "prefix": "dbg",
+    "body": ["dbg!($1);"]
+  },
+
+  "let": {
+    "prefix": "let",
+    "body": ["let ${1:var} = ${2:value};"]
+  },
+
+  "mut": {
+    "prefix": "mut",
+    "body": ["let mut ${1:var} = ${2:value};"]
+  },
+
+  "function": {
+    "prefix": "fn",
+    "body": ["fn ${1:name}(${2:args}) -> ${3:ReturnType} {", "    $4", "}"]
+  },
+
+  "struct": {
+    "prefix": "struct",
+    "body": ["struct ${1:Name} {", "    $2", "}"]
+  },
+
+  "impl": {
+    "prefix": "impl",
+    "body": [
+      "impl ${1:StructName} {",
+      "    fn ${2:new}() -> Self {",
+      "        Self {",
+      "            $3",
+      "        }",
+      "    }",
+      "}"
+    ]
+  },
+
+  "match": {
+    "prefix": "match",
+    "body": [
+      "match ${1:expr} {",
+      "    ${2:pattern} => {",
+      "        $3",
+      "    },",
+      "    _ => {}",
+      "}"
+    ]
+  },
+
+  "iflet": {
+    "prefix": "iflet",
+    "body": ["if let Some(${1:val}) = ${2:expr} {", "    $3", "}"]
+  },
+
+  "result": {
+    "prefix": "res",
+    "body": ["Result<${1:Ok}, ${2:Err}>"]
+  },
+
+  "option": {
+    "prefix": "opt",
+    "body": ["Option<${1:T}>"]
+  },
+
+  "vec": {
+    "prefix": "vec",
+    "body": ["let mut ${1:v} = Vec::new();"]
+  },
+
+  "vec_macro": {
+    "prefix": "vecm",
+    "body": ["let v = vec![${1:1, 2, 3}];"]
+  },
+
+  "for_loop": {
+    "prefix": "for",
+    "body": ["for ${1:i} in ${2:0..n} {", "    $3", "}"]
+  },
+
+  "while_loop": {
+    "prefix": "while",
+    "body": ["while ${1:condition} {", "    $2", "}"]
+  },
+
+  "iterator": {
+    "prefix": "iter",
+    "body": ["${1:vec}.iter().map(|x| $2).collect::<Vec<_>>()"]
+  },
+
+  "error_handling": {
+    "prefix": "err",
+    "body": [
+      "fn ${1:name}() -> Result<(), Box<dyn std::error::Error>> {",
+      "    $2",
+      "    Ok(())",
+      "}"
+    ]
+  }
+}

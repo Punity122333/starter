@@ -304,3 +304,10 @@ cmd("BrowseMDN", function()
 end, opts2)
 
 vim.keymap.del("n", "hi", {})
+
+vim.keymap.set({ "i", "s" }, "<C-Tab>", function()
+  if vim.snippet and vim.snippet.active({ direction = 1 }) then
+    vim.snippet.jump(1)
+    return
+  end
+end, { silent = true })

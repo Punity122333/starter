@@ -1,0 +1,54 @@
+{
+  "html5": {
+    "prefix": "html5",
+    "body": [
+      "<!DOCTYPE html>",
+      "<html lang=\"en\">",
+      "<head>",
+      "  <meta charset=\"UTF-8\">",
+      "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+      "  <title>${1:Document}</title>",
+      "  <link rel=\"stylesheet\" href=\"style.css\">",
+      "</head>",
+      "<body>",
+      "  $2",
+      "</body>",
+      "</html>"
+    ]
+  },
+
+  "navbar": {
+    "prefix": "nav",
+    "body": [
+      "<nav class=\"navbar\">",
+      "  <div class=\"logo\">${1:Logo}</div>",
+      "  <ul>",
+      "    <li><a href=\"#\">Home</a></li>",
+      "    <li><a href=\"#\">About</a></li>",
+      "    <li><a href=\"#\">Contact</a></li>",
+      "  </ul>",
+      "</nav>"
+    ]
+  },
+
+  "form": {
+    "prefix": "form",
+    "body": [
+      "<form action=\"${1:#}\" method=\"post\">",
+      "  <input type=\"text\" placeholder=\"Name\">",
+      "  <input type=\"email\" placeholder=\"Email\">",
+      "  <button type=\"submit\">Submit</button>",
+      "</form>"
+    ]
+  },
+
+  "script": {
+    "prefix": "script",
+    "body": ["<script>", "  $1", "</script>"]
+  },
+
+  "div": {
+    "prefix": "div",
+    "body": ["<div class=\"${1:container}\">", "  $2", "</div>"]
+  }
+}

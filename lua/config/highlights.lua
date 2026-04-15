@@ -53,7 +53,11 @@ vim.api.nvim_set_hl(0, "NoicePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = tr
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "GitSignsAdd", { link = "@string", force = true })
+vim.api.nvim_set_hl(0, "", { link = "@string", force = true })
 
+vim.api.nvim_set_hl(0, "MiniSnippetsCurrent", { blend = 100 })
+vim.api.nvim_set_hl(0, "MiniSnippetsVisited", { blend = 100 })
+vim.api.nvim_set_hl(0, "MiniSnippetsUnvisited", { blend = 100 })
 vim.api.nvim_set_hl(0, "BufferLineError", { fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(
 	0,
@@ -205,7 +209,7 @@ vim.api.nvim_set_hl(0, "StatusLine", { bg = COLOR_STATUS_LINE, force = true })
 vim.api.nvim_set_hl(0, "StatusLineNC", { bg = COLOR_STATUS_LINE, force = true })
 vim.api.nvim_set_hl(0, "BufferLineBuffer", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "Substitute", { link = "SubstituteRange" })
-vim.api.nvim_set_hl(0, "@punctuation.bracket", { fg = "#ff9e64"  })
+vim.api.nvim_set_hl(0, "@punctuation.bracket", { fg = "#ff9e64" })
 vim.cmd.highlight("MyTerminalBorder guifg=" .. COLOR_BACKGROUND_PRIMARY)
 
 vim.opt.guicursor = GUICURSOR_DEFAULT

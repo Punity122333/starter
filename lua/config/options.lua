@@ -359,3 +359,8 @@ vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
 })
 vim.opt.ttyfast = true
 vim.opt.swapfile = false
+vim.opt.clipboard = ""
+vim.opt.conceallevel = 3
+vim.opt.concealcursor = "nvc"
+vim.api.nvim_set_hl(0, "SnippetsTabstop", { fg = "NONE", bg = "NONE", blend = 100 })
+vim.api.nvim_set_hl(0, "SnippetsPlaceholder", { fg = "NONE", bg = "NONE", blend = 100 })

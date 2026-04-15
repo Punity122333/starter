@@ -30,6 +30,8 @@ vim.keymap.set("i", "<A-j>", "<Down>", { desc = "Move cursor down", silent = tru
 vim.keymap.set("i", "<A-k>", "<Up>", { desc = "Move cursor up", silent = true })
 vim.keymap.set("i", "<A-l>", "<Right>", { desc = "Move cursor right", silent = true })
 
+vim.keymap.set("v", "<leader>Y", '"+y')
+vim.keymap.set("n", "<leader>P", '"+p')
 vim.keymap.set("t", "<Esc>", function()
 	vim.cmd("stopinsert")
 end, { noremap = true, silent = true })
