@@ -81,6 +81,9 @@ local function wrap_saga(cmd)
 	end
 end
 
+-- Lua (init.lua)
+vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 vim.keymap.set("n", "gT", wrap_saga("Lspsaga finder"), { desc = "LSP Finder" })
 vim.keymap.set("n", "K", wrap_saga("Lspsaga hover_doc"), { desc = "Hover Docs" })
 vim.keymap.set("n", "gjd", wrap_saga("Lspsaga goto_definition"), { desc = "Goto Definition" })
@@ -170,7 +173,6 @@ map("<leader>sP", search_call("pickers"), "Builtin Pickers")
 map('<leader>s"', search_call("registers"), "Registers")
 map("<leader>s/", search_call("searchhistory"), "Search History")
 map("<leader>sn", search_call("noice"), "Noice History")
-
 map("<leader>sg", rg_call("rg"), "Grep (Root)")
 map("<leader>s.", rg_call("rg"), "Grep (CWD)")
 map("<leader>sb", rg_call("rg_buffer"), "Search Buffer")

@@ -49,12 +49,11 @@ telescope.load_extension("emoji")
 
 vim.keymap.set("n", "<leader>se", telescope.extensions.emoji.emoji, { desc = "Search Emojis" })
 
-
 local _scroll_ts = 0
+local _move_ts = 0
 local SCROLL_DEBOUNCE_MS = 120
 local _sv = { noremap = true, silent = true }
 local _uv = vim.uv or vim.loop
-
 local _pending_v = 0
 local _pending_h = 0
 local _flush_sched = false
@@ -126,6 +125,8 @@ vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
 		return
 	end
 	vim.api.nvim_feedkeys(_lm_raw, "n", false)
+
+
 end, _sv)
 
 local _j_raw = vim.api.nvim_replace_termcodes("j", true, false, true)
@@ -133,18 +134,21 @@ local _k_raw = vim.api.nvim_replace_termcodes("k", true, false, true)
 
 vim.keymap.set({ "n", "v" }, "j", function()
 	_move_ts = _uv.now()
-	vim.api.nvim_feedkeys(_j_raw, "n", false)
+	local count = vim.v.count1
+	vim.api.nvim_feedkeys(count .. _j_raw, "n", false)
 end, _sv)
+
 vim.keymap.set({ "n", "v" }, "k", function()
 	_move_ts = _uv.now()
-	vim.api.nvim_feedkeys(_k_raw, "n", false)
+	local count = vim.v.count1
+	vim.api.nvim_feedkeys(count .. _k_raw, "n", false)
 end, _sv)
+
 vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
 	callback = function()
 		_scroll_ts = _uv.now()
 	end,
 })
-
 vim.keymap.set("n", "H", "H", { desc = "Move to top of screen" })
 vim.keymap.set("n", "L", "L", { desc = "Move to bottom of screen" })
 
@@ -205,3 +209,4 @@ end, { silent = true, desc = "Next todo comment" })
 vim.keymap.set("n", "[o", function()
 	jump_todo("prev")
 end, { silent = true, desc = "Prev todo comment" })
+

@@ -2,7 +2,7 @@ return {
 	{
 		"jake-stewart/multicursor.nvim",
 		branch = "main",
-		lazy = false,
+		enabled = false,
 		config = function()
 			local mc = require("multicursor-nvim")
 

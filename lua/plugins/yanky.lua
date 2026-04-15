@@ -1,6 +1,6 @@
 return {
 	"gbprod/yanky.nvim",
-  lazy = false,
+	lazy = false,
 	dependencies = { "kkharji/sqlite.lua" },
 	event = "VeryLazy",
 	opts = {
@@ -22,6 +22,11 @@ return {
 		},
 		preserve_cursor_position = {
 			enabled = true,
+		},
+
+		keys = {
+			{ "p", false },
+			{ "P", false },
 		},
 	},
 }
