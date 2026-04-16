@@ -226,7 +226,7 @@ local function apply_theme()
 	vim.api.nvim_set_hl(0, "MiniSnippetsUnvisited", { blend = 100 })
 	set(0, "NavPreviewLine", { bg = COLOR_BG_PRIMARY, force = true })
 end
-
+-- Hi man this is a test comment!
 vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
 	group = vim.api.nvim_create_augroup("ThemeGodMode", { clear = true }),
 	callback = apply_theme,

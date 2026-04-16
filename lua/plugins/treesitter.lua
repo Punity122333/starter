@@ -71,7 +71,7 @@ return {
 					return false
 				end,
 			},
-			indent = { enable = true },
+			indent = { enable = false },
 
 			incremental_selection = {
 				enable = false,

@@ -3,8 +3,6 @@ return {
 	dependencies = { "nvim-mini/mini.snippets" },
 	lazy = false,
 	opts = function(_, opts)
-		-- ── Cached module refs ───────────────────────────────────────────────
-
 		local _ls = nil
 		local function get_ls()
 			if not _ls then
@@ -13,25 +11,48 @@ return {
 			return _ls
 		end
 
-		local function accept_and_enter_parens(cmp)
+		local function paren_context()
+			local col = vim.fn.col(".")
+			local line = vim.api.nvim_get_current_line()
+			local rest = line:sub(col)
+			local word_tail = rest:match("^[%w_%.]*") or ""
+			local after = rest:sub(#word_tail + 1)
+			local inside = after:match("^%((.-)%)")
+			if inside == nil then
+				return false, false
+			end
+			local has_args = inside:match("%S") ~= nil
+			return has_args, not has_args
+		end
+
+		local function smart_accept(cmp)
 			if not cmp.is_visible() then
 				return false
 			end
-
+			local _, empty = paren_context()
 			local ok = cmp.accept()
-			if ok then
+			if ok and empty then
 				vim.schedule(function()
-					local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+					local cur_line = vim.api.nvim_get_current_line()
+					local fixed = cur_line:gsub("%)%(%)$", ")"):gsub("%)%(%)([^%w%(])", ")" .. "%1")
+					local cursor = vim.api.nvim_win_get_cursor(0)
+					if fixed ~= cur_line then
+						vim.api.nvim_set_current_line(fixed)
+						local max_col = math.max(0, #fixed - 1)
+						if cursor[2] > max_col then
+							cursor = { cursor[1], max_col }
+							vim.api.nvim_win_set_cursor(0, cursor)
+						end
+					end
 					local line = vim.api.nvim_get_current_line()
-
-					if line:sub(col + 1, col + 2) == "()" then
-						vim.api.nvim_win_set_cursor(0, { row, col + 1 })
-					elseif col >= 1 and line:sub(col, col + 1) == "()" then
-						vim.api.nvim_win_set_cursor(0, { row, col })
+					local col = cursor[2]
+					local rest = line:sub(col + 1)
+					local open = rest:find("%(%)")
+					if open then
+						vim.api.nvim_win_set_cursor(0, { cursor[1], col + open })
 					end
 				end)
 			end
-
 			return ok
 		end
 
@@ -41,6 +62,37 @@ return {
 			end,
 			snippets = {
 				preset = "mini_snippets",
+				expand = function(snippet)
+					local col = vim.fn.col(".")
+					local line = vim.api.nvim_get_current_line()
+					local rest = line:sub(col)
+					local word_tail = rest:match("^[%w_%.]*") or ""
+					local after = rest:sub(#word_tail + 1)
+					local inside = after:match("^%((.-)%)")
+
+					local has_real_args = inside ~= nil and inside:match("%S") ~= nil
+					local has_empty_paren = inside ~= nil and not inside:match("%S")
+
+					if has_real_args then
+						local name = snippet:match("^([%w_%.]+)") or snippet
+						local row, c = unpack(vim.api.nvim_win_get_cursor(0))
+						vim.api.nvim_buf_set_text(0, row - 1, c, row - 1, c, { name })
+						vim.api.nvim_win_set_cursor(0, { row, c + #name })
+					elseif has_empty_paren then
+						vim.snippet.expand(snippet)
+						vim.schedule(function()
+							local cl = vim.api.nvim_get_current_line()
+							local fixed = cl:gsub("%)%(%)$", ")"):gsub("%)%(%)([^%w%(])", function(ch)
+								return ")" .. ch
+							end)
+							if fixed ~= cl then
+								vim.api.nvim_set_current_line(fixed)
+							end
+						end)
+					else
+						vim.snippet.expand(snippet)
+					end
+				end,
 			},
 			completion = {
 				list = {
@@ -52,8 +104,8 @@ return {
 					show_on_trigger_character = true,
 				},
 				accept = {
-					auto_brackets = { enabled = false },
-					resolve_timeout_ms = 200,
+					auto_brackets = { enabled = true },
+					resolve_timeout_ms = 1500,
 					dot_repeat = false,
 				},
 				menu = {
@@ -88,9 +140,9 @@ return {
 				["<C-j>"] = { "select_next", "fallback" },
 				["<C-k>"] = { "select_prev", "fallback" },
 
-				["<S-CR>"] = { accept_and_enter_parens, "fallback" },
-				["<C-y>"] = { accept_and_enter_parens, "fallback" },
-				["<C-CR>"] = { accept_and_enter_parens, "fallback" },
+				["<S-CR>"] = { smart_accept, "fallback" },
+				["<C-y>"] = { smart_accept, "fallback" },
+				["<C-CR>"] = { smart_accept, "fallback" },
 
 				["<C-S-0>"] = {
 					function()
@@ -107,7 +159,6 @@ return {
 					"fallback",
 				},
 
-				-- 🚀 CLEAN TAB (fixed)
 				["<Tab>"] = {
 					function()
 						local ls = get_ls()
@@ -121,7 +172,6 @@ return {
 					"fallback",
 				},
 
-				-- 🔥 CLEAN SHIFT-TAB
 				["<S-Tab>"] = {
 					function()
 						local ls = get_ls()
@@ -157,7 +207,6 @@ return {
 					emoji = {
 						name = "emoji",
 						module = "blink.compat.source",
-						---@diagnostic disable-next-line: unused-local
 						transform_items = function(ctx, items)
 							local kind = require("blink.cmp.types").CompletionItemKind.Text
 							for i = 1, #items do
@@ -171,3 +220,4 @@ return {
 		})
 	end,
 }
+

@@ -249,7 +249,7 @@ return {
 						{ find = "decoding suggestions" },
 						{ find = "<ed" },
 						{ find = "yanked" },
-            
+						{ find = ">ed" },
 					},
 				},
 				opts = { skip = true },

@@ -1,5 +1,6 @@
 return {
 	"nvim-mini/mini.snippets",
+  lazy = false,
 	dependencies = { "rafamadriz/friendly-snippets" },
 
 	opts = function()

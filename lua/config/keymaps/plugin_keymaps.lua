@@ -24,8 +24,8 @@ vim.keymap.set("n", "<leader>fV", function()
 	Snacks.terminal(nil, { win = { position = "left", width = 0.25 } })
 end, { desc = "Terminal Vertical (Left)" })
 
-vim.keymap.set("n", "<leader>pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
-vim.keymap.set("n", "<leader>ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })
+vim.keymap.set("n", "<leader>Pv", "<cmd>vsplit | term<cr>a", { desc = "Terminal Vertical Split" })
+vim.keymap.set("n", "<leader>Ph", "<cmd>split | term<cr>a", { desc = "Terminal Horizontal Split" })
 
 vim.keymap.set("n", "<leader>br", function()
 	Snacks.bufdelete()
@@ -41,7 +41,7 @@ vim.keymap.set("n", "<A-S-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decre
 vim.keymap.set("n", "<A-S-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window width" })
 
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
-vim.keymap.set("n", "<leader>pdf", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
+vim.keymap.set("n", "<leader>Po", ":silent !zathura <cfile> &<CR>", { desc = "Open PDF in Zathura" })
 
 vim.keymap.set("n", "<leader>uN", function()
 	local rn = not vim.wo.relativenumber
