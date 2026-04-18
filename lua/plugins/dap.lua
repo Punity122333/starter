@@ -79,7 +79,7 @@ return {
 				fg = "#7dcfff",
 				bg = "#1a1b26",
 				underline = false,
-				bold = false,
+				bold = true,
 			})
 
 			local titles = {

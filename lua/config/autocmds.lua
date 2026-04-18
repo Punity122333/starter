@@ -388,3 +388,30 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_clear_autocmds({ event = "WinScrolled" })
+
+-- Create a highlight group
+vim.api.nvim_set_hl(0, "CursorBoldChar", { bold = true })
+
+-- Namespace for our extmark
+local ns = vim.api.nvim_create_namespace("cursor_bold_char")
+
+-- Function to update highlight
+local function highlight_cursor_char()
+  local bufnr = 0
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local row, col = pos[1] - 1, pos[2]
+
+  -- Clear previous highlight
+  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+
+  -- Add highlight to current character
+  vim.api.nvim_buf_set_extmark(bufnr, ns, row, col, {
+    end_col = col + 1,
+    hl_group = "CursorBoldChar",
+  })
+end
+
+-- Trigger on cursor move
+vim.api.nvim_create_autocmd({ "CursorMoved" }, {
+  callback = highlight_cursor_char,
+})

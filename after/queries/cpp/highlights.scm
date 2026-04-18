@@ -5,3 +5,4 @@
 ")" @bracket.paren
 "{" @bracket.curly
 "}" @bracket.curly
+"mutable" @mutable

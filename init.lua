@@ -165,7 +165,7 @@ local function apply_theme()
 			or name:find("@conceal", 1, true)
 			or name:find("@spell", 1, true)
 		then
-			set(0, name, { bg = "NONE", fg = hl.fg, bold = false, force = true })
+			set(0, name, { bg = "NONE", fg = hl.fg, bold = true, force = true })
 			goto continue
 		end
 
@@ -190,7 +190,7 @@ local function apply_theme()
 	set(0, "SnacksPickerSelected", { bg = "NONE", fg = "#27a1b9", force = true })
 	set(0, "SnacksPickerUnselected", { bg = "NONE", force = true })
 
-	set(0, "Cursor", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG })
+	set(0, "Cursor", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG, bold = true })
 	set(0, "CursorInsert", { fg = COLOR_CURSOR_FG, bg = COLOR_CURSOR_BG })
 
 	for _, g in ipairs({ "Error", "Warn", "Info", "Hint", "Ok" }) do
@@ -217,8 +217,8 @@ local function apply_theme()
 	set(0, "StatusLine", { bg = "#16161e", force = true })
 	set(0, "StatusLineNC", { bg = "#16161e", force = true })
 
-	set(0, "RgPreviewLine", { bg = "#7aa2f7", fg = "#1a1b26", bold = false })
-	set(0, "RgPreviewLineCur", { bg = "#e07840", fg = "#1a1b26", bold = false })
+	set(0, "RgPreviewLine", { bg = "#7aa2f7", fg = "#1a1b26", bold = true })
+	set(0, "RgPreviewLineCur", { bg = "#e07840", fg = "#1a1b26", bold = true })
 	set(0, "SnacksBackdrop", { bg = "#1a1b26", blend = 0, force = true })
 
 	vim.api.nvim_set_hl(0, "MiniSnippetsCurrent", { blend = 100 })

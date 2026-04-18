@@ -72,7 +72,6 @@ return {
 				end,
 			},
 			indent = { enable = false },
-
 			incremental_selection = {
 				enable = false,
 				keymaps = {},

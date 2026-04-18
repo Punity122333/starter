@@ -53,11 +53,8 @@ vim.api.nvim_set_hl(0, "NoicePopup", { bg = COLOR_BACKGROUND_PRIMARY, force = tr
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(0, "GitSignsAdd", { link = "@string", force = true })
-vim.api.nvim_set_hl(0, "", { link = "@string", force = true })
-
-vim.api.nvim_set_hl(0, "MiniSnippetsCurrent", { blend = 100 })
-vim.api.nvim_set_hl(0, "MiniSnippetsVisited", { blend = 100 })
-vim.api.nvim_set_hl(0, "MiniSnippetsUnvisited", { blend = 100 })
+vim.api.nvim_set_hl(0, "@mutable", { fg = "#ff9e64", italic = true, bold = true })
+vim.api.nvim_set_hl(0, "@type.builtin", { link = "Type" })
 vim.api.nvim_set_hl(0, "BufferLineError", { fg = "#f7768e", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(
 	0,
@@ -158,6 +155,8 @@ vim.api.nvim_set_hl(
 
 local BG = "#1a1b26"
 
+vim.api.nvim_set_hl(0, "@keyword.repeat", { link = "@keyword" })
+vim.api.nvim_set_hl(0, "@keyword.conditional", { link = "@keyword" })
 vim.api.nvim_set_hl(0, "@bracket.square", { fg = "#7aa2f7" })
 vim.api.nvim_set_hl(0, "@bracket.paren", { fg = "#f38ba8" })
 vim.api.nvim_set_hl(0, "@bracket.curly", { fg = "#fab387" })
@@ -220,8 +219,8 @@ hl.bold = true
 vim.api.nvim_set_hl(0, "@keyword", hl)
 
 local hl2 = vim.api.nvim_get_hl(0, { name = "Comment" })
-hl2.italic = nil
-hl2.bold = true
+hl2.italic = true
+hl2.bold = false
 ---@diagnostic disable-next-line: param-type-mismatch
 vim.api.nvim_set_hl(0, "Comment", hl2)
 vim.api.nvim_set_hl(0, "@module.haskell", { link = "@type.haskell" })
