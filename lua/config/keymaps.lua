@@ -129,20 +129,6 @@ vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
 
 end, _sv)
 
-local _j_raw = vim.api.nvim_replace_termcodes("j", true, false, true)
-local _k_raw = vim.api.nvim_replace_termcodes("k", true, false, true)
-
-vim.keymap.set({ "n", "v" }, "j", function()
-	_move_ts = _uv.now()
-	local count = vim.v.count1
-	vim.api.nvim_feedkeys(count .. _j_raw, "n", false)
-end, _sv)
-
-vim.keymap.set({ "n", "v" }, "k", function()
-	_move_ts = _uv.now()
-	local count = vim.v.count1
-	vim.api.nvim_feedkeys(count .. _k_raw, "n", false)
-end, _sv)
 
 vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
 	callback = function()

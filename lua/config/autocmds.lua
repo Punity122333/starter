@@ -163,7 +163,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 	callback = function(args)
 		local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
@@ -339,7 +338,6 @@ for i = 1, #mark_chars do
 	end, { silent = true, desc = "Set mark " .. c })
 end
 
-
 vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", priority = 10 })
 vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DapBreakpointCondition", priority = 10 })
 vim.fn.sign_define("DapBreakpointRejected", { text = "○", texthl = "DapBreakpointRejected", priority = 10 })
@@ -351,15 +349,14 @@ vim.diagnostic.config({
 	},
 })
 
-
 vim.api.nvim_create_autocmd("FileType", {
-  callback = function(args)
-    -- Check if treesitter is even active for this buffer
-    local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
-    if ok and parser then
-      parser:parse()
-    end
-  end
+	callback = function(args)
+		-- Check if treesitter is even active for this buffer
+		local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
+		if ok and parser then
+			parser:parse()
+		end
+	end,
 })
 vim.api.nvim_create_autocmd("User", {
 	pattern = "MarksSetupComplete",
@@ -397,21 +394,29 @@ local ns = vim.api.nvim_create_namespace("cursor_bold_char")
 
 -- Function to update highlight
 local function highlight_cursor_char()
-  local bufnr = 0
-  local pos = vim.api.nvim_win_get_cursor(0)
-  local row, col = pos[1] - 1, pos[2]
+    local bufnr = vim.api.nvim_get_current_buf()
+    local pos = vim.api.nvim_win_get_cursor(0)
+    local row, col = pos[1] - 1, pos[2]
 
-  -- Clear previous highlight
-  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    -- Clear previous highlight
+    vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
-  -- Add highlight to current character
-  vim.api.nvim_buf_set_extmark(bufnr, ns, row, col, {
-    end_col = col + 1,
-    hl_group = "CursorBoldChar",
-  })
+    -- Get current line content to check length
+    local line_content = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ""
+    local line_len = #line_content
+
+    -- Only set extmark if the column is within the actual text bounds
+    if line_len > 0 and col < line_len then
+        vim.api.nvim_buf_set_extmark(bufnr, ns, row, col, {
+            end_col = col + 1,
+            hl_group = "CursorBoldChar",
+            strict = false, -- prevents crashing if bounds are slightly off
+        })
+    end
 end
 
 -- Trigger on cursor move
-vim.api.nvim_create_autocmd({ "CursorMoved" }, {
-  callback = highlight_cursor_char,
+vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+    callback = highlight_cursor_char,
 })
+

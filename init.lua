@@ -239,7 +239,6 @@ vim.filetype.add({
 		regex = "regex",
 	},
 })
-
 vim.opt.formatoptions:remove({ "o", "r" })
 vim.opt.paste = false
 vim.opt.autoindent = false

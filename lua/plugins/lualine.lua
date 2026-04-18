@@ -10,15 +10,29 @@ return {
 			},
 		})
 
-		-- Bold mode pill (lualine_a). LazyVim puts "mode" here by default.
-		-- gui = "bold" with no fg/bg inherits the theme's section colours,
-		-- so it stays correct across every mode and colorscheme.
 		opts.sections = opts.sections or {}
-		opts.sections.lualine_a = {
-			{ "mode", color = { gui = "bold" } },
-		}
 
-		-- Bold clock (lualine_z). LazyVim puts the time component here.
+		opts.sections.lualine_a = {
+			{
+				function()
+					if _G.MiniSnippets and _G.MiniSnippets.session.get() then
+						return "SNIP"
+					end
+
+					local m = vim.api.nvim_get_mode().mode
+					return ({
+						n = "NORMAL",
+						i = "INSERT",
+						v = "VISUAL",
+						V = "V-LINE",
+						["\22"] = "V-BLOCK",
+						c = "COMMAND",
+						t = "TERMINAL",
+					})[m] or m
+				end,
+				color = { gui = "bold" },
+			},
+		}
 		opts.sections.lualine_z = {
 			{
 				function()

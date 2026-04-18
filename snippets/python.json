@@ -1,17 +1,20 @@
 {
   "main": {
     "prefix": "main",
+    "description": "Python main entrypoint",
     "body": [
       "def main():",
       "    $1",
       "",
       "if __name__ == '__main__':",
-      "    main()"
+      "    main()",
+      "$0"
     ]
   },
 
   "logger": {
     "prefix": "log",
+    "description": "Setup logging",
     "body": [
       "import logging",
       "",
@@ -20,91 +23,110 @@
       "    format='%(asctime)s - %(levelname)s - %(message)s'",
       ")",
       "",
-      "logger = logging.getLogger(__name__)"
+      "logger = logging.getLogger(__name__)",
+      "$0"
     ]
   },
 
   "env": {
     "prefix": "env",
-    "body": ["import os", "", "VALUE = os.getenv('${1:KEY}')"]
+    "description": "Read environment variable",
+    "body": ["import os", "", "${2:VALUE} = os.getenv('${1:KEY}')", "$0"]
   },
 
   "argparse": {
     "prefix": "args",
+    "description": "Argument parser setup",
     "body": [
       "import argparse",
       "",
       "parser = argparse.ArgumentParser(description='${1:description}')",
-      "parser.add_argument('--${2:input}', type=str, required=True)",
+      "parser.add_argument('--${2:input}', type=${3:str}, required=${4:True})",
       "",
-      "args = parser.parse_args()"
+      "args = parser.parse_args()",
+      "$0"
     ]
   },
 
   "requests_session": {
     "prefix": "reqs",
+    "description": "Requests session template",
     "body": [
       "import requests",
       "",
       "with requests.Session() as s:",
       "    r = s.get('${1:url}')",
+      "    r.raise_for_status()",
       "    print(r.status_code)",
-      "    print(r.text)"
+      "    print(r.text)",
+      "$0"
     ]
   },
 
   "asyncio": {
     "prefix": "async",
+    "description": "Async function template",
     "body": [
       "import asyncio",
       "",
       "async def ${1:func}():",
-      "    await asyncio.sleep(1)",
-      "    $2",
+      "    await asyncio.sleep(${2:1})",
+      "    $3",
       "",
-      "asyncio.run(${1:func}())"
+      "if __name__ == '__main__':",
+      "    asyncio.run(${1:func}())",
+      "$0"
     ]
   },
 
   "file_read": {
     "prefix": "read",
+    "description": "Read file",
     "body": [
       "with open('${1:file.txt}', 'r', encoding='utf-8') as f:",
       "    data = f.read()",
-      "    print(data)"
+      "    print(data)",
+      "$0"
     ]
   },
 
   "file_write": {
     "prefix": "write",
+    "description": "Write file",
     "body": [
       "with open('${1:file.txt}', 'w', encoding='utf-8') as f:",
-      "    f.write('${2:data}')"
+      "    f.write('${2:data}')",
+      "$0"
     ]
   },
 
   "json_read": {
     "prefix": "jsonr",
+    "description": "Read JSON file",
     "body": [
       "import json",
       "",
       "with open('${1:file.json}', 'r') as f:",
-      "    data = json.load(f)"
+      "    data = json.load(f)",
+      "$0"
     ]
   },
 
   "json_write": {
     "prefix": "jsonw",
+    "description": "Write JSON file",
     "body": [
       "import json",
       "",
       "with open('${1:file.json}', 'w') as f:",
-      "    json.dump(${2:data}, f, indent=4)"
+      "    json.dump(${2:data}, f, indent=4)",
+      "$0"
     ]
   },
 
   "sqlalchemy_base": {
     "prefix": "sqlbase",
+    "description": "SQLAlchemy base setup",
     "body": [
       "from sqlalchemy import create_engine, Column, Integer, String",
       "from sqlalchemy.orm import declarative_base, sessionmaker",
@@ -113,24 +135,28 @@
       "",
       "engine = create_engine('${1:sqlite:///db.sqlite3}')",
       "Session = sessionmaker(bind=engine)",
-      "session = Session()"
+      "session = Session()",
+      "$0"
     ]
   },
 
   "sqlalchemy_model": {
     "prefix": "model",
+    "description": "SQLAlchemy model",
     "body": [
       "class ${1:User}(Base):",
       "    __tablename__ = '${2:users}'",
       "",
       "    id = Column(Integer, primary_key=True)",
       "    name = Column(String)",
-      "    $3"
+      "    $3",
+      "$0"
     ]
   },
 
   "fastapi": {
     "prefix": "api",
+    "description": "FastAPI starter",
     "body": [
       "from fastapi import FastAPI",
       "",
@@ -138,22 +164,26 @@
       "",
       "@app.get('/')",
       "def home():",
-      "    return {'message': 'ok'}"
+      "    return {'message': '${1:ok}'}",
+      "$0"
     ]
   },
 
   "pytest": {
     "prefix": "test",
+    "description": "Pytest test case",
     "body": [
       "import pytest",
       "",
       "def test_${1:name}():",
-      "    assert ${2:1} == ${3:1}"
+      "    assert ${2:1} == ${3:1}",
+      "$0"
     ]
   },
 
   "multiprocessing": {
     "prefix": "mp",
+    "description": "Multiprocessing pool",
     "body": [
       "from multiprocessing import Pool",
       "",
@@ -161,13 +191,15 @@
       "    return x * x",
       "",
       "if __name__ == '__main__':",
-      "    with Pool(4) as p:",
-      "        print(p.map(worker, [1,2,3,4]))"
+      "    with Pool(${1:4}) as p:",
+      "        print(p.map(worker, ${2:[1,2,3,4]}))",
+      "$0"
     ]
   },
 
   "web_scrape_bs4": {
     "prefix": "bs4",
+    "description": "BeautifulSoup scraping",
     "body": [
       "import requests",
       "from bs4 import BeautifulSoup",
@@ -175,19 +207,38 @@
       "r = requests.get('${1:url}')",
       "soup = BeautifulSoup(r.text, 'html.parser')",
       "",
-      "print(soup.title.text)"
+      "print(soup.title.text)",
+      "$0"
     ]
   },
 
   "context_manager": {
     "prefix": "ctx",
+    "description": "Custom context manager",
     "body": [
       "class ${1:MyContext}:",
       "    def __enter__(self):",
       "        return self",
       "",
       "    def __exit__(self, exc_type, exc_val, exc_tb):",
-      "        pass"
+      "        pass",
+      "$0"
+    ]
+  },
+
+  "property": {
+    "prefix": "property",
+    "description": "Python property with getter and setter",
+    "body": [
+      "@property",
+      "def ${1:name}(self):",
+      "    \"\"\"Get the $1 property.\"\"\"",
+      "    return self._$1",
+      "",
+      "@$1.setter",
+      "def $1(self, value):",
+      "    self._$1 = value",
+      "$0"
     ]
   }
 }
