@@ -53,7 +53,7 @@ return {
 		snips.setup({
 			snippets = {
 				snips.gen_loader.from_lang({ path = friendly_dir .. "/snippets" }),
-				snips.gen_loader.from_lang({ path = "~/.config/nvim/snippets" }),
+				snips.gen_loader.from_lang({ path = vim.fn.expand("~/.config/nvim/snippets") }),
 				snips.gen_loader.from_lang(),
 			},
 			expand = {
@@ -66,6 +66,7 @@ return {
 		})
 	end,
 }
+
 
 
 

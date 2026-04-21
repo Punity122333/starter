@@ -1,15 +1,6 @@
 vim.opt.rtp:prepend(vim.fn.expand("~/.local/share/nvim/site"))
 return {
-	{
-		"TheNoeTrevino/roids.nvim",
-		enabled = false,
-		event = { "BufReadPost", "BufNewFile" },
-		config = function()
-			require("roids").setup({
-				languages = { "css", "html", "sql", "javascript", "typescript" },
-			})
-		end,
-	},
+	
 	{
 		"nvim-treesitter/nvim-treesitter",
 		lazy = false,
