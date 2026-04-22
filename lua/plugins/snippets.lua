@@ -23,7 +23,6 @@ local function clear_session_virt_text()
 		end
 	end)
 end
-
 -- Make it accessible to blink-cmp without using _G hacks
 package.loaded["mini_snippets_utils"] = { clear_virt_text = clear_session_virt_text }
 
