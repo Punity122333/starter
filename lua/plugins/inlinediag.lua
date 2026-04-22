@@ -117,6 +117,12 @@ return {
 				pcall(vim.api.nvim_buf_del_extmark, buf, ns, diag_id)
 			end,
 		})
+		vim.api.nvim_create_autocmd("WinLeave", {
+			callback = function()
+				local buf = vim.api.nvim_get_current_buf()
+				pcall(vim.api.nvim_buf_del_extmark, buf, ns, diag_id)
+			end,
+		})
 		vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 			callback = function()
 				local curr_line = vim.api.nvim_win_get_cursor(0)[1]
@@ -138,6 +144,7 @@ return {
 		})
 	end,
 }
+
 
 
 

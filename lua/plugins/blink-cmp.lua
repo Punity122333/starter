@@ -1,35 +1,14 @@
-
 return {
 	"saghen/blink.cmp",
 	dependencies = { "nvim-mini/mini.snippets" },
 	lazy = false,
 	opts = function(_, opts)
-		local function get_ms()
-			return require("mini.snippets")
-		end
-
-		-- Same virt_text wiper — blink's expand bypasses config.expand.insert
-		-- so we need it here too for the completion-triggered path
-		local function clear_virt_text()
-			vim.schedule(function()
-				local ms = get_ms()
-				local session = ms.session.get()
-				if not session then return end
-				local bufnr = vim.api.nvim_get_current_buf()
-				local ns_id = session.ns_id
-				for _, mark in ipairs(vim.api.nvim_buf_get_extmarks(bufnr, ns_id, 0, -1, { details = true })) do
-					local id, row, col, d = mark[1], mark[2], mark[3], mark[4]
-					if d.virt_text and #d.virt_text > 0 then
-						vim.api.nvim_buf_set_extmark(bufnr, ns_id, row, col, {
-							id = id,
-							virt_text = {},
-							end_row = d.end_row,
-							end_col = d.end_col,
-							hl_group = d.hl_group,
-						})
-					end
-				end
-			end)
+		local _ls = nil
+		local function get_ls()
+			if not _ls then
+				_ls = require("luasnip")
+			end
+			return _ls
 		end
 
 		local function paren_context()
@@ -45,7 +24,6 @@ return {
 			local has_args = inside:match("%S") ~= nil
 			return has_args, not has_args
 		end
-
 		local function smart_accept(cmp)
 			if not cmp.is_visible() then
 				return false
@@ -82,7 +60,7 @@ return {
 				return vim.b.blink_enabled ~= false and vim.bo.buftype ~= "prompt"
 			end,
 			snippets = {
-				-- No preset: we handle expand/jump fully ourselves via mini.snippets
+				preset = "mini_snippets",
 				expand = function(snippet)
 					local col = vim.fn.col(".")
 					local line = vim.api.nvim_get_current_line()
@@ -94,15 +72,13 @@ return {
 					local has_real_args = inside ~= nil and inside:match("%S") ~= nil
 					local has_empty_paren = inside ~= nil and not inside:match("%S")
 
-					local ms = get_ms()
 					if has_real_args then
 						local name = snippet:match("^([%w_%.]+)") or snippet
 						local row, c = unpack(vim.api.nvim_win_get_cursor(0))
 						vim.api.nvim_buf_set_text(0, row - 1, c, row - 1, c, { name })
 						vim.api.nvim_win_set_cursor(0, { row, c + #name })
 					elseif has_empty_paren then
-						ms.default_insert({ body = snippet })
-						clear_virt_text()
+						vim.snippet.expand(snippet)
 						vim.schedule(function()
 							local cl = vim.api.nvim_get_current_line()
 							local fixed = cl:gsub("%)%(%)$", ")"):gsub("%)%(%)([^%w%(])", function(ch)
@@ -113,8 +89,7 @@ return {
 							end
 						end)
 					else
-						ms.default_insert({ body = snippet })
-						clear_virt_text()
+						vim.snippet.expand(snippet)
 					end
 				end,
 			},
@@ -151,6 +126,7 @@ return {
 			fuzzy = {
 				implementation = "lua",
 			},
+
 			keymap = {
 				preset = "default",
 
@@ -184,24 +160,27 @@ return {
 
 				["<Tab>"] = {
 					function()
-						local ms = get_ms()
-						if ms.session.get() then
-							ms.session.jump("next")
-							clear_virt_text()
+						local ls = get_ls()
+						if ls.jumpable(1) then
+							ls.jump(1)
 							return true
 						end
+						return false
 					end,
+					"snippet_forward",
 					"fallback",
 				},
+
 				["<S-Tab>"] = {
 					function()
-						local ms = get_ms()
-						if ms.session.get() then
-							ms.session.jump("prev")
-							clear_virt_text()
+						local ls = get_ls()
+						if ls.jumpable(-1) then
+							ls.jump(-1)
 							return true
 						end
+						return false
 					end,
+					"snippet_backward",
 					"fallback",
 				},
 			},
@@ -240,5 +219,6 @@ return {
 		})
 	end,
 }
+
 
 

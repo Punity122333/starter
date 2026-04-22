@@ -35,3 +35,21 @@ vim.keymap.set("t", "<Esc>", function()
 	vim.cmd("stopinsert")
 end, { noremap = true, silent = true })
 
+vim.keymap.set("n", "<leader>uj", function()
+  local img = require("snacks.image")
+  local buf = vim.api.nvim_get_current_buf()
+  local new_val = not img.config.doc.float
+
+  Snacks.config.image.doc.float = new_val
+  img.config.doc.float = new_val
+
+  if new_val then
+    vim.b[buf].snacks_image_attached = false
+    img.doc._attach(buf)
+  else
+    img.doc.hover_close()
+    pcall(vim.api.nvim_del_augroup_by_name, "snacks.image.doc." .. buf)
+  end
+
+  vim.notify("Hover images: " .. (new_val and "ON" or "OFF"))
+end, { desc = "Toggle hover image previews" })
