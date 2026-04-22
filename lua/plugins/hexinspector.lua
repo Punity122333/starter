@@ -20,6 +20,5 @@ return {
 			end,
 			desc = "Hex Editor (Pick File)",
 		},
-                            
 	},
 }

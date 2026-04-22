@@ -8,14 +8,6 @@ vim.keymap.set("v", ">", function()
 	vim.o.lazyredraw = saved
 end, { noremap = true, silent = true, desc = "Indent and reselect" })
 
-vim.keymap.set("v", ">", function()
-	local saved = vim.o.lazyredraw
-	vim.o.lazyredraw = true
-	vim.cmd("normal! >")
-	vim.cmd("normal! gv")
-	vim.o.lazyredraw = saved
-end, { noremap = true, silent = true, desc = "Indent and reselect" })
-
 vim.keymap.set("v", "<", function()
 	local saved = vim.o.lazyredraw
 	vim.o.lazyredraw = true

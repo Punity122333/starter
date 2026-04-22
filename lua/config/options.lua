@@ -275,7 +275,6 @@ local function init_sc()
 		"snacks_win_backdrop",
 		"TelescopePrompt",
 		"TelescopeResults",
-		-- misc
 		"qf",
 		"gitcommit",
 		"git",

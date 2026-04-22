@@ -31,7 +31,7 @@ vim.api.nvim_create_autocmd("FileType", {
 			-- fallback
 			local cr = vim.api.nvim_replace_termcodes("<CR>", true, false, true)
 			vim.api.nvim_feedkeys(cr, "n", true)
-		end, { silent = true, buffer = true }) -- buffer = true is key here
+		end, { silent = true, buffer = true })
 	end,
 })
 

@@ -10,7 +10,6 @@ return {
 			end
 			return _ls
 		end
-
 		local function paren_context()
 			local col = vim.fn.col(".")
 			local line = vim.api.nvim_get_current_line()
@@ -37,7 +36,7 @@ return {
 					local cursor = vim.api.nvim_win_get_cursor(0)
 					if fixed ~= cur_line then
 						vim.api.nvim_set_current_line(fixed)
-						local max_col = math.max(0, #fixed - 1)
+						local max_col = math.max(0, #fixed - 2)
 						if cursor[2] > max_col then
 							cursor = { cursor[1], max_col }
 							vim.api.nvim_win_set_cursor(0, cursor)
@@ -45,7 +44,7 @@ return {
 					end
 					local line = vim.api.nvim_get_current_line()
 					local col = cursor[2]
-					local rest = line:sub(col + 1)
+					local rest = line:sub(col)
 					local open = rest:find("%(%)")
 					if open then
 						vim.api.nvim_win_set_cursor(0, { cursor[1], col + open })
