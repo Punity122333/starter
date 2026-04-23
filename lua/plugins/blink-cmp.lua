@@ -33,21 +33,25 @@ return {
 				vim.schedule(function()
 					local cur_line = vim.api.nvim_get_current_line()
 					local fixed = cur_line:gsub("%)%(%)$", ")"):gsub("%)%(%)([^%w%(])", ")" .. "%1")
-					local cursor = vim.api.nvim_win_get_cursor(0)
 					if fixed ~= cur_line then
 						vim.api.nvim_set_current_line(fixed)
-						local max_col = math.max(0, #fixed - 2)
-						if cursor[2] > max_col then
-							cursor = { cursor[1], max_col }
-							vim.api.nvim_win_set_cursor(0, cursor)
-						end
 					end
 					local line = vim.api.nvim_get_current_line()
-					local col = cursor[2]
-					local rest = line:sub(col)
-					local open = rest:find("%(%)")
+					local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+					-- col is 0-indexed; line:sub() is 1-indexed → col+1 starts exactly at cursor.
+					-- find() offset within rest is 1-indexed, so inside-paren col = col + open.
+					local rest = line:sub(col + 1)
+					local open = rest:find("%(%)") 
 					if open then
-						vim.api.nvim_win_set_cursor(0, { cursor[1], col + open })
+						vim.api.nvim_win_set_cursor(0, { row, col + open })
+					else
+						-- blink placed cursor past the parens (e.g. auto_brackets after ")")
+						-- fall back to the first "()" in the line
+						local lopen = line:find("%(%)") 
+						if lopen then
+							-- lopen is 1-indexed pos of "("; used as 0-indexed col = inside the parens
+							vim.api.nvim_win_set_cursor(0, { row, lopen })
+						end
 					end
 				end)
 			end
@@ -218,6 +222,8 @@ return {
 		})
 	end,
 }
+
+
 
 
 
