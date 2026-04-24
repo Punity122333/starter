@@ -189,6 +189,7 @@ vim.api.nvim_set_hl(0, "@square_bracket", { fg = "#3d59a1", bold = true, force =
 vim.api.nvim_set_hl(0, "BlinkCmpSignatureActiveParameter", { bg = COLOR_BACKGROUND_PRIMARY, force = true })
 vim.api.nvim_set_hl(0, "@module.python", { link = "@type.python" })
 vim.api.nvim_set_hl(0, "@keyword.import.python", { link = "@keyword.conditional.python" })
+vim.api.nvim_set_hl(0, "@keyword.import.rust", { link = "@keyword.conditional.python" })
 vim.api.nvim_set_hl(0, "@lsp.type.namespace.python", { link = "@module.python" })
 vim.api.nvim_set_hl(0, "@lsp.type.variable", { fg = COLOR_LSP_TYPE_VARIABLE })
 vim.api.nvim_set_hl(0, "@variable", { fg = COLOR_LSP_TYPE_VARIABLE })

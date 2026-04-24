@@ -21,7 +21,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			return
 		end
 
-		local excluded_servers = { html = true, cssls = true, eslint = true }
+		local excluded_servers = { html = true, cssls = true, eslint = true, ["crates.nvim"] = true }
 		if excluded_servers[client.name] then
 			return
 		end
@@ -386,37 +386,40 @@ vim.api.nvim_create_autocmd("FileType", {
 
 vim.api.nvim_clear_autocmds({ event = "WinScrolled" })
 
--- Create a highlight group
 vim.api.nvim_set_hl(0, "CursorBoldChar", { bold = true })
 
--- Namespace for our extmark
 local ns = vim.api.nvim_create_namespace("cursor_bold_char")
 
--- Function to update highlight
 local function highlight_cursor_char()
-    local bufnr = vim.api.nvim_get_current_buf()
-    local pos = vim.api.nvim_win_get_cursor(0)
-    local row, col = pos[1] - 1, pos[2]
+	local bufnr = vim.api.nvim_get_current_buf()
+	local pos = vim.api.nvim_win_get_cursor(0)
+	local row, col = pos[1] - 1, pos[2]
 
-    -- Clear previous highlight
-    vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+	vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 
-    -- Get current line content to check length
-    local line_content = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ""
-    local line_len = #line_content
+	local line_content = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ""
+	local line_len = #line_content
 
-    -- Only set extmark if the column is within the actual text bounds
-    if line_len > 0 and col < line_len then
-        vim.api.nvim_buf_set_extmark(bufnr, ns, row, col, {
-            end_col = col + 1,
-            hl_group = "CursorBoldChar",
-            strict = false, -- prevents crashing if bounds are slightly off
-        })
-    end
+	if line_len > 0 and col < line_len then
+		vim.api.nvim_buf_set_extmark(bufnr, ns, row, col, {
+			end_col = col + 1,
+			hl_group = "CursorBoldChar",
+			strict = false,
+		})
+	end
 end
 
 -- Trigger on cursor move
 vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-    callback = highlight_cursor_char,
+	callback = highlight_cursor_char,
 })
 
+vim.api.nvim_create_autocmd("LspAttach", {
+	pattern = "Cargo.toml",
+	callback = function(ev)
+		local client = vim.lsp.get_client_by_id(ev.data.client_id)
+		if client and client.name == "taplo" then
+			client.server_capabilities.hoverProvider = false
+		end
+	end,
+})

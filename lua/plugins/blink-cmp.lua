@@ -38,18 +38,13 @@ return {
 					end
 					local line = vim.api.nvim_get_current_line()
 					local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-					-- col is 0-indexed; line:sub() is 1-indexed → col+1 starts exactly at cursor.
-					-- find() offset within rest is 1-indexed, so inside-paren col = col + open.
 					local rest = line:sub(col + 1)
-					local open = rest:find("%(%)") 
+					local open = rest:find("%(%)")
 					if open then
 						vim.api.nvim_win_set_cursor(0, { row, col + open })
 					else
-						-- blink placed cursor past the parens (e.g. auto_brackets after ")")
-						-- fall back to the first "()" in the line
-						local lopen = line:find("%(%)") 
+						local lopen = line:find("%(%)")
 						if lopen then
-							-- lopen is 1-indexed pos of "("; used as 0-indexed col = inside the parens
 							vim.api.nvim_win_set_cursor(0, { row, lopen })
 						end
 					end
@@ -222,8 +217,3 @@ return {
 		})
 	end,
 }
-
-
-
-
-

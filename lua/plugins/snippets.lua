@@ -1,72 +1,35 @@
--- Scrub augroup handle — nil when no session is active
-local _scrub_aug = nil
+-- Intercept nvim_buf_set_extmark at the API level to strip virt_text for the
+-- active mini.snippets namespace. This is the only race-free approach: instead
+-- of scheduling a cleanup AFTER mini.snippets draws, we prevent the draw at all.
+-- Overhead is one integer comparison per extmark set — negligible.
+local _patched_ns = nil -- set to session.ns_id while a session is live
 
--- Core scrubber: wipe virt_text from every extmark in the active session's namespace.
--- Preserves position tracking (end_row/end_col/hl_group) so mini.snippets keeps functioning.
-local function clear_session_virt_text()
-	local ok, ms = pcall(require, "mini.snippets")
-	if not ok then return end
-	local session = ms.session.get()
-	if not session then return end
-	local bufnr = vim.api.nvim_get_current_buf()
+local _orig_set_extmark = vim.api.nvim_buf_set_extmark
+---@diagnostic disable-next-line: duplicate-set-field
+vim.api.nvim_buf_set_extmark = function(bufnr, ns_id, row, col, opts)
+	if _patched_ns and ns_id == _patched_ns and opts.virt_text and #opts.virt_text > 0 then
+		opts = vim.tbl_extend("force", opts, { virt_text = {}, virt_text_pos = nil })
+	end
+	return _orig_set_extmark(bufnr, ns_id, row, col, opts)
+end
+
+-- Scrub any virt_text that snuck in before the patch was active (i.e. the very
+-- first frame after SessionStart, before our autocmd fires).
+local function scrub_existing(session, bufnr)
 	local ns_id = session.ns_id
 	for _, mark in ipairs(vim.api.nvim_buf_get_extmarks(bufnr, ns_id, 0, -1, { details = true })) do
 		local id, row, col, d = mark[1], mark[2], mark[3], mark[4]
 		if d.virt_text and #d.virt_text > 0 then
-			vim.api.nvim_buf_set_extmark(bufnr, ns_id, row, col, {
-				id      = id,
+			_orig_set_extmark(bufnr, ns_id, row, col, {
+				id        = id,
 				virt_text = {},
-				end_row = d.end_row,
-				end_col = d.end_col,
-				hl_group = d.hl_group,
+				end_row   = d.end_row,
+				end_col   = d.end_col,
+				hl_group  = d.hl_group,
 			})
 		end
 	end
 end
--- Schedule a clear to run AFTER any pending vim.schedule() calls from mini.snippets.
--- mini.snippets queues its redraws via vim.schedule; by scheduling ourselves at the
--- same point we'll always be enqueued after it (FIFO), so we always win the race.
-local function scheduled_clear()
-	vim.schedule(clear_session_virt_text)
-end
-
--- Spin up buffer-local autocmds that fire clear_session_virt_text after every event
--- that can cause mini.snippets to re-render its virt_text bullets:
---   • TextChangedI  – the root cause of the let~/linked-tabstop regression:
---                     mini.snippets' own TextChangedI handler re-draws bullets on
---                     unvisited empty tabstops whenever the current tabstop changes.
---   • MiniSnippetsSessionJump   – mini.snippets redraws after every tabstop jump.
---   • MiniSnippetsSessionResume – redraws when a nested session pops back.
-local function setup_scrub(bufnr)
-	if _scrub_aug then
-		pcall(vim.api.nvim_del_augroup_by_id, _scrub_aug)
-	end
-	_scrub_aug = vim.api.nvim_create_augroup("MiniSnippetsVirtScrub", { clear = true })
-
-	-- Buffer-scoped so we never fire in unrelated windows
-	vim.api.nvim_create_autocmd({ "TextChangedI", "CursorMovedI" }, {
-		group   = _scrub_aug,
-		buffer  = bufnr,
-		callback = scheduled_clear,
-	})
-	-- User events aren't buffer-scoped by the API but clear_session_virt_text
-	-- already guards with ms.session.get(), so false positives are harmless.
-	vim.api.nvim_create_autocmd("User", {
-		group   = _scrub_aug,
-		pattern = { "MiniSnippetsSessionJump", "MiniSnippetsSessionResume" },
-		callback = scheduled_clear,
-	})
-end
-
-local function teardown_scrub()
-	if _scrub_aug then
-		pcall(vim.api.nvim_del_augroup_by_id, _scrub_aug)
-		_scrub_aug = nil
-	end
-end
-
--- Still export for blink.cmp's use
-package.loaded["mini_snippets_utils"] = { clear_virt_text = clear_session_virt_text }
 
 return {
 	"nvim-mini/mini.snippets",
@@ -76,7 +39,8 @@ return {
 		local snips = require("mini.snippets")
 		local friendly_dir = require("lazy.core.config").plugins["friendly-snippets"].dir
 
-		-- Nuke all MiniSnippets highlight groups so they render invisibly
+		-- Nuke all MiniSnippets highlight groups so nothing renders even if a
+		-- virt_text somehow slips through (belt-and-suspenders).
 		local hl_groups = {
 			"MiniSnippetsCurrent",
 			"MiniSnippetsCurrentReplace",
@@ -92,27 +56,43 @@ return {
 		clear_hl()
 		vim.api.nvim_create_autocmd("ColorScheme", { callback = clear_hl })
 
-		-- MiniSnippetsSessionStart fires AFTER default_insert has placed all extmarks
-		-- and drawn the initial virt_text, so a scheduled_clear() here reliably wins.
+		-- Activate the patch as soon as a session starts, then do a one-shot scrub
+		-- for any extmarks already placed before we got here.
 		vim.api.nvim_create_autocmd("User", {
 			pattern  = "MiniSnippetsSessionStart",
 			callback = function()
+				local ok, ms = pcall(require, "mini.snippets")
+				if not ok then return end
+				local session = ms.session.get()
+				if not session then return end
+				_patched_ns = session.ns_id
 				local bufnr = vim.api.nvim_get_current_buf()
-				setup_scrub(bufnr)
-				scheduled_clear() -- wipe the initial bullets
+				-- Run immediately AND after one schedule tick to catch anything
+				-- mini.snippets deferred from inside default_insert.
+				scrub_existing(session, bufnr)
+				vim.schedule(function()
+					local s = ms.session.get()
+					if s then scrub_existing(s, bufnr) end
+				end)
 			end,
 		})
 
-		-- SessionStop fires BEFORE the session is fully torn down.
-		-- Schedule the teardown check so ms.session.get() reflects the post-stop state.
-		-- If nested sessions are still alive, keep the autocmds running.
+		-- On stop: scrub leftover extmarks (e.g. session killed mid-snippet by
+		-- deleting the text), then deactivate the patch if no sessions remain.
 		vim.api.nvim_create_autocmd("User", {
 			pattern  = "MiniSnippetsSessionStop",
 			callback = function()
+				local bufnr = vim.api.nvim_get_current_buf()
+				-- The session is still accessible at this point — scrub before it's gone.
+				local ok, ms = pcall(require, "mini.snippets")
+				if ok then
+					local session = ms.session.get()
+					if session then scrub_existing(session, bufnr) end
+				end
+				-- Deactivate patch after teardown completes (session.get() → nil).
 				vim.schedule(function()
-					local ok, ms = pcall(require, "mini.snippets")
 					if not ok or not ms.session.get() then
-						teardown_scrub()
+						_patched_ns = nil
 					end
 				end)
 			end,
@@ -127,6 +107,7 @@ return {
 		})
 	end,
 }
+
 
 
 
