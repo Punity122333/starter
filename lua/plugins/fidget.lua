@@ -29,8 +29,6 @@ return {
             },
         },
     },
-    -- Protected config wrapper: require and setup are guarded so any errors
-    -- are logged to the Neovim cache directory and the user is notified.
     config = function(_, opts)
         -- Try to require the plugin safely.
         local ok_req, mod_or_err = pcall(require, "fidget")

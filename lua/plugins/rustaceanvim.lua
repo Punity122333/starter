@@ -16,23 +16,30 @@ return {
 					return caps
 				end)(),
 
-				on_attach = function(_, bufnr)
+				on_attach = function(client, bufnr)
 					local DELAY_MS = 2500
 					local timer = vim.uv.new_timer()
 
-					vim.api.nvim_create_autocmd({ "InsertLeave", "BufWritePost" }, {
+					client.server_capabilities.semanticTokensProvider = nil
+					vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 						buffer = bufnr,
-						desc = "rust-analyzer: debounced flyCheck",
+						desc = "rust-analyzer: debounced flyCheck on cursor idle",
 						callback = function()
 							timer:stop()
-							timer:start(DELAY_MS, 0, vim.schedule_wrap(function()
-								vim.cmd.RustLsp({ "flyCheck", "run" })
-								if ok_snacks and snacks.explorer
-									and type(snacks.explorer.refresh) == "function"
-								then
-                  snacks.explorer.refresh()
-								end
-							end))
+							timer:start(
+								DELAY_MS,
+								0,
+								vim.schedule_wrap(function()
+									vim.cmd.RustLsp({ "flyCheck", "run" })
+									if
+										ok_snacks
+										and snacks.explorer
+										and type(snacks.explorer.refresh) == "function"
+									then
+										snacks.explorer.refresh()
+									end
+								end)
+							)
 						end,
 					})
 
@@ -48,25 +55,26 @@ return {
 
 				settings = {
 					["rust-analyzer"] = {
+						numThreads = 4, 
+						cachePriming = {
+              enable = true,
+							numThreads = 2,
+						},
 						files = {
 							excludeDirs = { ".git", "node_modules", "target" },
 						},
 						cargo = {
 							buildScripts = { enable = false },
-              allTargets = false,
+							allTargets = false,
 						},
 						procMacro = {
 							enable = true,
 						},
 						checkOnSave = false,
 						diagnostics = {
-							-- Experimental diagnostics (type mismatch hints etc.)
-							-- are expensive; disable unless you actively use them.
 							experimental = { enable = false },
 						},
 						completion = {
-							-- Full function signature completion requires RA to
-							-- resolve the full type of every candidate — skip it.
 							fullFunctionSignatures = { enable = false },
 						},
 					},
@@ -75,5 +83,3 @@ return {
 		}
 	end,
 }
-
-

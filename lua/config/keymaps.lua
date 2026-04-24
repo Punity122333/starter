@@ -58,19 +58,42 @@ local _pending_v = 0
 local _pending_h = 0
 local _flush_sched = false
 
+local function apply_scroll(dv, dh)
+	local view = vim.fn.winsaveview()
+
+	if dv ~= 0 then
+		view.topline = math.max(1, view.topline - dv)
+
+		local winheight = vim.fn.winheight(0)
+		local so = vim.o.scrolloff
+		local top_limit = view.topline + so
+		local bot_limit = view.topline + winheight - 1 - so
+
+		if top_limit > bot_limit then
+			view.lnum = view.topline + math.floor(winheight / 2)
+		else
+			view.lnum = math.max(top_limit, math.min(bot_limit, view.lnum))
+		end
+	end
+
+	if dh ~= 0 then
+		view.leftcol = math.max(0, view.leftcol + dh)
+	end
+
+	local ei = vim.o.eventignore
+	vim.o.eventignore = "all"
+	vim.fn.winrestview(view)
+	vim.o.eventignore = ei
+end
+
 local function flush_scroll()
 	_flush_sched = false
-	local v, h = _pending_v, _pending_h
+	local dv, dh = _pending_v, _pending_h
 	_pending_v, _pending_h = 0, 0
-	if v == 0 and h == 0 then
+	if dv == 0 and dh == 0 then
 		return
 	end
-	if v ~= 0 then
-		vim.cmd("normal! " .. math.abs(v) .. (v > 0 and "\025" or "\005"))
-	end
-	if h ~= 0 then
-		vim.cmd("normal! " .. math.abs(h) .. (h > 0 and "zl" or "zh"))
-	end
+	apply_scroll(dv, dh)
 end
 
 local function queue_scroll(dv, dh)
@@ -90,9 +113,7 @@ for _, dir in ipairs({ "Up", "Down" }) do
 	end
 	local i_fn = function()
 		_scroll_ts = _uv.now()
-		local view = vim.fn.winsaveview()
-		view.topline = math.max(1, view.topline + (dir == "Up" and -3 or 3))
-		vim.fn.winrestview(view)
+		apply_scroll(dv, 0)
 	end
 	for _, mult in ipairs({ "", "2-", "3-", "4-" }) do
 		local lhs = "<" .. mult .. "ScrollWheel" .. dir .. ">"
@@ -108,9 +129,7 @@ for _, dir in ipairs({ "Left", "Right" }) do
 	end
 	local i_fn = function()
 		_scroll_ts = _uv.now()
-		local view = vim.fn.winsaveview()
-		view.leftcol = math.max(0, view.leftcol + (dir == "Right" and 6 or -6))
-		vim.fn.winrestview(view)
+		apply_scroll(0, dh)
 	end
 	for _, mult in ipairs({ "", "2-", "3-", "4-" }) do
 		local lhs = "<" .. mult .. "ScrollWheel" .. dir .. ">"
@@ -125,16 +144,14 @@ vim.keymap.set({ "n", "v" }, "<LeftMouse>", function()
 		return
 	end
 	vim.api.nvim_feedkeys(_lm_raw, "n", false)
-
-
 end, _sv)
-
 
 vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "FocusGained" }, {
 	callback = function()
 		_scroll_ts = _uv.now()
 	end,
 })
+
 vim.keymap.set("n", "H", "H", { desc = "Move to top of screen" })
 vim.keymap.set("n", "L", "L", { desc = "Move to bottom of screen" })
 
@@ -174,7 +191,6 @@ local function jump_todo(direction)
 		local cur = vim.fn.getpos(".")
 		local key = cur[2] .. "," .. cur[3]
 
-		-- if we've already visited this position, nothing valid exists — bail
 		if seen[key] then
 			vim.fn.setpos(".", start_pos)
 			break
@@ -195,4 +211,5 @@ end, { silent = true, desc = "Next todo comment" })
 vim.keymap.set("n", "[o", function()
 	jump_todo("prev")
 end, { silent = true, desc = "Prev todo comment" })
+
 

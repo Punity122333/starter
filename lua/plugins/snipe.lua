@@ -4,7 +4,7 @@ return {
 		-- dir = "~/dev/projects/snipe.nvim",
 		branch = "master",
 		lazy = false,
-		priority = 1000,
+		priority = 10000,
 		keys = {
       {
         "<leader>ff",

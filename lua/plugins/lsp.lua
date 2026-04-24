@@ -246,7 +246,18 @@ return {
 		config = function(_, opts)
 			vim.diagnostic.config(opts.diagnostics)
 
-			local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
+			-- Disable semantic tokens globally; treesitter covers everything and
+		-- per-server token batches cause full-buffer flicker on large files.
+		vim.api.nvim_create_autocmd("LspAttach", {
+			callback = function(args)
+				local client = vim.lsp.get_client_by_id(args.data.client_id)
+				if client then
+					client.server_capabilities.semanticTokensProvider = nil
+				end
+			end,
+		})
+
+		local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
 
 			-- Track lua_ls client IDs at attach time so the handler can identify it
 			-- without calling get_client_by_id (which can return nil inside a handler).
@@ -328,3 +339,4 @@ return {
 		end,
 	},
 }
+
