@@ -1,0 +1,13 @@
+{
+  "name": "personal-snippets",
+  "contributes": {
+    "snippets": [
+      { "language": "python", "path": "./python.json" },
+      { "language": "rust", "path": "./rust.json" },
+      { "language": "cpp", "path": "./cpp.json" },
+      { "language": "javascript", "path": "./javascript.json" },
+      { "language": "html", "path": "./html.json" },
+      { "language": "css", "path": "./css.json" }
+    ]
+  }
+}

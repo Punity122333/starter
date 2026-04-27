@@ -63,8 +63,8 @@ return {
 								reportUnknownMemberAccess = false,
 								reportUnknownVariableType = false,
 								reportUnannotatedClassAttribute = false,
-								autoImportCompletions = false,
-								indexing = false,
+								autoImportCompletions = true,
+								indexing = true,
 							},
 						},
 					},
@@ -116,12 +116,10 @@ return {
 				lua_ls = {
 					on_attach = function(client, bufnr)
 						client.server_capabilities.diagnosticProvider = false
-						client.server_capabilities.semanticTokensProvider = nil
 						client.server_capabilities.documentSymbolProvider = true
 					end,
 
 					flags = {
-						-- wait 500ms after the last keystroke before sending changes to the server
 						debounce_text_changes = 500,
 					},
 					settings = {
@@ -180,7 +178,6 @@ return {
 						return root
 					end,
 					on_attach = function(client, bufnr)
-						client.server_capabilities.semanticTokensProvider = nil
 						if client.server_capabilities.completionProvider then
 							client.server_capabilities.completionProvider.triggerCharacters = { ".", ":" }
 							client.server_capabilities.completionProvider.resolveProvider = true
@@ -246,21 +243,17 @@ return {
 		config = function(_, opts)
 			vim.diagnostic.config(opts.diagnostics)
 
-			-- Disable semantic tokens globally; treesitter covers everything and
-		-- per-server token batches cause full-buffer flicker on large files.
-		vim.api.nvim_create_autocmd("LspAttach", {
-			callback = function(args)
-				local client = vim.lsp.get_client_by_id(args.data.client_id)
-				if client then
-					client.server_capabilities.semanticTokensProvider = nil
-				end
-			end,
-		})
+			-- Allowing basedpyright and clangd to keep their tokens
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					if client and client.name ~= "clangd" then
+						client.server_capabilities.semanticTokensProvider = nil
+					end
+				end,
+			})
 
-		local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
-
-			-- Track lua_ls client IDs at attach time so the handler can identify it
-			-- without calling get_client_by_id (which can return nil inside a handler).
+			local orig = vim.lsp.handlers["textDocument/publishDiagnostics"]
 			local lua_ls_ids = {}
 			local lua_ls_cfg = opts.servers.lua_ls
 			local lua_ls_upstream_attach = lua_ls_cfg.on_attach
@@ -271,8 +264,6 @@ return {
 				end
 			end
 
-			-- Debounce per buffer+client so multiple LSPs don't cancel each other's timers.
-			-- lua_ls is chatty; give it a longer delay than updatetime.
 			local timers = {}
 			vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, cfg)
 				local bufnr = vim.uri_to_bufnr(result.uri)
@@ -339,4 +330,3 @@ return {
 		end,
 	},
 }
-

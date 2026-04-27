@@ -1,15 +1,16 @@
 return {
 	"saghen/blink.cmp",
-	dependencies = { "nvim-mini/mini.snippets" },
+	dependencies = { "rafamadriz/friendly-snippets" },
 	lazy = false,
 	opts = function(_, opts)
-		local _ls = nil
-		local function get_ls()
-			if not _ls then
-				_ls = require("luasnip")
+		local _engine = nil
+		local function engine()
+			if not _engine then
+				_engine = require("snippet_engine")
 			end
-			return _ls
+			return _engine
 		end
+
 		local function paren_context()
 			local col = vim.fn.col(".")
 			local line = vim.api.nvim_get_current_line()
@@ -23,6 +24,7 @@ return {
 			local has_args = inside:match("%S") ~= nil
 			return has_args, not has_args
 		end
+
 		local function smart_accept(cmp)
 			if not cmp.is_visible() then
 				return false
@@ -58,37 +60,9 @@ return {
 				return vim.b.blink_enabled ~= false and vim.bo.buftype ~= "prompt"
 			end,
 			snippets = {
-				preset = "mini_snippets",
+				preset = "default",
 				expand = function(snippet)
-					local col = vim.fn.col(".")
-					local line = vim.api.nvim_get_current_line()
-					local rest = line:sub(col)
-					local word_tail = rest:match("^[%w_%.]*") or ""
-					local after = rest:sub(#word_tail + 1)
-					local inside = after:match("^%((.-)%)")
-
-					local has_real_args = inside ~= nil and inside:match("%S") ~= nil
-					local has_empty_paren = inside ~= nil and not inside:match("%S")
-
-					if has_real_args then
-						local name = snippet:match("^([%w_%.]+)") or snippet
-						local row, c = unpack(vim.api.nvim_win_get_cursor(0))
-						vim.api.nvim_buf_set_text(0, row - 1, c, row - 1, c, { name })
-						vim.api.nvim_win_set_cursor(0, { row, c + #name })
-					elseif has_empty_paren then
-						vim.snippet.expand(snippet)
-						vim.schedule(function()
-							local cl = vim.api.nvim_get_current_line()
-							local fixed = cl:gsub("%)%(%)$", ")"):gsub("%)%(%)([^%w%(])", function(ch)
-								return ")" .. ch
-							end)
-							if fixed ~= cl then
-								vim.api.nvim_set_current_line(fixed)
-							end
-						end)
-					else
-						vim.snippet.expand(snippet)
-					end
+					engine().expand(snippet)
 				end,
 			},
 			completion = {
@@ -131,13 +105,16 @@ return {
 				["<Up>"] = { "fallback" },
 				["<Down>"] = { "fallback" },
 				["<C-n>"] = { "select_next", "fallback" },
+				["<A-n>"] = { "select_next", "fallback" },
 				["<C-p>"] = { "select_prev", "fallback" },
+				["<A-p>"] = { "select_prev", "fallback" },
 				["<C-Up>"] = { "select_prev", "fallback" },
 				["<C-Down>"] = { "select_next", "fallback" },
 				["<C-j>"] = { "select_next", "fallback" },
 				["<C-k>"] = { "select_prev", "fallback" },
 
 				["<S-CR>"] = { smart_accept, "fallback" },
+				["<A-CR>"] = { smart_accept, "fallback" },
 				["<C-y>"] = { smart_accept, "fallback" },
 				["<C-CR>"] = { smart_accept, "fallback" },
 
@@ -158,9 +135,9 @@ return {
 
 				["<Tab>"] = {
 					function()
-						local ls = get_ls()
-						if ls.jumpable(1) then
-							ls.jump(1)
+						local e = engine()
+						if e.active(1) then
+							e.jump(1)
 							return true
 						end
 						return false
@@ -171,9 +148,9 @@ return {
 
 				["<S-Tab>"] = {
 					function()
-						local ls = get_ls()
-						if ls.jumpable(-1) then
-							ls.jump(-1)
+						local e = engine()
+						if e.active(-1) then
+							e.jump(-1)
 							return true
 						end
 						return false
@@ -200,6 +177,10 @@ return {
 						max_items = 8,
 						min_keyword_length = 2,
 						module = "blink.cmp.sources.snippets",
+						opts = {
+							friendly_snippets = true,
+							search_paths = { vim.fn.expand("~/.config/nvim/snippets") },
+						},
 					},
 					emoji = {
 						name = "emoji",
@@ -217,3 +198,4 @@ return {
 		})
 	end,
 }
+

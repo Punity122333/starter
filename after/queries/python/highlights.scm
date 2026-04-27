@@ -5,3 +5,6 @@
 ")" @bracket.paren
 "{" @bracket.curly
 "}" @bracket.curly
+
+((comment) @comment
+ (#set! priority 110))

@@ -119,19 +119,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		end
 	end,
 })
-
-local rust_clippy_group = vim.api.nvim_create_augroup("RustAutoClippy", { clear = true })
-vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-	group = rust_clippy_group,
-	pattern = "*.rs",
-	callback = function()
-		if vim.bo.modified then
-			vim.cmd("silent! noautocmd write")
-			vim.cmd("RustLsp flyCheck")
-		end
-	end,
-})
-
 local snacks_refresh_group = vim.api.nvim_create_augroup("SnacksExplorerRefresh", { clear = true })
 local refresh_timer = nil
 

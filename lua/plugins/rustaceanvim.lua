@@ -17,7 +17,7 @@ return {
 				end)(),
 
 				on_attach = function(client, bufnr)
-					local DELAY_MS = 2500
+					local DELAY_MS = 4500
 					local timer = vim.uv.new_timer()
 
 					client.server_capabilities.semanticTokensProvider = nil
@@ -30,6 +30,12 @@ return {
 								DELAY_MS,
 								0,
 								vim.schedule_wrap(function()
+									if not vim.lsp.buf_is_attached(bufnr, client.id) then
+										return
+									end
+									if vim.fn.exists(":RustLsp") ~= 2 then
+										return
+									end
 									vim.cmd.RustLsp({ "flyCheck", "run" })
 									if
 										ok_snacks
@@ -55,9 +61,8 @@ return {
 
 				settings = {
 					["rust-analyzer"] = {
-						numThreads = 4, 
+						numThreads = 4,
 						cachePriming = {
-              enable = true,
 							numThreads = 2,
 						},
 						files = {
@@ -83,3 +88,4 @@ return {
 		}
 	end,
 }
+

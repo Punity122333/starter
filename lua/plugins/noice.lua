@@ -1,6 +1,7 @@
 local hover_win = nil
 local hover_pending = false
 local _any_float_open = false
+local _prev_win = nil -- window we were in before focusing into the float
 
 local function get_sig_win()
 	for _, win in ipairs(vim.api.nvim_list_wins()) do
@@ -25,15 +26,48 @@ local function get_active_popup()
 end
 
 local function dismiss_all()
+	local target = _prev_win
 	if hover_win and vim.api.nvim_win_is_valid(hover_win) then
 		pcall(vim.api.nvim_win_close, hover_win, true)
 	end
 	hover_win = nil
 	hover_pending = false
 	_any_float_open = false
+	_prev_win = nil
 	pcall(function()
 		require("noice").cmd("dismiss")
 	end)
+	-- Return cursor to origin window if we were inside the float
+	if target and vim.api.nvim_win_is_valid(target) then
+		vim.api.nvim_set_current_win(target)
+	end
+end
+
+local function focus_hover()
+	local popup = get_active_popup()
+	if not popup or not vim.api.nvim_win_is_valid(popup) then
+		return
+	end
+	_prev_win = vim.api.nvim_get_current_win()
+	vim.api.nvim_set_current_win(popup)
+end
+
+-- 3-state toggle:
+--   no popup open        → open it
+--   popup open, cursor outside → focus into popup
+--   cursor inside popup  → close popup
+local function toggle_hover(show_lsp_info_fn)
+	local popup = get_active_popup()
+	if not popup then
+		show_lsp_info_fn()
+		return
+	end
+	local cur_win = vim.api.nvim_get_current_win()
+	if cur_win == popup then
+		dismiss_all()
+	else
+		focus_hover()
+	end
 end
 
 local function show_lsp_info()
@@ -90,19 +124,46 @@ local function show_lsp_info()
 			max_height = 20,
 			wrap = true,
 			stylize_markdown = true,
-			close_events = { "CursorMoved", "CursorMovedI", "BufLeave", "InsertCharPre" },
+			-- Empty: we handle all close logic ourselves so that focusing into
+			-- the float (which changes the active buffer) doesn't trigger BufLeave
+			-- and kill the window before the user can scroll it.
+			close_events = {},
 		})
 		if new_win and vim.api.nvim_win_is_valid(new_win) then
 			hover_win = new_win
 			_any_float_open = true
 			vim.api.nvim_set_option_value("conceallevel", 3, { win = new_win })
 			vim.api.nvim_set_option_value("spell", false, { win = new_win })
+
+			-- Close when the float window itself is closed (any reason)
 			vim.api.nvim_create_autocmd("WinClosed", {
 				pattern = tostring(new_win),
 				once = true,
 				callback = function()
 					hover_win = nil
 					_any_float_open = false
+					_prev_win = nil
+				end,
+			})
+
+			-- Close when the source buffer leaves (user switches file), but only
+			-- if it's a genuine buffer switch — not us jumping into the float.
+			-- We use vim.schedule so that nvim_get_current_win() reflects the new
+			-- window *after* the transition completes.
+			vim.api.nvim_create_autocmd("BufLeave", {
+				buffer = bufnr,
+				once = true,
+				callback = function()
+					vim.schedule(function()
+						-- If cursor is now inside our float, this was just us
+						-- focusing the float — don't close.
+						if hover_win and vim.api.nvim_win_is_valid(hover_win) then
+							if vim.api.nvim_get_current_win() == hover_win then
+								return
+							end
+						end
+						dismiss_all()
+					end)
 				end,
 			})
 		end
@@ -250,6 +311,7 @@ return {
 						{ find = "<ed" },
 						{ find = "yanked" },
 						{ find = ">ed" },
+						{ find = "fewer" },
 					},
 				},
 				opts = { skip = true },
@@ -293,6 +355,12 @@ return {
 				if not _any_float_open then
 					return
 				end
+				-- User is scrolling inside the float — leave it alone
+				if hover_win and vim.api.nvim_win_is_valid(hover_win) then
+					if vim.api.nvim_get_current_win() == hover_win then
+						return
+					end
+				end
 				if _sig_close_timer then
 					_sig_close_timer:stop()
 					_sig_close_timer:close()
@@ -312,8 +380,24 @@ return {
 								return
 							end
 						end
-						if get_sig_win() and not is_in_function_call() then
-							require("noice").cmd("dismiss")
+						-- Guard again after the timer delay — user may have focused float
+						if hover_win and vim.api.nvim_win_is_valid(hover_win) then
+							if vim.api.nvim_get_current_win() == hover_win then
+								return
+							end
+						end
+						if not is_in_function_call() then
+							-- Close our custom hover float if open
+							if hover_win and vim.api.nvim_win_is_valid(hover_win) then
+								pcall(vim.api.nvim_win_close, hover_win, true)
+								hover_win = nil
+								_any_float_open = false
+								_prev_win = nil
+							end
+							-- Dismiss noice signature windows
+							if get_sig_win() then
+								require("noice").cmd("dismiss")
+							end
 						end
 					end)
 				)
@@ -324,14 +408,31 @@ return {
 		{
 			"<C-;>",
 			function()
+				toggle_hover(show_lsp_info)
+			end,
+			mode = { "i", "n" },
+			desc = "Toggle LSP info: open → focus → close",
+		},
+		{
+			"<C-S-;>",
+			function()
 				if get_active_popup() then
 					dismiss_all()
-				else
-					show_lsp_info()
 				end
 			end,
 			mode = { "i", "n" },
-			desc = "Toggle LSP info (hover / signature / bytes)",
+			desc = "Force-close LSP info popup",
+		},
+		{
+			"<A-;>",
+			function()
+				if get_active_popup() then
+					dismiss_all()
+				end
+			end,
+			mode = { "i", "n" },
+			desc = "Force-close LSP info popup",
 		},
 	},
 }
+
