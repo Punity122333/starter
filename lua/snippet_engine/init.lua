@@ -7,7 +7,7 @@ local M = {}
 
 local ns = vim.api.nvim_create_namespace("snip_engine")
 
--- Localise hot-path API calls (avoids table lookup overhead in TextChangedI)
+-- Localise hot-path API calls
 local nvim_buf_get_extmark = vim.api.nvim_buf_get_extmark_by_id
 local nvim_buf_get_lines   = vim.api.nvim_buf_get_lines
 local nvim_buf_set_text    = vim.api.nvim_buf_set_text
@@ -17,7 +17,6 @@ local nvim_win_set_cursor  = vim.api.nvim_win_set_cursor
 -- ============================================================================
 -- TRANSFORM HELPERS
 -- ============================================================================
-
 local modifiers = {
   upcase     = function(s) return s:upper() end,
   downcase   = function(s) return s:lower() end,
@@ -44,12 +43,6 @@ local modifiers = {
   end,
 }
 
--- Parse LSP transform format string into a list of segments:
---   {type="lit",     value=str}
---   {type="cap",     index=N, modifier=str|nil}
---   {type="if_set",  index=N, value=str}
---   {type="cond",    index=N, if_set=str, if_not=str}
---   {type="default", index=N, default=str}
 local function parse_format(fmt)
   local segs = {}
   local i, len, text = 1, #fmt, ""
@@ -68,7 +61,6 @@ local function parse_format(fmt)
       flush(); i = i+1
       if fmt:sub(i,i) == "{" then
         i = i+1
-        -- read index
         local s = i
         while i <= len and fmt:sub(i,i):match("%d") do i = i+1 end
         local idx = tonumber(fmt:sub(s, i-1)) or 0
@@ -77,31 +69,24 @@ local function parse_format(fmt)
         if nc == "}" then
           i = i+1
           segs[#segs+1] = {type="cap", index=idx}
-
         elseif nc == ":" then
           i = i+1
           local mc = fmt:sub(i,i)
-
           if mc == "/" then
-            -- ${N:/modifier}
             i = i+1
             local ms = i
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             local mod = fmt:sub(ms, i-1)
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="cap", index=idx, modifier=mod}
-
           elseif mc == "+" then
-            -- ${N:+if_set}
             i = i+1
             local vs = i
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             local val = fmt:sub(vs, i-1)
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="if_set", index=idx, value=val}
-
           elseif mc == "?" then
-            -- ${N:?if_set:if_not}
             i = i+1
             local vs = i
             while i <= len and fmt:sub(i,i) ~= ":" and fmt:sub(i,i) ~= "}" do i = i+1 end
@@ -115,16 +100,13 @@ local function parse_format(fmt)
             end
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="cond", index=idx, if_set=if_set, if_not=if_not}
-
           elseif mc == "-" then
-            -- ${N:-default}
             i = i+1
             local ds = i
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             local def = fmt:sub(ds, i-1)
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="default", index=idx, default=def}
-
           else
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             if fmt:sub(i,i) == "}" then i = i+1 end
@@ -135,7 +117,6 @@ local function parse_format(fmt)
           segs[#segs+1] = {type="cap", index=idx}
         end
       else
-        -- bare $N
         local s = i
         while i <= len and fmt:sub(i,i):match("%d") do i = i+1 end
         local idx = tonumber(fmt:sub(s, i-1)) or 0
@@ -149,14 +130,11 @@ local function parse_format(fmt)
   return segs
 end
 
--- Apply a parsed format segment list against a matchlist result.
--- `captures`: vim.fn.matchlist return — [1]=full match, [2]=group1, etc.
 local function apply_format(segs, captures)
   local parts = {}
   for _, seg in ipairs(segs) do
     if seg.type == "lit" then
       parts[#parts+1] = seg.value
-
     elseif seg.type == "cap" then
       local val = captures[seg.index + 1] or ""
       if seg.modifier then
@@ -164,16 +142,13 @@ local function apply_format(segs, captures)
         val = fn and fn(val) or val
       end
       parts[#parts+1] = val
-
     elseif seg.type == "if_set" then
       if (captures[seg.index + 1] or "") ~= "" then
         parts[#parts+1] = seg.value
       end
-
     elseif seg.type == "cond" then
       parts[#parts+1] = (captures[seg.index + 1] or "") ~= ""
         and seg.if_set or seg.if_not
-
     elseif seg.type == "default" then
       local val = captures[seg.index + 1] or ""
       parts[#parts+1] = val ~= "" and val or seg.default
@@ -182,20 +157,11 @@ local function apply_format(segs, captures)
   return table.concat(parts)
 end
 
--- Translate common ECMAScript-isms to Vim very-magic equivalents.
--- \v mode already handles: (group), +, ?, |, {n,m}, \d \w \s
--- We only need to patch the things that differ.
 local function ecma_to_vim(pattern)
-  -- non-capturing groups: (?:...) → \%(...)   [in \v mode: %(...)]
   pattern = pattern:gsub("%(%?:", "%%(")
-  -- lookahead/behind: strip (?=...) (?!...) (?<=...) (?<!...)
-  -- (approximate — Vim has \@= \@! \@<= \@<! but the translation is complex;
-  --  for the 99% of real-world snippet transforms this is not needed)
   return pattern
 end
 
--- Apply a transform: run regex against source_text, replace with format.
--- Handles global flag by looping; zero-width match protection included.
 local function apply_transform(source_text, regex, format_segs, flags)
   local vim_pat = "\\v" .. ecma_to_vim(regex)
   if flags:find("i") then vim_pat = "\\c" .. vim_pat end
@@ -211,7 +177,6 @@ local function apply_transform(source_text, regex, format_segs, flags)
         .. source_text:sub(me + 1)
   end
 
-  -- global: loop, protect against infinite loop on zero-width matches
   local result, remaining = {}, source_text
   while remaining ~= "" do
     local caps = vim.fn.matchlist(remaining, vim_pat)
@@ -221,7 +186,7 @@ local function apply_transform(source_text, regex, format_segs, flags)
     result[#result+1] = remaining:sub(1, ms)
     result[#result+1] = apply_format(format_segs, caps)
     remaining = remaining:sub(me + 1)
-    if #caps[1] == 0 then  -- zero-width match: advance one byte
+    if #caps[1] == 0 then
       if remaining ~= "" then result[#result+1] = remaining:sub(1,1) end
       remaining = remaining:sub(2)
     end
@@ -231,11 +196,6 @@ end
 
 -- ============================================================================
 -- PARSER
--- Nodes:
---   {type="text",      value=str}
---   {type="tabstop",   index=N, children=[nodes]}
---   {type="choice",    index=N, choices=[str,...]}
---   {type="transform", source=N, regex=str, format_segs=[...], flags=str}
 -- ============================================================================
 
 local VARS = {
@@ -272,7 +232,6 @@ local function parse(src)
     return src:sub(s, pos-1)
   end
 
-  -- Read raw text until an unescaped `stop` char, consuming the stop char.
   local function read_until(stop)
     local parts, s = {}, pos
     while pos <= len do
@@ -285,7 +244,7 @@ local function parse(src)
         s = pos
       elseif ch == stop then
         parts[#parts+1] = src:sub(s, pos-1)
-        pos = pos+1  -- consume stop
+        pos = pos+1
         return table.concat(parts)
       else
         pos = pos+1
@@ -295,7 +254,7 @@ local function parse(src)
     return table.concat(parts)
   end
 
-  local parse_nodes  -- forward declaration
+  local parse_nodes
 
   local function parse_choice(index)
     local choices, cur = {}, ""
@@ -340,19 +299,16 @@ local function parse(src)
             if nc == "}" then
               eat()
               nodes[#nodes+1] = {type="tabstop", index=index, children={}}
-
             elseif nc == ":" then
               eat()
               local children = parse_nodes("}")
               if peek() == "}" then eat() end
               nodes[#nodes+1] = {type="tabstop", index=index, children=children}
-
             elseif nc == "|" then
               eat()
               nodes[#nodes+1] = parse_choice(index)
-
             elseif nc == "/" then
-              eat()  -- /
+              eat()
               local regex      = read_until("/")
               local format_raw = read_until("/")
               local flags      = read_until("}")
@@ -363,7 +319,6 @@ local function parse(src)
                 format_segs = parse_format(format_raw),
                 flags       = flags,
               }
-
             else
               local depth = 1
               while pos <= len and depth > 0 do
@@ -407,15 +362,7 @@ local function parse(src)
 end
 
 -- ============================================================================
--- FLATTEN  (two-phase: collect defaults first, then lay out with transforms)
---
--- Phase 1 — collect_defaults: fast text-only walk, no position tracking.
---   Returns defaults[index] = default_text for every tabstop/choice node.
---
--- Phase 2 — flatten_nodes: full walk, O(n) via running offset.
---   Writes out_ts[index]   = list of {start, stop, default, choices?}
---   Writes out_xf[source]  = list of {start, stop, regex, format_segs, flags}
---   Transforms resolved using defaults collected in phase 1.
+-- FLATTEN (two-phase, O(n))
 -- ============================================================================
 
 local function collect_defaults(nodes, defs)
@@ -423,16 +370,12 @@ local function collect_defaults(nodes, defs)
   for _, node in ipairs(nodes) do
     if node.type == "tabstop" then
       if not defs[node.index] then
-        -- flatten children text-only (no position tracking)
         local parts = {}
         local function text_of(nl)
           for _, n in ipairs(nl) do
             if n.type == "text" then parts[#parts+1] = n.value
-            elseif n.type == "tabstop" or n.type == "choice" then
-              if n.type == "choice" then
-                parts[#parts+1] = (n.choices and n.choices[1]) or ""
-              else text_of(n.children or {}) end
-            end
+            elseif n.type == "choice" then parts[#parts+1] = (n.choices and n.choices[1]) or ""
+            elseif n.type == "tabstop" then text_of(n.children or {}) end
           end
         end
         text_of(node.children or {})
@@ -464,9 +407,7 @@ local function flatten_nodes(nodes, base, out_ts, out_xf, defs)
       offset           = offset + #child_text
       if not out_ts[node.index] then out_ts[node.index] = {} end
       out_ts[node.index][#out_ts[node.index]+1] = {
-        start   = start,
-        stop    = offset,
-        default = child_text,
+        start = start, stop = offset, default = child_text,
       }
 
     elseif node.type == "choice" then
@@ -476,14 +417,10 @@ local function flatten_nodes(nodes, base, out_ts, out_xf, defs)
       offset = offset + #first
       if not out_ts[node.index] then out_ts[node.index] = {} end
       out_ts[node.index][#out_ts[node.index]+1] = {
-        start   = start,
-        stop    = offset,
-        default = first,
-        choices = node.choices,
+        start = start, stop = offset, default = first, choices = node.choices,
       }
 
     elseif node.type == "transform" then
-      -- Resolve now using the source tabstop's default (from phase-1 pre-pass)
       local source_val = defs[node.source] or ""
       local result     = apply_transform(source_val, node.regex, node.format_segs, node.flags)
       local start      = offset
@@ -491,11 +428,8 @@ local function flatten_nodes(nodes, base, out_ts, out_xf, defs)
       offset           = offset + #result
       if not out_xf[node.source] then out_xf[node.source] = {} end
       out_xf[node.source][#out_xf[node.source]+1] = {
-        start       = start,
-        stop        = offset,
-        regex       = node.regex,
-        format_segs = node.format_segs,
-        flags       = node.flags,
+        start = start, stop = offset,
+        regex = node.regex, format_segs = node.format_segs, flags = node.flags,
       }
     end
   end
@@ -505,14 +439,13 @@ end
 
 local function flatten(nodes)
   local defs   = collect_defaults(nodes)
-  local out_ts = {}
-  local out_xf = {}
+  local out_ts, out_xf = {}, {}
   local text   = flatten_nodes(nodes, 0, out_ts, out_xf, defs)
   return text, out_ts, out_xf
 end
 
 -- ============================================================================
--- POSITION MATH (precomputed line lengths → O(lines) per call, not O(n²))
+-- POSITION MATH
 -- ============================================================================
 
 local function make_line_lens(lines)
@@ -535,7 +468,7 @@ local function byte_to_rowcol(byte, line_lens, base_row, base_col)
 end
 
 -- ============================================================================
--- EXTMARK HELPERS (pcall-free hot path)
+-- EXTMARK HELPERS
 -- ============================================================================
 
 local function mark_pos(bufnr, id)
@@ -565,7 +498,6 @@ end
 
 -- ============================================================================
 -- CHOICE UI
--- Float near cursor, <C-n>/<C-p> navigate live, <CR>/<Tab> confirm, <Esc> cancel.
 -- ============================================================================
 
 local choice_state = nil
@@ -613,8 +545,7 @@ local function open_choice_ui(bufnr, ts, session)
     relative  = "buf",
     buf       = bufnr,
     bufpos    = {sr, sc},
-    row       = 1,
-    col       = 0,
+    row       = 1, col = 0,
     width     = max_w,
     height    = #choices,
     style     = "minimal",
@@ -631,7 +562,6 @@ local function open_choice_ui(bufnr, ts, session)
     local saved = nvim_win_get_cursor(0)
     session._jumping = true
     set_region_text(bufnr, ts.start_id, ts.end_id, choices[selected])
-    -- mirror to linked occurrences
     local list = session.tabstops[session.current]
     if list then
       for i = 2, #list do
@@ -672,6 +602,8 @@ local function session_destroy()
   pcall(vim.api.nvim_del_augroup_by_id, session.aug)
   pcall(vim.api.nvim_buf_clear_namespace, session.bufnr, ns, 0, -1)
   session = nil
+  -- Notify lualine the snippet mode indicator should disappear
+  vim.cmd("redrawstatus")
 end
 
 local function sort_indices(ts)
@@ -685,7 +617,6 @@ local function sort_indices(ts)
   return idxs
 end
 
--- Update all transforms sourced from `index` using the current text of that tabstop.
 local function update_transforms(index)
   if not session then return end
   local xf_list = session.transforms[index]
@@ -730,7 +661,6 @@ local function activate(index)
   if not session then return end
   close_choice_ui()
 
-  -- Before leaving current tabstop, fire transforms sourced from it
   if session.current ~= nil then
     update_transforms(session.current)
   end
@@ -752,6 +682,9 @@ local function activate(index)
     select_tabstop(session.bufnr, ts)
   end
 
+  -- Notify lualine to re-evaluate the mode component (shows SNIPPET)
+  vim.cmd("redrawstatus")
+
   vim.schedule(function() if session then session._jumping = false end end)
 end
 
@@ -766,19 +699,17 @@ function M.expand(snippet_body)
     snippet_body = table.concat(snippet_body, "\n")
   end
 
-  local ast             = parse(snippet_body)
+  local ast               = parse(snippet_body)
   local text, out_ts, out_xf = flatten(ast)
-  local lines           = vim.split(text, "\n", {plain=true})
-  local line_lens       = make_line_lens(lines)
-  local row0, col0      = unpack(nvim_win_get_cursor(0))
+  local lines             = vim.split(text, "\n", {plain=true})
+  local line_lens         = make_line_lens(lines)
+  local row0, col0        = unpack(nvim_win_get_cursor(0))
   row0 = row0 - 1
 
-  -- Single atomic buffer write — no intermediate renders, no grow
   vim.api.nvim_buf_set_text(0, row0, col0, row0, col0, lines)
 
   local bufnr = vim.api.nvim_get_current_buf()
 
-  -- Place extmark pairs for tabstops
   local sess_ts = {}
   for index, occurrences in pairs(out_ts) do
     sess_ts[index] = {}
@@ -788,12 +719,11 @@ function M.expand(snippet_body)
       local s_id = vim.api.nvim_buf_set_extmark(bufnr, ns, sr, sc, {right_gravity=false, virt_text={}})
       local e_id = vim.api.nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text={}})
       sess_ts[index][#sess_ts[index]+1] = {
-        start_id = s_id, end_id = e_id, choices = occ.choices,
+        start_id=s_id, end_id=e_id, choices=occ.choices,
       }
     end
   end
 
-  -- Place extmark pairs for transforms
   local sess_xf = {}
   for source, xfs in pairs(out_xf) do
     sess_xf[source] = {}
@@ -803,16 +733,12 @@ function M.expand(snippet_body)
       local s_id = vim.api.nvim_buf_set_extmark(bufnr, ns, sr, sc, {right_gravity=false, virt_text={}})
       local e_id = vim.api.nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text={}})
       sess_xf[source][#sess_xf[source]+1] = {
-        start_id    = s_id,
-        end_id      = e_id,
-        regex       = xf.regex,
-        format_segs = xf.format_segs,
-        flags       = xf.flags,
+        start_id=s_id, end_id=e_id,
+        regex=xf.regex, format_segs=xf.format_segs, flags=xf.flags,
       }
     end
   end
 
-  -- Synthesize $0 if absent
   if not sess_ts[0] then
     local er   = row0 + #lines - 1
     local ec   = (#lines == 1 and col0 or 0) + line_lens[#line_lens]
@@ -826,15 +752,13 @@ function M.expand(snippet_body)
   session = {
     bufnr      = bufnr,
     tabstops   = sess_ts,
-    transforms = sess_xf,  -- keyed by source tabstop index
+    transforms = sess_xf,
     indices    = indices,
     current    = nil,
     _jumping   = false,
     aug        = vim.api.nvim_create_augroup("SnipEngine", {clear=true}),
   }
 
-  -- Mirror: propagate edits from primary → linked occurrences (not transforms —
-  -- those update only on jump for performance)
   vim.api.nvim_create_autocmd("TextChangedI", {
     group    = session.aug,
     buffer   = bufnr,
@@ -843,7 +767,6 @@ function M.expand(snippet_body)
       local cur_idx = session.current
       if not cur_idx then return end
       local list = session.tabstops[cur_idx]
-      -- fast exits before any API calls
       if not list or #list < 2 then return end
       if choice_state then return end
 
@@ -911,5 +834,6 @@ function M.get_session() return session    end
 function M.destroy()     session_destroy() end
 
 return M
+
 
 

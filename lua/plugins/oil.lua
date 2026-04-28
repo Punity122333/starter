@@ -17,8 +17,7 @@ return {
 				if oil_win then
 					vim.api.nvim_win_close(oil_win, true)
 				else
-					vim.cmd("vsplit")
-					vim.cmd("wincmd L")
+					vim.cmd("botright vsplit")
 					require("oil").open()
 					vim.api.nvim_win_set_width(0, 41)
 				end
@@ -34,8 +33,6 @@ return {
 			relativenumber = false,
 			signcolumn = "no",
 			foldcolumn = "1",
-			winbar = "",
-			statusline = "",
 		},
 		keymaps = {
 			["<C-h>"] = {
@@ -57,7 +54,6 @@ return {
 				desc = "Close oil",
 			},
 
-			-- multicursor.nvim keymaps integrated into oil
 			["\\q"] = {
 				callback = function()
 					require("multicursor-nvim").toggleCursor()
@@ -112,4 +108,34 @@ return {
 			show_hidden = true,
 		},
 	},
+	config = function(_, opts)
+		require("oil").setup(opts)
+
+		local augroup = vim.api.nvim_create_augroup("OilLualineFix", { clear = true })
+
+		vim.api.nvim_create_autocmd("FileType", {
+			group = augroup,
+			pattern = "oil",
+			callback = function(ev)
+				local win = vim.fn.bufwinid(ev.buf)
+				if win == -1 then
+					return
+				end
+				vim.api.nvim_set_option_value("statusline", " ", { win = win })
+				vim.api.nvim_set_option_value("winbar", "", { win = win })
+
+				vim.api.nvim_create_autocmd("WinClosed", {
+					pattern = tostring(win),
+					once = true,
+					callback = function()
+						vim.schedule(function()
+							pcall(function()
+								require("lualine").refresh({ place = { "statusline", "winbar" } })
+							end)
+						end)
+					end,
+				})
+			end,
+		})
+	end,
 }

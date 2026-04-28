@@ -20,6 +20,8 @@ return {
 		explorer = {
 			enabled = true,
 			cycle = false,
+      follow = true,
+      follow_file = true,
 			git_status = false,
 			win = {
 				layout = {
