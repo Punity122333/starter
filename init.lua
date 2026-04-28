@@ -44,7 +44,6 @@ if ok then
 		orig_rm_attach(buf)
 	end
 end
-
 vim.opt.relativenumber = true
 vim.opt.number = true
 vim.opt.concealcursor = ""

@@ -120,8 +120,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 local snacks_refresh_group = vim.api.nvim_create_augroup("SnacksExplorerRefresh", { clear = true })
-local refresh_timer = nil
-
 vim.api.nvim_create_autocmd("DiagnosticChanged", {
 	group = snacks_refresh_group,
 	callback = function()

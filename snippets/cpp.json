@@ -144,5 +144,17 @@
       "    cout << n << endl;",
       "}"
     ]
+  },
+
+  "typename_kw": {
+    "prefix": "typename",
+    "body": ["typename$0"],
+    "description": "C++ typename keyword"
+  },
+
+  "typename_path": {
+    "prefix": "typenamepath",
+    "body": ["typename ${1:T}::${2:type}"],
+    "description": "Dependent typename with scope resolution"
   }
 }

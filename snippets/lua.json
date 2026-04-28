@@ -1,0 +1,234 @@
+{
+  "lua_base": {
+    "prefix": "lua",
+    "body": [
+      "-- Lua script",
+      "",
+      "local function main()",
+      "    $1",
+      "end",
+      "",
+      "main()"
+    ],
+    "description": "Base Lua script"
+  },
+
+  "lua_print": {
+    "prefix": "pr",
+    "body": ["print(${1:v})"],
+    "description": "print"
+  },
+
+  "lua_printf_debug": {
+    "prefix": "dbg",
+    "body": ["print(\"DEBUG: ${1:var} =\", vim.inspect(${1:var}))"],
+    "description": "Neovim debug print"
+  },
+
+  "lua_safe_call": {
+    "prefix": "pcall",
+    "body": [
+      "local ok, result = pcall(function()",
+      "    $1",
+      "end)",
+      "",
+      "if not ok then",
+      "    print(\"Error:\", result)",
+      "end"
+    ],
+    "description": "pcall wrapper"
+  },
+
+  "lua_xpcall": {
+    "prefix": "xpcall",
+    "body": [
+      "local function handler(err)",
+      "    print(\"Error:\", err)",
+      "end",
+      "",
+      "xpcall(function()",
+      "    $1",
+      "end, handler)"
+    ],
+    "description": "xpcall safety"
+  },
+
+  "lua_for_i": {
+    "prefix": "fori",
+    "body": ["for i = ${1:1}, ${2:n} do", "    $3", "end"],
+    "description": "numeric loop"
+  },
+
+  "lua_pairs": {
+    "prefix": "forp",
+    "body": ["for ${1:k}, ${2:v} in pairs(${3:t}) do", "    $4", "end"],
+    "description": "pairs loop"
+  },
+
+  "lua_ipairs": {
+    "prefix": "forip",
+    "body": ["for ${1:i}, ${2:v} in ipairs(${3:t}) do", "    $4", "end"],
+    "description": "ipairs loop"
+  },
+
+  "lua_func": {
+    "prefix": "fn",
+    "body": ["local function ${1:name}(${2:args})", "    $3", "end"],
+    "description": "function"
+  },
+
+  "lua_lambda": {
+    "prefix": "lam",
+    "body": ["local ${1:f} = function(${2:args})", "    return $3", "end"],
+    "description": "lambda-style function"
+  },
+
+  "lua_table": {
+    "prefix": "tbl",
+    "body": ["local ${1:t} = {", "    $2", "}"],
+    "description": "table"
+  },
+
+  "lua_module": {
+    "prefix": "mod",
+    "body": [
+      "local M = {}",
+      "",
+      "function M.${1:func}(${2:args})",
+      "    $3",
+      "end",
+      "",
+      "return M"
+    ],
+    "description": "module pattern"
+  },
+
+  "lua_metatable": {
+    "prefix": "meta",
+    "body": [
+      "local t = {}",
+      "local mt = {}",
+      "",
+      "mt.__index = mt",
+      "",
+      "setmetatable(t, mt)"
+    ],
+    "description": "metatable boilerplate"
+  },
+
+  "lua_class": {
+    "prefix": "class",
+    "body": [
+      "local ${1:Class} = {}",
+      "${1:Class}.__index = ${1:Class}",
+      "",
+      "function ${1:Class}.new(${2:args})",
+      "    local self = setmetatable({}, ${1:Class})",
+      "    $3",
+      "    return self",
+      "end"
+    ],
+    "description": "OOP-style class"
+  },
+
+  "lua_coroutine": {
+    "prefix": "co",
+    "body": [
+      "local co = coroutine.create(function()",
+      "    $1",
+      "end)",
+      "",
+      "coroutine.resume(co)"
+    ],
+    "description": "coroutine"
+  },
+
+  "lua_resume_yield": {
+    "prefix": "yield",
+    "body": ["coroutine.yield(${1:value})"],
+    "description": "yield"
+  },
+
+  "lua_require": {
+    "prefix": "req",
+    "body": ["local ${1:mod} = require(\"${1:mod}\")"],
+    "description": "require"
+  },
+
+  "lua_local": {
+    "prefix": "loc",
+    "body": ["local ${1:x} = ${2:v}"],
+    "description": "local var"
+  },
+
+  "lua_map": {
+    "prefix": "map",
+    "body": [
+      "local function map(tbl, f)",
+      "    local out = {}",
+      "    for i, v in ipairs(tbl) do",
+      "        out[i] = f(v)",
+      "    end",
+      "    return out",
+      "end"
+    ],
+    "description": "map function"
+  },
+
+  "lua_filter": {
+    "prefix": "filter",
+    "body": [
+      "local function filter(tbl, f)",
+      "    local out = {}",
+      "    for _, v in ipairs(tbl) do",
+      "        if f(v) then",
+      "            table.insert(out, v)",
+      "        end",
+      "    end",
+      "    return out",
+      "end"
+    ],
+    "description": "filter function"
+  },
+
+  "lua_reduce": {
+    "prefix": "reduce",
+    "body": [
+      "local function reduce(tbl, f, acc)",
+      "    for _, v in ipairs(tbl) do",
+      "        acc = f(acc, v)",
+      "    end",
+      "    return acc",
+      "end"
+    ],
+    "description": "reduce function"
+  },
+
+  "lua_nvim_map": {
+    "prefix": "mapkey",
+    "body": [
+      "vim.keymap.set(${1:\"n\"}, ${2:\"<leader>x\"}, function()",
+      "    $3",
+      "end)"
+    ],
+    "description": "Neovim keymap"
+  },
+
+  "lua_autocmd": {
+    "prefix": "autocmd",
+    "body": [
+      "vim.api.nvim_create_autocmd(\"${1:Event}\", {",
+      "    callback = function()",
+      "        $2",
+      "    end",
+      "})"
+    ],
+    "description": "autocmd"
+  },
+
+  "lua_timer": {
+    "prefix": "timer",
+    "body": ["vim.defer_fn(function()", "    $1", "end, ${2:1000})"],
+    "description": "async timer"
+  }
+}

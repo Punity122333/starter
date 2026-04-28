@@ -95,6 +95,9 @@ vim.api.nvim_set_hl(
 	{ fg = "#7dcfff", bg = COLOR_BACKGROUND_PRIMARY, bold = true, force = true }
 )
 
+vim.api.nvim_set_hl(0, "@io.cout", { fg = "#f7768e" })
+vim.api.nvim_set_hl(0, "@io.cin", { fg = "#f7768e" })
+vim.api.nvim_set_hl(0, "@io.endl", { fg = "#ff9e64" })
 -- HINT
 vim.api.nvim_set_hl(0, "BufferLineHint", { fg = "#1abc9c", bg = COLOR_BACKGROUND_PRIMARY, blend = 0, force = true })
 vim.api.nvim_set_hl(

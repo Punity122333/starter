@@ -1,0 +1,161 @@
+{
+  "go_base": {
+    "prefix": "gobase",
+    "body": [
+      "package main",
+      "",
+      "import (",
+      "    \"fmt\"",
+      ")",
+      "",
+      "func main() {",
+      "    $1",
+      "}"
+    ],
+    "description": "Go base template"
+  },
+
+  "go_print": {
+    "prefix": "pr",
+    "body": ["fmt.Println(${1:\"hello\"})"],
+    "description": "Print line"
+  },
+
+  "go_printf": {
+    "prefix": "pf",
+    "body": ["fmt.Printf(\"${1:%v}\\n\", ${2:val})"],
+    "description": "Printf"
+  },
+
+  "go_for_basic": {
+    "prefix": "for",
+    "body": [
+      "for ${1:i} := ${2:0}; ${1:i} < ${3:n}; ${1:i}++ {",
+      "    $4",
+      "}"
+    ],
+    "description": "basic for loop"
+  },
+
+  "go_for_range": {
+    "prefix": "forr",
+    "body": ["for ${1:i}, ${2:v} := range ${3:arr} {", "    $4", "}"],
+    "description": "range loop"
+  },
+
+  "go_if": {
+    "prefix": "if",
+    "body": ["if ${1:cond} {", "    $2", "}"],
+    "description": "if statement"
+  },
+
+  "go_if_err": {
+    "prefix": "ife",
+    "body": ["if ${1:err} != nil {", "    return ${2:nil}, ${1:err}", "}"],
+    "description": "error handling pattern"
+  },
+
+  "go_func": {
+    "prefix": "fn",
+    "body": ["func ${1:name}(${2:args}) ${3:ret} {", "    $4", "}"],
+    "description": "function"
+  },
+
+  "go_struct": {
+    "prefix": "struct",
+    "body": ["type ${1:Name} struct {", "    ${2:Field} ${3:type}", "}"],
+    "description": "struct definition"
+  },
+
+  "go_method": {
+    "prefix": "method",
+    "body": [
+      "func (s *${1:Struct}) ${2:Method}(${3:args}) ${4:ret} {",
+      "    $5",
+      "}"
+    ],
+    "description": "method with receiver"
+  },
+
+  "go_map": {
+    "prefix": "map",
+    "body": ["m := make(map[${1:string}]${2:int})"],
+    "description": "map init"
+  },
+
+  "go_slice": {
+    "prefix": "slice",
+    "body": ["s := make([]${1:int}, ${2:0}, ${3:10})"],
+    "description": "slice init"
+  },
+
+  "go_append": {
+    "prefix": "app",
+    "body": ["${1:s} = append(${1:s}, ${2:val})"],
+    "description": "append to slice"
+  },
+
+  "go_error_new": {
+    "prefix": "err",
+    "body": ["return ${1:nil}, fmt.Errorf(\"${2:error}\")"],
+    "description": "return error"
+  },
+
+  "go_goroutine": {
+    "prefix": "go",
+    "body": ["go func() {", "    $1", "}()"],
+    "description": "goroutine"
+  },
+
+  "go_channel": {
+    "prefix": "ch",
+    "body": ["ch := make(chan ${1:int})"],
+    "description": "channel"
+  },
+
+  "go_select": {
+    "prefix": "sel",
+    "body": [
+      "select {",
+      "case ${1:v} := <-${2:ch}:",
+      "    $3",
+      "case ${4:ch} <- ${5:v}:",
+      "    $6",
+      "default:",
+      "    $7",
+      "}"
+    ],
+    "description": "select statement"
+  },
+
+  "go_http_handler": {
+    "prefix": "handler",
+    "body": [
+      "func ${1:handler}(w http.ResponseWriter, r *http.Request) {",
+      "    $2",
+      "}"
+    ],
+    "description": "HTTP handler"
+  },
+
+  "go_main_http": {
+    "prefix": "http",
+    "body": [
+      "http.HandleFunc(\"${1:/}\", ${2:handler})",
+      "http.ListenAndServe(\":${3:8080}\", nil)"
+    ],
+    "description": "simple HTTP server"
+  },
+
+  "go_defer": {
+    "prefix": "defer",
+    "body": ["defer ${1:funcCall}"],
+    "description": "defer statement"
+  },
+
+  "go_log": {
+    "prefix": "log",
+    "body": ["log.Println(${1:\"debug\"})"],
+    "description": "log print"
+  }
+}
