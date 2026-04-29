@@ -238,6 +238,18 @@ return {
 						provideFormatter = true,
 					},
 				},
+
+				pasls = {
+					mason = false,
+					cmd = { vim.fn.expand("~/.local/bin/pasls") },
+					filetypes = { "pascal" },
+					root_dir = function(fname)
+						local util = require("lspconfig.util")
+						return util.root_pattern("*.lpi", "*.lpr", "*.dpr", ".git")(fname) or vim.fn.getcwd()
+					end,
+					settings = {
+					},
+				},
 			},
 		},
 		config = function(_, opts)

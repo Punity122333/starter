@@ -1,22 +1,43 @@
 -- lua/snippet_engine/init.lua
--- Custom snippet engine: parses LSP snippet syntax, manages sessions via
--- extmarks, mirrors linked tabstops, applies regex transforms on jump,
--- and shows choice node UI. Zero external dependencies.
+-- Custom snippet engine: LSP snippet syntax, extmark sessions, mirroring,
+-- regex transforms, choice UI, nested snippet history (session stack).
 
 local M = {}
 
 local ns = vim.api.nvim_create_namespace("snip_engine")
 
--- Localise hot-path API calls
+-- Localised API upvalues (avoid table-lookup overhead in hot paths)
 local nvim_buf_get_extmark = vim.api.nvim_buf_get_extmark_by_id
 local nvim_buf_get_lines   = vim.api.nvim_buf_get_lines
 local nvim_buf_set_text    = vim.api.nvim_buf_set_text
 local nvim_win_get_cursor  = vim.api.nvim_win_get_cursor
 local nvim_win_set_cursor  = vim.api.nvim_win_set_cursor
+local nvim_buf_set_extmark = vim.api.nvim_buf_set_extmark
+local nvim_buf_clear_ns    = vim.api.nvim_buf_clear_namespace
+local nvim_create_autocmd  = vim.api.nvim_create_autocmd
+local nvim_del_augroup     = vim.api.nvim_del_augroup_by_id
+local nvim_create_augroup  = vim.api.nvim_create_augroup
+local nvim_open_win        = vim.api.nvim_open_win
+local nvim_create_buf      = vim.api.nvim_create_buf
+local nvim_buf_set_lines   = vim.api.nvim_buf_set_lines
+local nvim_win_close       = vim.api.nvim_win_close
+local nvim_buf_delete      = vim.api.nvim_buf_delete
+local fn_matchlist         = vim.fn.matchlist
+local fn_match             = vim.fn.match
+local fn_mode              = vim.fn.mode
+local fn_feedkeys          = vim.fn.feedkeys
+local fn_maparg            = vim.fn.maparg
+local tbl_concat           = table.concat
+local str_split            = vim.split
+local str_rep              = string.rep
+
+-- Shared empty opts table — reused on every extmark query to avoid alloc
+local EMPTY = {}
 
 -- ============================================================================
 -- TRANSFORM HELPERS
 -- ============================================================================
+
 local modifiers = {
   upcase     = function(s) return s:upper() end,
   downcase   = function(s) return s:lower() end,
@@ -46,17 +67,13 @@ local modifiers = {
 local function parse_format(fmt)
   local segs = {}
   local i, len, text = 1, #fmt, ""
-
   local function flush()
     if text ~= "" then segs[#segs+1] = {type="lit", value=text}; text="" end
   end
-
   while i <= len do
     local ch = fmt:sub(i,i)
-
     if ch == "\\" and i < len then
       i = i+1; text = text .. fmt:sub(i,i); i = i+1
-
     elseif ch == "$" then
       flush(); i = i+1
       if fmt:sub(i,i) == "{" then
@@ -65,44 +82,37 @@ local function parse_format(fmt)
         while i <= len and fmt:sub(i,i):match("%d") do i = i+1 end
         local idx = tonumber(fmt:sub(s, i-1)) or 0
         local nc  = fmt:sub(i,i)
-
         if nc == "}" then
-          i = i+1
-          segs[#segs+1] = {type="cap", index=idx}
+          i = i+1; segs[#segs+1] = {type="cap", index=idx}
         elseif nc == ":" then
           i = i+1
           local mc = fmt:sub(i,i)
           if mc == "/" then
-            i = i+1
-            local ms = i
+            i = i+1; local ms = i
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             local mod = fmt:sub(ms, i-1)
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="cap", index=idx, modifier=mod}
           elseif mc == "+" then
-            i = i+1
-            local vs = i
+            i = i+1; local vs = i
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             local val = fmt:sub(vs, i-1)
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="if_set", index=idx, value=val}
           elseif mc == "?" then
-            i = i+1
-            local vs = i
+            i = i+1; local vs = i
             while i <= len and fmt:sub(i,i) ~= ":" and fmt:sub(i,i) ~= "}" do i = i+1 end
             local if_set = fmt:sub(vs, i-1)
             local if_not = ""
             if fmt:sub(i,i) == ":" then
-              i = i+1
-              local vns = i
+              i = i+1; local vns = i
               while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
               if_not = fmt:sub(vns, i-1)
             end
             if fmt:sub(i,i) == "}" then i = i+1 end
             segs[#segs+1] = {type="cond", index=idx, if_set=if_set, if_not=if_not}
           elseif mc == "-" then
-            i = i+1
-            local ds = i
+            i = i+1; local ds = i
             while i <= len and fmt:sub(i,i) ~= "}" do i = i+1 end
             local def = fmt:sub(ds, i-1)
             if fmt:sub(i,i) == "}" then i = i+1 end
@@ -119,8 +129,7 @@ local function parse_format(fmt)
       else
         local s = i
         while i <= len and fmt:sub(i,i):match("%d") do i = i+1 end
-        local idx = tonumber(fmt:sub(s, i-1)) or 0
-        segs[#segs+1] = {type="cap", index=idx}
+        segs[#segs+1] = {type="cap", index=tonumber(fmt:sub(s, i-1)) or 0}
       end
     else
       text = text .. ch; i = i+1
@@ -138,60 +147,51 @@ local function apply_format(segs, captures)
     elseif seg.type == "cap" then
       local val = captures[seg.index + 1] or ""
       if seg.modifier then
-        local fn = modifiers[seg.modifier]
-        val = fn and fn(val) or val
+        local fn = modifiers[seg.modifier]; val = fn and fn(val) or val
       end
       parts[#parts+1] = val
     elseif seg.type == "if_set" then
-      if (captures[seg.index + 1] or "") ~= "" then
-        parts[#parts+1] = seg.value
-      end
+      if (captures[seg.index + 1] or "") ~= "" then parts[#parts+1] = seg.value end
     elseif seg.type == "cond" then
-      parts[#parts+1] = (captures[seg.index + 1] or "") ~= ""
-        and seg.if_set or seg.if_not
+      parts[#parts+1] = (captures[seg.index + 1] or "") ~= "" and seg.if_set or seg.if_not
     elseif seg.type == "default" then
       local val = captures[seg.index + 1] or ""
       parts[#parts+1] = val ~= "" and val or seg.default
     end
   end
-  return table.concat(parts)
+  return tbl_concat(parts)
 end
 
-local function ecma_to_vim(pattern)
-  pattern = pattern:gsub("%(%?:", "%%(")
-  return pattern
-end
+local function ecma_to_vim(p) return p:gsub("%(%?:", "%%(") end
 
-local function apply_transform(source_text, regex, format_segs, flags)
-  local vim_pat = "\\v" .. ecma_to_vim(regex)
-  if flags:find("i") then vim_pat = "\\c" .. vim_pat end
-  local global  = flags:find("g") ~= nil
+local function apply_transform(src, regex, fmt_segs, flags)
+  local pat    = "\\v" .. ecma_to_vim(regex)
+  if flags:find("i") then pat = "\\c" .. pat end
+  local global = flags:find("g") ~= nil
 
   if not global then
-    local caps = vim.fn.matchlist(source_text, vim_pat)
-    if #caps == 0 then return source_text end
-    local ms = vim.fn.match(source_text, vim_pat)
+    local caps = fn_matchlist(src, pat)
+    if #caps == 0 then return src end
+    local ms = fn_match(src, pat)
     local me = ms + #caps[1]
-    return source_text:sub(1, ms)
-        .. apply_format(format_segs, caps)
-        .. source_text:sub(me + 1)
+    return src:sub(1, ms) .. apply_format(fmt_segs, caps) .. src:sub(me + 1)
   end
 
-  local result, remaining = {}, source_text
-  while remaining ~= "" do
-    local caps = vim.fn.matchlist(remaining, vim_pat)
-    if #caps == 0 then result[#result+1] = remaining; break end
-    local ms = vim.fn.match(remaining, vim_pat)
+  local result, rem = {}, src
+  while rem ~= "" do
+    local caps = fn_matchlist(rem, pat)
+    if #caps == 0 then result[#result+1] = rem; break end
+    local ms = fn_match(rem, pat)
     local me = ms + #caps[1]
-    result[#result+1] = remaining:sub(1, ms)
-    result[#result+1] = apply_format(format_segs, caps)
-    remaining = remaining:sub(me + 1)
+    result[#result+1] = rem:sub(1, ms)
+    result[#result+1] = apply_format(fmt_segs, caps)
+    rem = rem:sub(me + 1)
     if #caps[1] == 0 then
-      if remaining ~= "" then result[#result+1] = remaining:sub(1,1) end
-      remaining = remaining:sub(2)
+      if rem ~= "" then result[#result+1] = rem:sub(1,1) end
+      rem = rem:sub(2)
     end
   end
-  return table.concat(result)
+  return tbl_concat(result)
 end
 
 -- ============================================================================
@@ -214,60 +214,46 @@ local VARS = {
 
 local function parse(src)
   local pos, len = 1, #src
-
   local function peek()  return src:sub(pos, pos) end
   local function eat(n)  pos = pos + (n or 1)     end
-
   local function read_int()
     local s = pos
     while pos <= len and src:sub(pos,pos):match("%d") do pos = pos+1 end
     if pos == s then return nil end
     return tonumber(src:sub(s, pos-1))
   end
-
   local function read_ident()
     local s = pos
     while pos <= len and src:sub(pos,pos):match("[%w_]") do pos = pos+1 end
     if pos == s then return nil end
     return src:sub(s, pos-1)
   end
-
   local function read_until(stop)
     local parts, s = {}, pos
     while pos <= len do
       local ch = src:sub(pos,pos)
       if ch == "\\" and pos < len then
-        parts[#parts+1] = src:sub(s, pos-1)
-        pos = pos+1
-        parts[#parts+1] = src:sub(pos,pos)
-        pos = pos+1
-        s = pos
+        parts[#parts+1] = src:sub(s, pos-1); pos = pos+1
+        parts[#parts+1] = src:sub(pos,pos);  pos = pos+1; s = pos
       elseif ch == stop then
-        parts[#parts+1] = src:sub(s, pos-1)
-        pos = pos+1
-        return table.concat(parts)
-      else
-        pos = pos+1
-      end
+        parts[#parts+1] = src:sub(s, pos-1); pos = pos+1
+        return tbl_concat(parts)
+      else pos = pos+1 end
     end
     parts[#parts+1] = src:sub(s, pos-1)
-    return table.concat(parts)
+    return tbl_concat(parts)
   end
 
   local parse_nodes
-
   local function parse_choice(index)
     local choices, cur = {}, ""
     while pos <= len do
       local ch = peek()
-      if ch == "\\" and pos < len then
-        eat(); cur = cur .. peek(); eat()
-      elseif ch == "," then
-        choices[#choices+1] = cur; cur = ""; eat()
+      if ch == "\\" and pos < len then eat(); cur = cur .. peek(); eat()
+      elseif ch == "," then choices[#choices+1] = cur; cur = ""; eat()
       elseif ch == "|" then
         choices[#choices+1] = cur; eat()
-        if peek() == "}" then eat() end
-        break
+        if peek() == "}" then eat() end; break
       else cur = cur .. ch; eat() end
     end
     return {type="choice", index=index, choices=choices}
@@ -275,58 +261,44 @@ local function parse(src)
 
   parse_nodes = function(stop_char)
     local nodes, text = {}, ""
-
     local function flush()
       if text ~= "" then nodes[#nodes+1]={type="text",value=text}; text="" end
     end
-
     while pos <= len do
       if stop_char and peek() == stop_char then break end
       local ch = peek()
-
-      if ch == "\\" and pos < len then
-        eat(); text = text .. peek(); eat()
-
+      if ch == "\\" and pos < len then eat(); text = text .. peek(); eat()
       elseif ch == "$" then
         flush(); eat()
-
         if peek() == "{" then
           eat()
           local index = read_int()
-
           if index then
             local nc = peek()
             if nc == "}" then
-              eat()
-              nodes[#nodes+1] = {type="tabstop", index=index, children={}}
+              eat(); nodes[#nodes+1] = {type="tabstop", index=index, children={}}
             elseif nc == ":" then
               eat()
               local children = parse_nodes("}")
               if peek() == "}" then eat() end
               nodes[#nodes+1] = {type="tabstop", index=index, children=children}
             elseif nc == "|" then
-              eat()
-              nodes[#nodes+1] = parse_choice(index)
+              eat(); nodes[#nodes+1] = parse_choice(index)
             elseif nc == "/" then
               eat()
               local regex      = read_until("/")
               local format_raw = read_until("/")
               local flags      = read_until("}")
               nodes[#nodes+1] = {
-                type        = "transform",
-                source      = index,
-                regex       = regex,
-                format_segs = parse_format(format_raw),
-                flags       = flags,
+                type="transform", source=index, regex=regex,
+                format_segs=parse_format(format_raw), flags=flags,
               }
             else
               local depth = 1
               while pos <= len and depth > 0 do
-                if peek()=="{"then depth=depth+1 elseif peek()=="}"then depth=depth-1 end
-                eat()
+                if peek()=="{"then depth=depth+1 elseif peek()=="}"then depth=depth-1 end; eat()
               end
             end
-
           else
             local name = read_ident() or ""
             local default_nodes = {}
@@ -340,24 +312,20 @@ local function parse(src)
               for _, n in ipairs(default_nodes) do nodes[#nodes+1] = n end
             end
           end
-
         else
           local index = read_int()
-          if index then
-            nodes[#nodes+1] = {type="tabstop", index=index, children={}}
+          if index then nodes[#nodes+1] = {type="tabstop", index=index, children={}}
           else
             local name = read_ident() or ""
             local fn = VARS[name]
             if fn then nodes[#nodes+1] = {type="text", value=fn()} end
           end
         end
-
       else text = text .. ch; eat() end
     end
     flush()
     return nodes
   end
-
   return parse_nodes(nil)
 end
 
@@ -373,13 +341,13 @@ local function collect_defaults(nodes, defs)
         local parts = {}
         local function text_of(nl)
           for _, n in ipairs(nl) do
-            if n.type == "text" then parts[#parts+1] = n.value
-            elseif n.type == "choice" then parts[#parts+1] = (n.choices and n.choices[1]) or ""
+            if     n.type == "text"    then parts[#parts+1] = n.value
+            elseif n.type == "choice"  then parts[#parts+1] = (n.choices and n.choices[1]) or ""
             elseif n.type == "tabstop" then text_of(n.children or {}) end
           end
         end
         text_of(node.children or {})
-        defs[node.index] = table.concat(parts)
+        defs[node.index] = tbl_concat(parts)
         collect_defaults(node.children or {}, defs)
       end
     elseif node.type == "choice" then
@@ -394,53 +362,38 @@ end
 local function flatten_nodes(nodes, base, out_ts, out_xf, defs)
   local parts  = {}
   local offset = base
-
   for _, node in ipairs(nodes) do
     if node.type == "text" then
-      parts[#parts+1] = node.value
-      offset = offset + #node.value
-
+      parts[#parts+1] = node.value; offset = offset + #node.value
     elseif node.type == "tabstop" then
       local start      = offset
       local child_text = flatten_nodes(node.children or {}, start, out_ts, out_xf, defs)
-      parts[#parts+1] = child_text
-      offset           = offset + #child_text
+      parts[#parts+1] = child_text; offset = offset + #child_text
       if not out_ts[node.index] then out_ts[node.index] = {} end
-      out_ts[node.index][#out_ts[node.index]+1] = {
-        start = start, stop = offset, default = child_text,
-      }
-
+      out_ts[node.index][#out_ts[node.index]+1] = {start=start, stop=offset, default=child_text}
     elseif node.type == "choice" then
       local start = offset
       local first = (node.choices and node.choices[1]) or ""
-      parts[#parts+1] = first
-      offset = offset + #first
+      parts[#parts+1] = first; offset = offset + #first
       if not out_ts[node.index] then out_ts[node.index] = {} end
-      out_ts[node.index][#out_ts[node.index]+1] = {
-        start = start, stop = offset, default = first, choices = node.choices,
-      }
-
+      out_ts[node.index][#out_ts[node.index]+1] = {start=start, stop=offset, default=first, choices=node.choices}
     elseif node.type == "transform" then
-      local source_val = defs[node.source] or ""
-      local result     = apply_transform(source_val, node.regex, node.format_segs, node.flags)
-      local start      = offset
-      parts[#parts+1] = result
-      offset           = offset + #result
+      local result = apply_transform(defs[node.source] or "", node.regex, node.format_segs, node.flags)
+      local start  = offset
+      parts[#parts+1] = result; offset = offset + #result
       if not out_xf[node.source] then out_xf[node.source] = {} end
       out_xf[node.source][#out_xf[node.source]+1] = {
-        start = start, stop = offset,
-        regex = node.regex, format_segs = node.format_segs, flags = node.flags,
+        start=start, stop=offset, regex=node.regex, format_segs=node.format_segs, flags=node.flags,
       }
     end
   end
-
-  return table.concat(parts)
+  return tbl_concat(parts)
 end
 
 local function flatten(nodes)
-  local defs   = collect_defaults(nodes)
+  local defs = collect_defaults(nodes)
   local out_ts, out_xf = {}, {}
-  local text   = flatten_nodes(nodes, 0, out_ts, out_xf, defs)
+  local text = flatten_nodes(nodes, 0, out_ts, out_xf, defs)
   return text, out_ts, out_xf
 end
 
@@ -455,16 +408,13 @@ local function make_line_lens(lines)
 end
 
 local function byte_to_rowcol(byte, line_lens, base_row, base_col)
-  local remaining = byte
+  local rem = byte
   for i, ll in ipairs(line_lens) do
-    local col_base = (i == 1) and base_col or 0
-    if i == #line_lens or remaining <= ll then
-      return base_row + i - 1, col_base + remaining
-    end
-    remaining = remaining - ll - 1
+    local cb = (i == 1) and base_col or 0
+    if i == #line_lens or rem <= ll then return base_row + i - 1, cb + rem end
+    rem = rem - ll - 1
   end
-  local col_base = (#line_lens == 1) and base_col or 0
-  return base_row + #line_lens - 1, col_base + line_lens[#line_lens]
+  return base_row + #line_lens - 1, ((#line_lens==1) and base_col or 0) + line_lens[#line_lens]
 end
 
 -- ============================================================================
@@ -472,28 +422,35 @@ end
 -- ============================================================================
 
 local function mark_pos(bufnr, id)
-  local r = nvim_buf_get_extmark(bufnr, ns, id, {})
-  if r and #r == 2 then return r[1], r[2] end
+  local r = nvim_buf_get_extmark(bufnr, ns, id, EMPTY)
+  if r and r[1] then return r[1], r[2] end
   return nil, nil
 end
 
 local function region_text(bufnr, s_id, e_id)
   local sr, sc = mark_pos(bufnr, s_id)
-  local er, ec = mark_pos(bufnr, e_id)
   if not sr then return "" end
+  local er, ec = mark_pos(bufnr, e_id)
+  -- fast path: empty region
+  if sr == er and sc == ec then return "" end
   local lines = nvim_buf_get_lines(bufnr, sr, er+1, false)
   if #lines == 0 then return "" end
   if sr == er then return lines[1]:sub(sc+1, ec) end
   lines[1]      = lines[1]:sub(sc+1)
   lines[#lines] = lines[#lines]:sub(1, ec)
-  return table.concat(lines, "\n")
+  return tbl_concat(lines, "\n")
 end
 
 local function set_region_text(bufnr, s_id, e_id, text)
   local sr, sc = mark_pos(bufnr, s_id)
-  local er, ec = mark_pos(bufnr, e_id)
   if not sr then return end
-  nvim_buf_set_text(bufnr, sr, sc, er, ec, vim.split(text, "\n", {plain=true}))
+  local er, ec = mark_pos(bufnr, e_id)
+  -- fast path: no newlines → skip vim.split
+  if text:find("\n", 1, true) then
+    nvim_buf_set_text(bufnr, sr, sc, er, ec, str_split(text, "\n", {plain=true}))
+  else
+    nvim_buf_set_text(bufnr, sr, sc, er, ec, {text})
+  end
 end
 
 -- ============================================================================
@@ -515,8 +472,8 @@ local function close_choice_ui()
       end
     end
   end
-  pcall(vim.api.nvim_win_close, choice_state.win,  true)
-  pcall(vim.api.nvim_buf_delete, choice_state.buf, {force=true})
+  pcall(nvim_win_close,  choice_state.win, true)
+  pcall(nvim_buf_delete, choice_state.buf, {force=true})
   choice_state = nil
 end
 
@@ -525,33 +482,25 @@ local function render_choice_float(buf, choices, selected)
   for i, ch in ipairs(choices) do
     lines[#lines+1] = (i == selected and " ▶ " or "   ") .. ch
   end
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
   vim.api.nvim_buf_add_highlight(buf, ns, "CursorLine", selected-1, 0, -1)
 end
 
-local function open_choice_ui(bufnr, ts, session)
+local function open_choice_ui(bufnr, ts, sess)
   local choices = ts.choices
   if not choices or #choices == 0 then return end
   close_choice_ui()
-
   local selected = 1
   local max_w    = 4
   for _, ch in ipairs(choices) do max_w = math.max(max_w, #ch + 4) end
 
-  local float_buf = vim.api.nvim_create_buf(false, true)
+  local float_buf = nvim_create_buf(false, true)
   local sr, sc    = mark_pos(bufnr, ts.start_id)
-  local win       = vim.api.nvim_open_win(float_buf, false, {
-    relative  = "buf",
-    buf       = bufnr,
-    bufpos    = {sr, sc},
-    row       = 1, col = 0,
-    width     = max_w,
-    height    = #choices,
-    style     = "minimal",
-    border    = "rounded",
-    focusable = false,
-    zindex    = 200,
+  local win       = nvim_open_win(float_buf, false, {
+    relative="buf", buf=bufnr, bufpos={sr, sc},
+    row=1, col=0, width=max_w, height=#choices,
+    style="minimal", border="rounded", focusable=false, zindex=200,
   })
   vim.wo[win].wrap = false
   render_choice_float(float_buf, choices, selected)
@@ -560,23 +509,20 @@ local function open_choice_ui(bufnr, ts, session)
     selected = idx
     render_choice_float(float_buf, choices, selected)
     local saved = nvim_win_get_cursor(0)
-    session._jumping = true
+    sess._jumping = true
     set_region_text(bufnr, ts.start_id, ts.end_id, choices[selected])
-    local list = session.tabstops[session.current]
+    local list = sess.tabstops[sess.current]
     if list then
-      for i = 2, #list do
-        set_region_text(bufnr, list[i].start_id, list[i].end_id, choices[selected])
-      end
+      for i = 2, #list do set_region_text(bufnr, list[i].start_id, list[i].end_id, choices[selected]) end
     end
-    session._jumping = false
+    sess._jumping = false
     pcall(nvim_win_set_cursor, 0, saved)
   end
 
-  local intercept = {"<C-n>", "<C-p>", "<CR>", "<Tab>", "<Esc>"}
+  local intercept  = {"<C-n>", "<C-p>", "<CR>", "<Tab>", "<Esc>"}
   local saved_maps = {}
   for _, key in ipairs(intercept) do
-    local m = vim.fn.maparg(key, "i", false, true)
-    m.buffer = bufnr
+    local m = fn_maparg(key, "i", false, true); m.buffer = bufnr
     saved_maps[#saved_maps+1] = m
   end
 
@@ -591,19 +537,35 @@ local function open_choice_ui(bufnr, ts, session)
 end
 
 -- ============================================================================
--- SESSION
+-- SESSION STACK
+-- A stack of sessions. Top of stack is the active session.
+-- Expanding a snippet inside an active session pushes a new one.
+-- Completing ($0) or destroying pops back to the parent.
 -- ============================================================================
 
-local session = nil
+local stack = {}  -- stack[#stack] = active session
 
-local function session_destroy()
-  if not session then return end
+local function top() return stack[#stack] end
+
+-- Pop the top session off the stack, clean up its resources.
+-- Does NOT resume the parent — caller decides whether to resume.
+local function pop_session()
+  local sess = stack[#stack]
+  if not sess then return end
   close_choice_ui()
-  pcall(vim.api.nvim_del_augroup_by_id, session.aug)
-  pcall(vim.api.nvim_buf_clear_namespace, session.bufnr, ns, 0, -1)
-  session = nil
-  -- Notify lualine the snippet mode indicator should disappear
-  vim.cmd("redrawstatus")
+  pcall(nvim_del_augroup, sess.aug)
+  pcall(nvim_buf_clear_ns, sess.bufnr, ns, 0, -1)
+  stack[#stack] = nil
+end
+
+-- Destroy the entire stack (e.g. BufLeave)
+local function destroy_stack()
+  close_choice_ui()
+  for i = #stack, 1, -1 do
+    pcall(nvim_del_augroup, stack[i].aug)
+    pcall(nvim_buf_clear_ns, stack[i].bufnr, ns, 0, -1)
+    stack[i] = nil
+  end
 end
 
 local function sort_indices(ts)
@@ -617,75 +579,86 @@ local function sort_indices(ts)
   return idxs
 end
 
-local function update_transforms(index)
-  if not session then return end
-  local xf_list = session.transforms[index]
+local function update_transforms(sess, index)
+  local xf_list = sess.transforms[index]
   if not xf_list or #xf_list == 0 then return end
-  local ts_list = session.tabstops[index]
+  local ts_list = sess.tabstops[index]
   if not ts_list or #ts_list == 0 then return end
-
-  local source_text = region_text(session.bufnr, ts_list[1].start_id, ts_list[1].end_id)
+  local src  = region_text(sess.bufnr, ts_list[1].start_id, ts_list[1].end_id)
   local saved = nvim_win_get_cursor(0)
-  session._jumping = true
+  sess._jumping = true
   for _, xf in ipairs(xf_list) do
-    local result = apply_transform(source_text, xf.regex, xf.format_segs, xf.flags)
-    set_region_text(session.bufnr, xf.start_id, xf.end_id, result)
+    set_region_text(sess.bufnr, xf.start_id, xf.end_id,
+      apply_transform(src, xf.regex, xf.format_segs, xf.flags))
   end
-  session._jumping = false
+  sess._jumping = false
   pcall(nvim_win_set_cursor, 0, saved)
 end
 
 local function select_tabstop(bufnr, ts)
   local sr, sc = mark_pos(bufnr, ts.start_id)
-  local er, ec = mark_pos(bufnr, ts.end_id)
   if not sr then return end
-
+  local er, ec = mark_pos(bufnr, ts.end_id)
   if sr == er and sc == ec then
     nvim_win_set_cursor(0, {sr+1, sc})
-    if vim.fn.mode() ~= "i" then vim.cmd("startinsert") end
+    if fn_mode() ~= "i" then vim.cmd("startinsert") end
     return
   end
-
   if sr == er then
     nvim_win_set_cursor(0, {sr+1, sc})
     local ctrl_g = vim.api.nvim_replace_termcodes("<C-G>", true, false, true)
-    local motion  = "v" .. (ec-sc > 1 and string.rep("l", ec-sc-1) or "") .. ctrl_g
-    vim.fn.feedkeys(motion, "n")
+    fn_feedkeys("v" .. (ec-sc > 1 and str_rep("l", ec-sc-1) or "") .. ctrl_g, "n")
   else
     nvim_win_set_cursor(0, {sr+1, sc})
-    if vim.fn.mode() ~= "i" then vim.cmd("startinsert") end
+    if fn_mode() ~= "i" then vim.cmd("startinsert") end
   end
 end
 
-local function activate(index)
-  if not session then return end
-  close_choice_ui()
-
-  if session.current ~= nil then
-    update_transforms(session.current)
-  end
-
-  local ts_list = session.tabstops[index]
+-- Resume a paused session (used when popping back to parent)
+local function resume_session(sess)
+  if not sess then return end
+  local ts_list = sess.tabstops[sess.current]
   if not ts_list or #ts_list == 0 then return end
-  session.current  = index
-  session._jumping = true
   local ts = ts_list[1]
-
+  sess._jumping = true
   if ts.choices then
-    local sr, sc = mark_pos(session.bufnr, ts.start_id)
+    local sr, sc = mark_pos(sess.bufnr, ts.start_id)
     if sr then
       nvim_win_set_cursor(0, {sr+1, sc})
-      if vim.fn.mode() ~= "i" then vim.cmd("startinsert") end
+      if fn_mode() ~= "i" then vim.cmd("startinsert") end
     end
-    open_choice_ui(session.bufnr, ts, session)
+    open_choice_ui(sess.bufnr, ts, sess)
   else
-    select_tabstop(session.bufnr, ts)
+    select_tabstop(sess.bufnr, ts)
   end
+  vim.schedule(function() if top() == sess then sess._jumping = false end end)
+end
 
-  -- Notify lualine to re-evaluate the mode component (shows SNIPPET)
-  vim.cmd("redrawstatus")
+local function activate(sess, index)
+  close_choice_ui()
+  if sess.current ~= nil then update_transforms(sess, sess.current) end
+  local ts_list = sess.tabstops[index]
+  if not ts_list or #ts_list == 0 then return end
+  sess.current    = index
 
-  vim.schedule(function() if session then session._jumping = false end end)
+  -- Cache primary mark IDs and mirror presence for hot TextChangedI path
+  sess._pri_s     = ts_list[1].start_id
+  sess._pri_e     = ts_list[1].end_id
+  sess._has_mirrors = #ts_list > 1
+
+  sess._jumping   = true
+  local ts = ts_list[1]
+  if ts.choices then
+    local sr, sc = mark_pos(sess.bufnr, ts.start_id)
+    if sr then
+      nvim_win_set_cursor(0, {sr+1, sc})
+      if fn_mode() ~= "i" then vim.cmd("startinsert") end
+    end
+    open_choice_ui(sess.bufnr, ts, sess)
+  else
+    select_tabstop(sess.bufnr, ts)
+  end
+  vim.schedule(function() if top() == sess then sess._jumping = false end end)
 end
 
 -- ============================================================================
@@ -693,20 +666,26 @@ end
 -- ============================================================================
 
 function M.expand(snippet_body)
-  session_destroy()
-
   if type(snippet_body) == "table" then
-    snippet_body = table.concat(snippet_body, "\n")
+    snippet_body = tbl_concat(snippet_body, "\n")
   end
 
-  local ast               = parse(snippet_body)
-  local text, out_ts, out_xf = flatten(ast)
-  local lines             = vim.split(text, "\n", {plain=true})
-  local line_lens         = make_line_lens(lines)
-  local row0, col0        = unpack(nvim_win_get_cursor(0))
-  row0 = row0 - 1
+  -- Suspend the parent session immediately so that any InsertLeave fired
+  -- during blink's completion flow (before this expand fully runs) does not
+  -- pop the parent off the stack. resume_session() will clear _jumping when
+  -- the child finishes.
+  local parent = top()
+  if parent then parent._jumping = true end
 
-  vim.api.nvim_buf_set_text(0, row0, col0, row0, col0, lines)
+  local ast              = parse(snippet_body)
+  local text, out_ts, out_xf = flatten(ast)
+  local lines            = str_split(text, "\n", {plain=true})
+  local line_lens        = make_line_lens(lines)
+  local cur              = nvim_win_get_cursor(0)
+  local row0, col0       = cur[1] - 1, cur[2]
+
+  -- Single atomic buffer write
+  nvim_buf_set_text(0, row0, col0, row0, col0, lines)
 
   local bufnr = vim.api.nvim_get_current_buf()
 
@@ -716,11 +695,9 @@ function M.expand(snippet_body)
     for _, occ in ipairs(occurrences) do
       local sr, sc = byte_to_rowcol(occ.start, line_lens, row0, col0)
       local er, ec = byte_to_rowcol(occ.stop,  line_lens, row0, col0)
-      local s_id = vim.api.nvim_buf_set_extmark(bufnr, ns, sr, sc, {right_gravity=false, virt_text={}})
-      local e_id = vim.api.nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text={}})
-      sess_ts[index][#sess_ts[index]+1] = {
-        start_id=s_id, end_id=e_id, choices=occ.choices,
-      }
+      local s_id = nvim_buf_set_extmark(bufnr, ns, sr, sc, {right_gravity=false, virt_text=EMPTY})
+      local e_id = nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text=EMPTY})
+      sess_ts[index][#sess_ts[index]+1] = {start_id=s_id, end_id=e_id, choices=occ.choices}
     end
   end
 
@@ -730,8 +707,8 @@ function M.expand(snippet_body)
     for _, xf in ipairs(xfs) do
       local sr, sc = byte_to_rowcol(xf.start, line_lens, row0, col0)
       local er, ec = byte_to_rowcol(xf.stop,  line_lens, row0, col0)
-      local s_id = vim.api.nvim_buf_set_extmark(bufnr, ns, sr, sc, {right_gravity=false, virt_text={}})
-      local e_id = vim.api.nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text={}})
+      local s_id = nvim_buf_set_extmark(bufnr, ns, sr, sc, {right_gravity=false, virt_text=EMPTY})
+      local e_id = nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text=EMPTY})
       sess_xf[source][#sess_xf[source]+1] = {
         start_id=s_id, end_id=e_id,
         regex=xf.regex, format_segs=xf.format_segs, flags=xf.flags,
@@ -742,62 +719,92 @@ function M.expand(snippet_body)
   if not sess_ts[0] then
     local er   = row0 + #lines - 1
     local ec   = (#lines == 1 and col0 or 0) + line_lens[#line_lens]
-    local s_id = vim.api.nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=false, virt_text={}})
-    local e_id = vim.api.nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text={}})
+    local s_id = nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=false, virt_text=EMPTY})
+    local e_id = nvim_buf_set_extmark(bufnr, ns, er, ec, {right_gravity=true,  virt_text=EMPTY})
     sess_ts[0] = {{start_id=s_id, end_id=e_id}}
   end
 
   local indices = sort_indices(sess_ts)
 
-  session = {
-    bufnr      = bufnr,
-    tabstops   = sess_ts,
-    transforms = sess_xf,
-    indices    = indices,
-    current    = nil,
-    _jumping   = false,
-    aug        = vim.api.nvim_create_augroup("SnipEngine", {clear=true}),
+  local sess = {
+    bufnr       = bufnr,
+    tabstops    = sess_ts,
+    transforms  = sess_xf,
+    indices     = indices,
+    current     = nil,
+    _jumping    = false,
+    _pri_s      = nil,   -- primary start mark ID of current tabstop (hot path cache)
+    _pri_e      = nil,   -- primary end   mark ID of current tabstop (hot path cache)
+    _has_mirrors = false, -- precomputed: current tabstop has >1 occurrence
+    aug         = nvim_create_augroup("SnipEngine" .. tostring(#stack + 1), {clear=true}),
   }
 
-  vim.api.nvim_create_autocmd("TextChangedI", {
-    group    = session.aug,
+  -- Mirror handler: fires on every keypress while inside a tabstop.
+  -- All expensive checks are ordered cheapest-first.
+  nvim_create_autocmd("TextChangedI", {
+    group    = sess.aug,
     buffer   = bufnr,
     callback = function()
-      if not session or session._jumping then return end
-      local cur_idx = session.current
-      if not cur_idx then return end
-      local list = session.tabstops[cur_idx]
-      if not list or #list < 2 then return end
-      if choice_state then return end
+      -- Only handle if this session is the active top of stack
+      if top() ~= sess then return end
+      if sess._jumping        then return end
+      if not sess._has_mirrors then return end
+      if choice_state         then return end
 
-      local crow, ccol = unpack(nvim_win_get_cursor(0))
-      crow = crow - 1
-      local sr, sc = mark_pos(bufnr, list[1].start_id)
+      local c    = nvim_win_get_cursor(0)
+      local crow, ccol = c[1] - 1, c[2]
+      local sr, sc = mark_pos(bufnr, sess._pri_s)
       if not sr then return end
-      local er, ec = mark_pos(bufnr, list[1].end_id)
+      local er, ec = mark_pos(bufnr, sess._pri_e)
+
       if not (  (crow > sr or (crow == sr and ccol >= sc))
             and (crow < er or (crow == er and ccol <= ec)) ) then return end
 
-      local new_text = region_text(bufnr, list[1].start_id, list[1].end_id)
+      local new_text = region_text(bufnr, sess._pri_s, sess._pri_e)
       local saved    = nvim_win_get_cursor(0)
-      session._jumping = true
+      sess._jumping  = true
+      local list     = sess.tabstops[sess.current]
       for i = 2, #list do
         set_region_text(bufnr, list[i].start_id, list[i].end_id, new_text)
       end
-      session._jumping = false
+      sess._jumping = false
       pcall(nvim_win_set_cursor, 0, saved)
     end,
   })
 
-  vim.api.nvim_create_autocmd({"InsertLeave", "BufLeave"}, {
-    group    = session.aug,
+  -- InsertLeave: pop only the current session, resume parent if any.
+  -- BufLeave: destroy everything.
+  nvim_create_autocmd("InsertLeave", {
+    group    = sess.aug,
     buffer   = bufnr,
     callback = function()
-      if session and not session._jumping then session_destroy() end
+      if top() ~= sess then return end
+      if sess._jumping then return end
+      -- Don't pop if we're transitioning to visual/select mode — this happens
+      -- when select_tabstop uses feedkeys("v...ctrl_g") to select a placeholder.
+      -- vim.schedule resets _jumping BEFORE the typehead 'v' is processed, so
+      -- _jumping is already false by the time this InsertLeave fires from 'v'.
+      -- Checking the destination mode here is the correct guard.
+      local m = fn_mode()
+      if m == "v" or m == "V" or m == "s" or m == "S"
+      or m == "\22" or m == "\19" then return end
+      pop_session()
+      local parent = top()
+      if parent then resume_session(parent) end
     end,
   })
 
-  activate(indices[1])
+  nvim_create_autocmd("BufLeave", {
+    group    = sess.aug,
+    buffer   = bufnr,
+    callback = function()
+      destroy_stack()
+    end,
+  })
+
+  -- Push onto stack and activate first tabstop
+  stack[#stack+1] = sess
+  activate(sess, indices[1])
 end
 
 -- ============================================================================
@@ -805,35 +812,45 @@ end
 -- ============================================================================
 
 function M.active(direction)
-  if not session then return false end
-  for i, idx in ipairs(session.indices) do
-    if idx == session.current then
-      return direction > 0 and i < #session.indices or i > 1
+  local sess = top()
+  if not sess then return false end
+  for i, idx in ipairs(sess.indices) do
+    if idx == sess.current then
+      return direction > 0 and i < #sess.indices or i > 1
     end
   end
   return false
 end
 
 function M.jump(direction)
-  if not session then return false end
+  local sess = top()
+  if not sess then return false end
   local next_i = nil
-  for i, idx in ipairs(session.indices) do
-    if idx == session.current then
-      next_i = i + (direction > 0 and 1 or -1)
-      break
+  for i, idx in ipairs(sess.indices) do
+    if idx == sess.current then
+      next_i = i + (direction > 0 and 1 or -1); break
     end
   end
-  if not next_i or next_i < 1 or next_i > #session.indices then return false end
-  local next_idx = session.indices[next_i]
-  activate(next_idx)
-  if next_idx == 0 then vim.schedule(session_destroy) end
+  if not next_i or next_i < 1 or next_i > #sess.indices then return false end
+  local next_idx = sess.indices[next_i]
+  activate(sess, next_idx)
+  if next_idx == 0 then
+    vim.schedule(function()
+      pop_session()
+      local parent = top()
+      if parent then resume_session(parent) end
+    end)
+  end
   return true
 end
 
-function M.get_session() return session    end
-function M.destroy()     session_destroy() end
+function M.get_session() return top() end
+function M.destroy()     destroy_stack() end
 
 return M
+
+
+
 
 
 
