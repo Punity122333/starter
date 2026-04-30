@@ -29,7 +29,6 @@ return {
 			return "open"
 		end
 
-		-- 🧠 Tree-sitter check for existing closing paren
 		local function has_closing_paren_ts(row, col)
 			local ok = pcall(vim.treesitter.get_parser, 0)
 			if not ok then
@@ -47,12 +46,10 @@ return {
 				if t == "call_expression" or t == "function_call" then
 					local sr, sc, er, ec = node:range()
 
-					-- if node extends beyond cursor → closing paren exists
 					if er > (row - 1) or ec > col then
 						return true
 					end
 
-					-- fallback check at end of node
 					local line = vim.api.nvim_buf_get_lines(0, er, er + 1, false)[1]
 					if line and line:sub(ec, ec) == ")" then
 						return true
@@ -72,7 +69,6 @@ return {
 				return false
 			end
 
-			-- BEFORE accept
 			local pos = vim.api.nvim_win_get_cursor(0)
 			local row, col = pos[1], pos[2]
 			local line = vim.api.nvim_get_current_line()
@@ -92,16 +88,13 @@ return {
 				local did_insert = false
 				local did_move = false
 
-				-- 🧠 smart insert
 				if state == "open" then
 					local has_close = false
 
-					-- fast same-line check
 					if line2:find(")", col2 + 1, true) then
 						has_close = true
 					end
 
-					-- Tree-sitter fallback
 					if not has_close then
 						has_close = has_closing_paren_ts(row2, col2)
 					end
@@ -113,14 +106,12 @@ return {
 					end
 				end
 
-				-- move into "("
 				local open = line2:find("(", col2 + 1, true)
 				if open then
 					vim.api.nvim_win_set_cursor(0, { row2, open })
 					did_move = true
 				end
 
-				-- shift left ONLY if needed
 				if did_insert or did_move then
 					local final = vim.api.nvim_win_get_cursor(0)
 					if final[2] > 0 then
@@ -240,7 +231,6 @@ return {
 					"fallback",
 				},
 			},
-
 			sources = {
 				default = { "snippets", "lsp", "path", "buffer" },
 				providers = {
