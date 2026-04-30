@@ -322,7 +322,6 @@ for i = 1, #mark_chars do
 		redraw_signs()
 	end, { silent = true, desc = "Set mark " .. c })
 end
-
 vim.fn.sign_define("DapBreakpoint", { text = "●", texthl = "DapBreakpoint", priority = 10 })
 vim.fn.sign_define("DapBreakpointCondition", { text = "◆", texthl = "DapBreakpointCondition", priority = 10 })
 vim.fn.sign_define("DapBreakpointRejected", { text = "○", texthl = "DapBreakpointRejected", priority = 10 })
@@ -336,7 +335,6 @@ vim.diagnostic.config({
 
 vim.api.nvim_create_autocmd("FileType", {
 	callback = function(args)
-		-- Check if treesitter is even active for this buffer
 		local ok, parser = pcall(vim.treesitter.get_parser, args.buf)
 		if ok and parser then
 			parser:parse()
@@ -370,7 +368,6 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_clear_autocmds({ event = "WinScrolled" })
-
 vim.api.nvim_set_hl(0, "CursorBoldChar", { bold = true })
 
 local ns = vim.api.nvim_create_namespace("cursor_bold_char")
@@ -394,7 +391,6 @@ local function highlight_cursor_char()
 	end
 end
 
--- Trigger on cursor move
 vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
 	callback = highlight_cursor_char,
 })
