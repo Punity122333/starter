@@ -4,6 +4,7 @@ return {
 	lazy = false,
 
 	opts = function(_, opts)
+		-- Lazy-init snippet engine
 		local _engine = nil
 		local function engine()
 			if not _engine then
@@ -12,17 +13,46 @@ return {
 			return _engine
 		end
 
+		-- Cache TS parser availability per buffer to avoid repeated pcall(get_parser) on every accept.
+		-- get_parser() instantiates the parser on first call — paying that pcall cost every time is wasteful.
+		local _ts_capable = {} -- [bufnr] -> bool
+		local function buf_has_ts()
+			local bufnr = vim.api.nvim_get_current_buf()
+			local cached = _ts_capable[bufnr]
+			if cached ~= nil then
+				return cached
+			end
+			local ok = pcall(vim.treesitter.get_parser, bufnr)
+			_ts_capable[bufnr] = ok
+			if ok then
+				-- Evict on buffer unload so we don't hold stale state
+				vim.api.nvim_buf_attach(bufnr, false, {
+					on_detach = function()
+						_ts_capable[bufnr] = nil
+					end,
+				})
+			end
+			return ok
+		end
+
 		local function get_paren_state(line, col)
 			local c = line:sub(col, col)
-			if not c or not c:match("[%w_%.]") then
+			-- fast char-class check before heavier match
+			if c == "" then
+				return nil
+			end
+			local b = c:byte()
+			-- [%w_%.] via byte: skip if not alnum, underscore, or dot
+			if not (b == 95 or b == 46 or (b >= 48 and b <= 57) or (b >= 65 and b <= 90) or (b >= 97 and b <= 122)) then
 				return nil
 			end
 
-			if line:sub(col + 1, col + 1) ~= "(" then
+			local next = line:sub(col + 1, col + 1)
+			if next ~= "(" then
 				return nil
 			end
 
-			if line:sub(col + 1, col + 2) == "()" then
+			if line:sub(col + 2, col + 2) == ")" then
 				return "empty"
 			end
 
@@ -30,8 +60,7 @@ return {
 		end
 
 		local function has_closing_paren_ts(row, col)
-			local ok = pcall(vim.treesitter.get_parser, 0)
-			if not ok then
+			if not buf_has_ts() then
 				return false
 			end
 
@@ -40,29 +69,29 @@ return {
 				return false
 			end
 
-			while node do
+			-- Bound the walk — call sites are never more than a handful of levels deep
+			local depth = 0
+			while node and depth < 8 do
 				local t = node:type()
-
 				if t == "call_expression" or t == "function_call" then
-					local sr, sc, er, ec = node:range()
-
+					local _, _, er, ec = node:range()
 					if er > (row - 1) or ec > col then
 						return true
 					end
-
-					local line = vim.api.nvim_buf_get_lines(0, er, er + 1, false)[1]
-					if line and line:sub(ec, ec) == ")" then
-						return true
-					end
-
-					return false
+					local ln = vim.api.nvim_buf_get_lines(0, er, er + 1, false)[1]
+					return ln ~= nil and ln:sub(ec, ec) == ")"
 				end
-
 				node = node:parent()
+				depth = depth + 1
 			end
 
 			return false
 		end
+
+		-- Snapshot paren state in a closure variable set synchronously before cmp.accept() fires,
+		-- so the scheduled callback reads a stable pre-edit snapshot regardless of what blink does
+		-- to the buffer between accept() and the next event loop tick.
+		local _paren_ctx = nil
 
 		local function smart_accept(cmp)
 			if not cmp.is_visible() then
@@ -70,17 +99,27 @@ return {
 			end
 
 			local pos = vim.api.nvim_win_get_cursor(0)
-			local row, col = pos[1], pos[2]
 			local line = vim.api.nvim_get_current_line()
 
-			local state = get_paren_state(line, col)
+			-- Snapshot BEFORE blink mutates the buffer
+			_paren_ctx = get_paren_state(line, pos[2])
 
 			local ok = cmp.accept()
 			if not ok then
+				_paren_ctx = nil
 				return false
 			end
 
-			vim.schedule_wrap(function()
+			-- Use vim.schedule directly — schedule_wrap(fn)() allocates a closure on every call
+			vim.schedule(function()
+				local state = _paren_ctx
+				_paren_ctx = nil
+
+				-- Nothing to do for nil/"empty" states
+				if not state then
+					return
+				end
+
 				local pos2 = vim.api.nvim_win_get_cursor(0)
 				local row2, col2 = pos2[1], pos2[2]
 				local line2 = vim.api.nvim_get_current_line()
@@ -89,16 +128,10 @@ return {
 				local did_move = false
 
 				if state == "open" then
-					local has_close = false
-
-					if line2:find(")", col2 + 1, true) then
-						has_close = true
-					end
-
+					local has_close = line2:find(")", col2 + 1, true) ~= nil
 					if not has_close then
 						has_close = has_closing_paren_ts(row2, col2)
 					end
-
 					if not has_close then
 						vim.api.nvim_buf_set_text(0, row2 - 1, col2, row2 - 1, col2, { ")" })
 						line2 = vim.api.nvim_get_current_line()
@@ -118,9 +151,18 @@ return {
 						vim.api.nvim_win_set_cursor(0, { final[1], final[2] - 1 })
 					end
 				end
-			end)()
+			end)
 
 			return true
+		end
+
+		-- Cache emoji kind constant — require() in a per-item-batch hot path is wasteful
+		local _emoji_kind = nil
+		local function emoji_kind()
+			if not _emoji_kind then
+				_emoji_kind = require("blink.cmp.types").CompletionItemKind.Text
+			end
+			return _emoji_kind
 		end
 
 		return vim.tbl_deep_extend("force", opts or {}, {
@@ -146,7 +188,10 @@ return {
 				},
 				accept = {
 					auto_brackets = { enabled = false },
-					resolve_timeout_ms = 1500,
+					-- 1500ms was the primary accept-lag culprit: blink blocks on LSP resolve
+					-- before applying the item. 400ms is plenty for local LSPs (clangd, lua-ls,
+					-- pyright, etc.). Bump to 600-800 only if you're on a slow remote LSP.
+					resolve_timeout_ms = 400,
 					dot_repeat = false,
 				},
 				menu = {
@@ -168,6 +213,9 @@ return {
 			signature = { enabled = false },
 
 			fuzzy = {
+				-- "lua" is safe but ~3-5x slower than the native Rust implementation.
+				-- If you have the compiled binary (blink.cmp installs it via cargo by default),
+				-- switch to: implementation = "prefer_rust_with_warning"
 				implementation = "lua",
 			},
 
@@ -231,6 +279,7 @@ return {
 					"fallback",
 				},
 			},
+
 			sources = {
 				default = { "snippets", "lsp", "path", "buffer" },
 				providers = {
@@ -242,11 +291,11 @@ return {
 						timeout_ms = 1000,
 
 						transform_items = function(ctx, items)
+							-- Early exit is the fast path — most of the time cursor isn't right
+							-- before a "(" so we skip the entire loop
 							local pos = vim.api.nvim_win_get_cursor(0)
-							local col = pos[2]
 							local line = vim.api.nvim_get_current_line()
-
-							local state = get_paren_state(line, col)
+							local state = get_paren_state(line, pos[2])
 							if not state then
 								return items
 							end
@@ -254,15 +303,18 @@ return {
 							for i = 1, #items do
 								local item = items[i]
 
-								if item.insertText and item.insertText:find("(", 1, true) then
-									item.insertText = item.insertText:gsub("%b()", "", 1)
+								local it = item.insertText
+								if it and it:find("(", 1, true) then
+									item.insertText = it:gsub("%b()", "", 1)
 								end
 
-								if item.textEdit
-									and item.textEdit.newText
-									and item.textEdit.newText:find("(", 1, true)
-								then
-									item.textEdit.newText = item.textEdit.newText:gsub("%b()", "", 1)
+								-- Cache textEdit to avoid double table lookup
+								local te = item.textEdit
+								if te then
+									local nt = te.newText
+									if nt and nt:find("(", 1, true) then
+										te.newText = nt:gsub("%b()", "", 1)
+									end
 								end
 							end
 
@@ -291,7 +343,7 @@ return {
 						name = "emoji",
 						module = "blink.compat.source",
 						transform_items = function(ctx, items)
-							local kind = require("blink.cmp.types").CompletionItemKind.Text
+							local kind = emoji_kind()
 							for i = 1, #items do
 								items[i].kind = kind
 							end
@@ -303,5 +355,6 @@ return {
 		})
 	end,
 }
+
 
 
