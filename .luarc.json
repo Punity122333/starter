@@ -8,7 +8,8 @@
         "ipairs",
         "pcall",
         "require",
-        "table"
+        "table",
+        "refresh_timer"
     ],
     "diagnostics.disable": [
         "missing-fields",

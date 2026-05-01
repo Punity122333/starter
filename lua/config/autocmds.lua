@@ -366,10 +366,8 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.cmd("vertical resize 40")
 	end,
 })
-
 vim.api.nvim_clear_autocmds({ event = "WinScrolled" })
 vim.api.nvim_set_hl(0, "CursorBoldChar", { bold = true })
-
 local ns = vim.api.nvim_create_namespace("cursor_bold_char")
 
 local function highlight_cursor_char()

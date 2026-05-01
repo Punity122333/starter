@@ -4,7 +4,6 @@ return {
 	lazy = false,
 
 	opts = function(_, opts)
-		-- Lazy-init snippet engine
 		local _engine = nil
 		local function engine()
 			if not _engine then
@@ -13,9 +12,7 @@ return {
 			return _engine
 		end
 
-		-- Cache TS parser availability per buffer to avoid repeated pcall(get_parser) on every accept.
-		-- get_parser() instantiates the parser on first call — paying that pcall cost every time is wasteful.
-		local _ts_capable = {} -- [bufnr] -> bool
+		local _ts_capable = {}
 		local function buf_has_ts()
 			local bufnr = vim.api.nvim_get_current_buf()
 			local cached = _ts_capable[bufnr]
@@ -25,7 +22,6 @@ return {
 			local ok = pcall(vim.treesitter.get_parser, bufnr)
 			_ts_capable[bufnr] = ok
 			if ok then
-				-- Evict on buffer unload so we don't hold stale state
 				vim.api.nvim_buf_attach(bufnr, false, {
 					on_detach = function()
 						_ts_capable[bufnr] = nil
@@ -37,12 +33,10 @@ return {
 
 		local function get_paren_state(line, col)
 			local c = line:sub(col, col)
-			-- fast char-class check before heavier match
 			if c == "" then
 				return nil
 			end
 			local b = c:byte()
-			-- [%w_%.] via byte: skip if not alnum, underscore, or dot
 			if not (b == 95 or b == 46 or (b >= 48 and b <= 57) or (b >= 65 and b <= 90) or (b >= 97 and b <= 122)) then
 				return nil
 			end
@@ -69,9 +63,8 @@ return {
 				return false
 			end
 
-			-- Bound the walk — call sites are never more than a handful of levels deep
 			local depth = 0
-			while node and depth < 8 do
+			while node and depth < 50 do
 				local t = node:type()
 				if t == "call_expression" or t == "function_call" then
 					local _, _, er, ec = node:range()
@@ -88,9 +81,6 @@ return {
 			return false
 		end
 
-		-- Snapshot paren state in a closure variable set synchronously before cmp.accept() fires,
-		-- so the scheduled callback reads a stable pre-edit snapshot regardless of what blink does
-		-- to the buffer between accept() and the next event loop tick.
 		local _paren_ctx = nil
 
 		local function smart_accept(cmp)
@@ -101,7 +91,6 @@ return {
 			local pos = vim.api.nvim_win_get_cursor(0)
 			local line = vim.api.nvim_get_current_line()
 
-			-- Snapshot BEFORE blink mutates the buffer
 			_paren_ctx = get_paren_state(line, pos[2])
 
 			local ok = cmp.accept()
@@ -110,12 +99,10 @@ return {
 				return false
 			end
 
-			-- Use vim.schedule directly — schedule_wrap(fn)() allocates a closure on every call
 			vim.schedule(function()
 				local state = _paren_ctx
 				_paren_ctx = nil
 
-				-- Nothing to do for nil/"empty" states
 				if not state then
 					return
 				end
@@ -156,7 +143,6 @@ return {
 			return true
 		end
 
-		-- Cache emoji kind constant — require() in a per-item-batch hot path is wasteful
 		local _emoji_kind = nil
 		local function emoji_kind()
 			if not _emoji_kind then
@@ -188,10 +174,7 @@ return {
 				},
 				accept = {
 					auto_brackets = { enabled = false },
-					-- 1500ms was the primary accept-lag culprit: blink blocks on LSP resolve
-					-- before applying the item. 400ms is plenty for local LSPs (clangd, lua-ls,
-					-- pyright, etc.). Bump to 600-800 only if you're on a slow remote LSP.
-					resolve_timeout_ms = 400,
+					resolve_timeout_ms = 100,
 					dot_repeat = false,
 				},
 				menu = {
@@ -213,10 +196,7 @@ return {
 			signature = { enabled = false },
 
 			fuzzy = {
-				-- "lua" is safe but ~3-5x slower than the native Rust implementation.
-				-- If you have the compiled binary (blink.cmp installs it via cargo by default),
-				-- switch to: implementation = "prefer_rust_with_warning"
-				implementation = "lua",
+				implementation = "prefer_rust_with_warning",
 			},
 
 			keymap = {
@@ -291,8 +271,6 @@ return {
 						timeout_ms = 1000,
 
 						transform_items = function(ctx, items)
-							-- Early exit is the fast path — most of the time cursor isn't right
-							-- before a "(" so we skip the entire loop
 							local pos = vim.api.nvim_win_get_cursor(0)
 							local line = vim.api.nvim_get_current_line()
 							local state = get_paren_state(line, pos[2])
@@ -308,7 +286,6 @@ return {
 									item.insertText = it:gsub("%b()", "", 1)
 								end
 
-								-- Cache textEdit to avoid double table lookup
 								local te = item.textEdit
 								if te then
 									local nt = te.newText
@@ -355,6 +332,3 @@ return {
 		})
 	end,
 }
-
-
-
