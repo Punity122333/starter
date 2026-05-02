@@ -1,0 +1,6 @@
+vim.keymap.set("n", "<leader>br", function()
+    Snacks.bufdelete()
+end, { desc = "Remove Current Buffer" })
+vim.keymap.set("n", "<leader>bn", "<cmd>BufferLineCycleNext<cr>", { desc = "Next Buffer" })
+vim.keymap.set("n", "<leader>bp", "<cmd>BufferLineCyclePrev<cr>", { desc = "Previous Buffer" })
+vim.keymap.set("n", "<leader>rb", "<cmd>edit!<cr>", { desc = "Refresh Buffer" })
