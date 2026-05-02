@@ -4,18 +4,17 @@ if vim.loader then
     vim.loader.enable()
 end
 
-require("core.env").setup()
-require("core.options")
+require("core")
 
 require("patches.treesitter").setup()
 require("patches.render_markdown").setup()
 require("patches.notify").setup()
 
-require("config.lazy")
-require("config.highlights")
+require("modules.system.lazy")
+require("modules.ui")
 
 require("theme").setup()
-require("core.commands")
+require("modules.system")
 
 vim.defer_fn(function()
     pcall(require, "lspconfig")

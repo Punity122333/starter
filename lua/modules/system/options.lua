@@ -138,7 +138,7 @@ vim.opt.updatetime = 400
 
 vim.opt.signcolumn = "no"
 
-require("ui.statuscolumn").setup()
+require("modules.ui.statuscolumn").setup()
 vim.opt.ttyfast = true
 vim.opt.swapfile = false
 vim.opt.clipboard = ""
