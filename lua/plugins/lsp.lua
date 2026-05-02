@@ -118,16 +118,15 @@ return {
 						client.server_capabilities.diagnosticProvider = false
 						client.server_capabilities.documentSymbolProvider = true
 					end,
-
-					flags = {
-						debounce_text_changes = 500,
-					},
 					settings = {
 						Lua = {
 							runtime = { version = "LuaJIT" },
 							diagnostics = {
 								globals = { "vim" },
 								disable = { "lowercase-global", "undefined-global", "missing-fields" },
+								-- Delay workspace-wide recheck by 3s after last change.
+								-- Prevents spam-publishing diagnostics for every file on each keystroke.
+								workspaceDelay = 3000,
 							},
 							checkThirdParty = false,
 							workspace = {
@@ -276,19 +275,36 @@ return {
 				end
 			end
 
+			-- Single global timer for lua_ls: collapses the entire workspace
+			-- diagnostic flood (N buffers) into one callback 800ms after the
+			-- last push, instead of N independent per-buffer timers staggered
+			-- across the workspace.
+			local lua_ls_timer = nil
 			local timers = {}
+
 			vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, cfg)
+				if lua_ls_ids[ctx.client_id] then
+					if lua_ls_timer then
+						lua_ls_timer:stop()
+						lua_ls_timer:close()
+					end
+					lua_ls_timer = vim.defer_fn(function()
+						lua_ls_timer = nil
+						orig(err, result, ctx, cfg)
+					end, 800)
+					return
+				end
+
+				-- Non-lua_ls servers keep per-buffer debounce
 				local bufnr = vim.uri_to_bufnr(result.uri)
 				local key = bufnr .. "_" .. (ctx.client_id or 0)
-				local delay = lua_ls_ids[ctx.client_id] and 800 or vim.o.updatetime
-
 				if timers[key] then
 					timers[key]:stop()
 				end
 				timers[key] = vim.defer_fn(function()
 					timers[key] = nil
 					orig(err, result, ctx, cfg)
-				end, delay)
+				end, vim.o.updatetime)
 			end
 
 			local ok, lspconfig = pcall(require, "lspconfig")
@@ -342,3 +358,4 @@ return {
 		end,
 	},
 }
+

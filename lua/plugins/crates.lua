@@ -62,7 +62,8 @@ return {
 			local bg_r = tonumber("16", 16)
 			local bg_g = tonumber("16", 16)
 			local bg_b = tonumber("1e", 16)
-			return string.format("#%02x%02x%02x",
+			return string.format(
+				"#%02x%02x%02x",
 				math.floor(r * alpha + bg_r * (1 - alpha)),
 				math.floor(g * alpha + bg_g * (1 - alpha)),
 				math.floor(b * alpha + bg_b * (1 - alpha))
@@ -73,17 +74,16 @@ return {
 			return { fg = fg, bg = blend(fg, 0.15), bold = true }
 		end
 
-		vim.api.nvim_set_hl(0, "CratesNvimVersion",         pill("#1abc9c")) -- teal
-		vim.api.nvim_set_hl(0, "CratesNvimUpgrade",         pill("#e0af68")) -- yellow
-		vim.api.nvim_set_hl(0, "CratesNvimPreRelease",      pill("#ff9e64")) -- orange
-		vim.api.nvim_set_hl(0, "CratesNvimYanked",          pill("#f7768e")) -- red
-		vim.api.nvim_set_hl(0, "CratesNvimNoMatch",         pill("#f7768e")) -- red
-		vim.api.nvim_set_hl(0, "CratesNvimError",           pill("#db4b4b")) -- red1
-		vim.api.nvim_set_hl(0, "CratesNvimSearching",       pill("#7aa2f7")) -- blue
-		vim.api.nvim_set_hl(0, "CratesNvimLoading",         pill("#7aa2f7")) -- blue
-		vim.api.nvim_set_hl(0, "CratesNvimPopupTitle",      { link = "FloatTitle" })
-		vim.api.nvim_set_hl(0, "CratesNvimPopupPillText",   {})
+		vim.api.nvim_set_hl(0, "CratesNvimVersion", pill("#1abc9c")) -- teal
+		vim.api.nvim_set_hl(0, "CratesNvimUpgrade", pill("#e0af68")) -- yellow
+		vim.api.nvim_set_hl(0, "CratesNvimPreRelease", pill("#ff9e64")) -- orange
+		vim.api.nvim_set_hl(0, "CratesNvimYanked", pill("#f7768e")) -- red
+		vim.api.nvim_set_hl(0, "CratesNvimNoMatch", pill("#f7768e")) -- red
+		vim.api.nvim_set_hl(0, "CratesNvimError", pill("#db4b4b")) -- red1
+		vim.api.nvim_set_hl(0, "CratesNvimSearching", pill("#7aa2f7")) -- blue
+		vim.api.nvim_set_hl(0, "CratesNvimLoading", pill("#7aa2f7")) -- blue
+		vim.api.nvim_set_hl(0, "CratesNvimPopupTitle", { link = "FloatTitle" })
+		vim.api.nvim_set_hl(0, "CratesNvimPopupPillText", {})
 		vim.api.nvim_set_hl(0, "CratesNvimPopupPillBorder", {})
 	end,
 }
-

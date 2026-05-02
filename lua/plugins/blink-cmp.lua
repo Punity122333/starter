@@ -294,7 +294,6 @@ return {
 									end
 								end
 							end
-
 							return items
 						end,
 					},
